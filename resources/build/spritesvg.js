@@ -1,7 +1,7 @@
 /**
  * The external dependencies.
  */
-const SvgSpriteLoaderPlugin = require('svg-sprite-loader/plugin');
+const SvgSpriteLoaderPlugin = require('svg-sprite-loader/plugin')
 
 module.exports = new SvgSpriteLoaderPlugin({
   plainSprite: true,
@@ -9,4 +9,4 @@ module.exports = new SvgSpriteLoaderPlugin({
     'aria-hidden': 'true',
     style: 'display: none; visibility: hidden;',
   },
-});
+})

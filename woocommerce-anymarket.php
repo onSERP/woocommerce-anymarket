@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: Woocommerce Anymarket
- * Plugin URI: https://wpemerge.com/
- * Description:
- * Version: 0.15.0
+ * Plugin URI: https://onserp.com.br/integracao-anymarket
+ * Description: Integração entre o Woocommerce e a plataforma de marketplaces ANYMARKET.
+ * Version: 1.0.0
  * Requires at least: 4.7
- * Requires PHP: 5.5.9
- * Author: Atanas Angelov
- * Author URI: https://atanas.dev/
+ * Requires PHP: 7.3.2
+ * Author: onSERP Marketing
+ * Author URI: https://onserp.com.br
  * License: GPL-2.0-only
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: anymarket

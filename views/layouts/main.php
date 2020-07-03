@@ -8,6 +8,6 @@
  */
 
 ?>
-<div class="anymarket__layout">
+<div class="wrap">
 	<?php \Anymarket::layoutContent(); ?>
 </div>

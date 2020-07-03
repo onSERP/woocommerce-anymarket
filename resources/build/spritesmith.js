@@ -1,12 +1,12 @@
 /**
  * The external dependencies.
  */
-const SpritesmithPlugin = require('webpack-spritesmith');
+const SpritesmithPlugin = require('webpack-spritesmith')
 
 /**
  * The internal dependencies.
  */
-const utils = require('./lib/utils');
+const utils = require('./lib/utils')
 
 module.exports = new SpritesmithPlugin({
   src: {
@@ -22,4 +22,4 @@ module.exports = new SpritesmithPlugin({
   },
   // Uncomment the following line to enable retina spritesheets:
   // retina: '@2x',
-});
+})

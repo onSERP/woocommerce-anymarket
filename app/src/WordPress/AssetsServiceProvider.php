@@ -20,39 +20,8 @@ class AssetsServiceProvider implements ServiceProviderInterface
 	 * {@inheritDoc}
 	 */
 	public function bootstrap( $container ) {
-		add_action( 'wp_enqueue_scripts', [$this, 'enqueueFrontendAssets'] );
 		add_action( 'admin_enqueue_scripts', [$this, 'enqueueAdminAssets'] );
 		add_action( 'wp_footer', [$this, 'loadSvgSprite'] );
-	}
-
-	/**
-	 * Enqueue frontend assets.
-	 *
-	 * @return void
-	 */
-	public function enqueueFrontendAssets() {
-		// Enqueue the built-in comment-reply script for singular pages.
-		if ( is_singular() ) {
-			wp_enqueue_script( 'comment-reply' );
-		}
-
-		// Enqueue scripts.
-		\Anymarket::core()->assets()->enqueueScript(
-			'theme-js-bundle',
-			\Anymarket::core()->assets()->getBundleUrl( 'frontend', '.js' ),
-			[ 'jquery' ],
-			true
-		);
-
-		// Enqueue styles.
-		$style = \Anymarket::core()->assets()->getBundleUrl( 'frontend', '.css' );
-
-		if ( $style ) {
-			\Anymarket::core()->assets()->enqueueStyle(
-				'theme-css-bundle',
-				$style
-			);
-		}
 	}
 
 	/**

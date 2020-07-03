@@ -28,7 +28,21 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 * @return void
 	 */
 	public function registerAdminPages() {
-		// phpcs:ignore
-		// add_theme_page( string $page_title, string $menu_title, string $capability, string $menu_slug, callable $function = '', int $position = null );
+
+		global $submenu;
+
+		$capability = 'manage_options';
+		$slug       = 'anymarket';
+
+		add_menu_page( __( 'Painel', 'anymarket' ), 'Anymarket', $capability, $slug, [$this, 'adminIndexPage'], 'dashicons-anymarket', 56 );
+
+		if ( current_user_can( $capability ) ) {
+            $submenu[ $slug ][] = [ __( 'Painel', 'anymarket' ), $capability, 'admin.php?page=' . $slug . '#/' ];
+            $submenu[ $slug ][] = [ __( 'Sobre', 'anymarket' ), $capability, 'admin.php?page=' . $slug . '#/about' ];
+        }
+	}
+
+	public function adminIndexPage(){
+		\Anymarket::render('app');
 	}
 }

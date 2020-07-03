@@ -36,7 +36,7 @@ class ViewServiceProvider implements ServiceProviderInterface {
 		 * @link https://docs.wpemerge.com/#/framework/views/overview
 		 */
 		// phpcs:ignore
-		\Anymarket::views()->addGlobal( 'foo', 'bar' );
+		// \Anymarket::views()->addGlobal( 'foo', 'bar' );
 	}
 
 	/**

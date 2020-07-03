@@ -1,30 +1,36 @@
 /**
  * The external dependencies.
  */
-const url = require('url');
-const { ProvidePlugin, WatchIgnorePlugin } = require('webpack');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const ManifestPlugin = require('webpack-manifest-plugin');
-const chokidar = require('chokidar');
-const get = require('lodash/get');
+const url = require('url')
+const { ProvidePlugin, WatchIgnorePlugin } = require('webpack')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const ManifestPlugin = require('webpack-manifest-plugin')
+const chokidar = require('chokidar')
+const get = require('lodash/get')
 
 /**
  * The internal dependencies.
  */
-const utils = require('./lib/utils');
-const configLoader = require('./config-loader');
-const spriteSmith = require('./spritesmith');
-const spriteSvg = require('./spritesvg');
-const postcss = require('./postcss');
+const utils = require('./lib/utils')
+const configLoader = require('./config-loader')
+const spriteSmith = require('./spritesmith')
+const spriteSvg = require('./spritesvg')
+const postcss = require('./postcss')
 
 /**
  * Setup the environment.
  */
-const env = utils.detectEnv();
-const userConfig = utils.getUserConfig();
-const devPort = get(userConfig, 'development.port', 3000);
-const devHotUrl = url.parse(get(userConfig, 'development.hotUrl', 'http://localhost/').replace(/\/$/, ''));
+const env = utils.detectEnv()
+const userConfig = utils.getUserConfig()
+const devPort = get(userConfig, 'development.port', 3000)
+const devUrl = url.parse(
+  get(userConfig, 'development.url', 'http://localhost/').replace(/\/$/, '')
+)
+const devHotUrl = url.parse(
+  get(userConfig, 'development.hotUrl', 'http://localhost/').replace(/\/$/, '')
+)
 
 /**
  * Setup babel loader.
@@ -40,7 +46,7 @@ const babelLoader = {
       'stage-2',
     ],
   },
-};
+}
 
 /**
  * Setup webpack plugins.
@@ -60,12 +66,13 @@ const plugins = [
   new MiniCssExtractPlugin({
     filename: `styles/[name]${env.filenameSuffix}.css`,
   }),
+  new VueLoaderPlugin(),
   spriteSmith,
   spriteSvg,
   new ManifestPlugin({
     writeToFileEmit: true,
   }),
-];
+]
 
 /**
  * Export the configuration.
@@ -82,10 +89,9 @@ module.exports = {
   output: {
     ...require('./webpack/output'),
     ...(env.isHot
-      // Required to work around https://github.com/webpack/webpack-dev-server/issues/1385
-      ? { publicPath: `${devHotUrl.protocol}//${devHotUrl.host}:${devPort}/` }
-      : {}
-    ),
+      ? // Required to work around https://github.com/webpack/webpack-dev-server/issues/1385
+        { publicPath: `${devHotUrl.protocol}//${devHotUrl.host}:${devPort}/` }
+      : {}),
   },
 
   /**
@@ -119,6 +125,14 @@ module.exports = {
         type: 'javascript/auto',
         test: utils.rootPath('config.json'),
         use: configLoader,
+      },
+
+      /**
+       * Vue loader
+       * */
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader',
       },
 
       /**
@@ -161,7 +175,8 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: file => `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
+              name: (file) =>
+                `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
               outputPath: 'images',
             },
           },
@@ -192,7 +207,8 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: file => `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
+              name: (file) =>
+                `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
               outputPath: 'fonts',
             },
           },
@@ -215,25 +231,28 @@ module.exports = {
   watch: true,
   devtool: 'source-map',
   devServer: {
+    index: '',
     hot: true,
     host: devHotUrl.host,
     port: devPort,
+    proxy: {
+      context: () => true,
+      target: devUrl,
+      secure: false,
+      changeOrigin: true,
+    },
     disableHostCheck: true,
     headers: {
       'Access-Control-Allow-Origin': '*',
     },
     overlay: true,
+    writeToDisk: true,
 
     // Reload on view file changes.
     before: (app, server) => {
-      chokidar
-        .watch([
-          './views/**/*.php',
-          './*.php',
-        ])
-        .on('all', () => {
-          server.sockWrite(server.sockets, 'content-changed');
-        });
+      chokidar.watch(['./views/**/*.php', './*.php']).on('all', () => {
+        server.sockWrite(server.sockets, 'content-changed')
+      })
     },
   },
-};
+}

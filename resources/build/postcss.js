@@ -15,13 +15,13 @@ const plugins = [
   require('postcss-discard-comments'),
   require('autoprefixer'),
   require('./lib/combine-media-queries'),
-];
+]
 
 /**
  * Prepare the configuration.
  */
 const config = {
   plugins,
-};
+}
 
-module.exports = config;
+module.exports = config
