@@ -1,25 +1,25 @@
 /**
  * The external dependencies.
  */
-const { ProvidePlugin, WatchIgnorePlugin } = require('webpack');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const ImageminPlugin = require('imagemin-webpack-plugin').default;
-const ManifestPlugin = require('webpack-manifest-plugin');
+const { ProvidePlugin, WatchIgnorePlugin } = require('webpack')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const ImageminPlugin = require('imagemin-webpack-plugin').default
+const ManifestPlugin = require('webpack-manifest-plugin')
 
 /**
  * The internal dependencies.
  */
-const utils = require('./lib/utils');
-const configLoader = require('./config-loader');
-const spriteSmith = require('./spritesmith');
-const spriteSvg = require('./spritesvg');
-const postcss = require('./postcss');
+const utils = require('./lib/utils')
+const configLoader = require('./config-loader')
+const spriteSmith = require('./spritesmith')
+const spriteSvg = require('./spritesvg')
+const postcss = require('./postcss')
 
 /**
  * Setup the env.
  */
-const env = utils.detectEnv();
+const env = utils.detectEnv()
 
 /**
  * Setup babel loader.
@@ -35,7 +35,7 @@ const babelLoader = {
       'stage-2',
     ],
   },
-};
+}
 
 /**
  * Setup webpack plugins.
@@ -87,13 +87,15 @@ const plugins = [
     ],
   }),
   new ManifestPlugin(),
-];
+]
 
 // When doing a combined build, only clean up the first time.
 if (process.env.WPEMERGE_COMBINED_BUILD && env.isDebug) {
-  plugins.push(new CleanWebpackPlugin(utils.distPath(), {
-    root: utils.rootPath(),
-  }));
+  plugins.push(
+    new CleanWebpackPlugin(utils.distPath(), {
+      root: utils.rootPath(),
+    })
+  )
 }
 
 /**
@@ -144,6 +146,14 @@ module.exports = {
       },
 
       /**
+       * Vue loader
+       * */
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+      },
+
+      /**
        * Handle scripts.
        */
       {
@@ -164,6 +174,7 @@ module.exports = {
               publicPath: '../',
             },
           },
+          'vue-style-loader',
           'css-loader',
           {
             loader: 'postcss-loader',
@@ -189,7 +200,8 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: file => `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
+              name: (file) =>
+                `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
               outputPath: 'images',
             },
           },
@@ -221,7 +233,8 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: file => `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
+              name: (file) =>
+                `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
               outputPath: 'fonts',
             },
           },
@@ -250,4 +263,4 @@ module.exports = {
   bail: false,
   watch: false,
   devtool: false,
-};
+}

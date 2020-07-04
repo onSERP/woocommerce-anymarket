@@ -140,7 +140,7 @@ module.exports = {
        */
       {
         test: utils.tests.scripts,
-        exclude: /node_modules/,
+        exclude: (file) => /node_modules/.test(file) && !/\.vue\.js/.test(file),
         use: babelLoader,
       },
 
@@ -178,6 +178,7 @@ module.exports = {
               name: (file) =>
                 `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
               outputPath: 'images',
+              esModule: false,
             },
           },
         ],

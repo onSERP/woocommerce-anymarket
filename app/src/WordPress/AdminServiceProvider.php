@@ -38,6 +38,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		if ( current_user_can( $capability ) ) {
             $submenu[ $slug ][] = [ __( 'Painel', 'anymarket' ), $capability, 'admin.php?page=' . $slug . '#/' ];
+            $submenu[ $slug ][] = [ __( 'Exportar', 'anymarket' ), $capability, 'admin.php?page=' . $slug . '#/export' ];
             $submenu[ $slug ][] = [ __( 'Sobre', 'anymarket' ), $capability, 'admin.php?page=' . $slug . '#/about' ];
         }
 	}

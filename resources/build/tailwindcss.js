@@ -24,6 +24,10 @@ module.exports = {
       black: '#000',
       white: '#fff',
 
+      custom: {
+        blue: '#3366FF',
+      },
+
       gray: {
         100: '#f7fafc',
         200: '#edf2f7',
@@ -210,9 +214,7 @@ module.exports = {
       outline: '0 0 0 3px rgba(66, 153, 225, 0.5)',
       none: 'none',
     },
-    container: {
-      center: true,
-    },
+    container: {},
     cursor: {
       auto: 'auto',
       default: 'default',
@@ -244,10 +246,6 @@ module.exports = {
     },
     fontFamily: {
       sans: [
-        'system-ui',
-        '-apple-system',
-        'BlinkMacSystemFont',
-        '"Segoe UI"',
         'Roboto',
         '"Helvetica Neue"',
         'Arial',

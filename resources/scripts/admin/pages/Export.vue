@@ -1,12 +1,12 @@
 <template>
-	<div class="app-about">
-		The About Page
+	<div class="app-export">
+		The Export Page
 	</div>
 </template>
 
 <script>
 export default {
-	name: 'About',
+	name: 'Export',
 	data() {
 		return {}
 	},
