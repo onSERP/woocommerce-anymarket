@@ -1,7 +1,5 @@
 <template>
-	<div id="vue-backend-app">
-		<h1>Backend App</h1>
-
+	<div id="anymarket__app">
 		<router-view />
 	</div>
 </template>
@@ -12,4 +10,10 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+/* stylelint-disable */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* stylelint-enaable */
+</style>
