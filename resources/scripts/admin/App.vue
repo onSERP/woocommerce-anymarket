@@ -100,4 +100,19 @@ input[type='text'] {
 		@apply absolute py-2 right-0 mr-4 mt-1;
 	}
 }
+
+.menu {
+	@apply text-lg font-bold;
+
+	li {
+		a {
+			@apply block px-4 py-2;
+
+			&:hover,
+			&.router-link-exact-active {
+				@apply text-white bg-custom-blue;
+			}
+		}
+	}
+}
 </style>

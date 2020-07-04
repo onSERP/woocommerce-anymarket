@@ -7,22 +7,25 @@ Plugin desenvolvido por onSERP Marketing
 ### Criação de Produto
 
 -   O cliente cria o produto no Woocommerce.
--
+-   Escolhe exportar o produto para a Anymarket
+-   O produto recebe dois parãmetros extras:
+    -   exported_to_anymarket (bool)
+    -   anymarket_id (string)
 
 ### Venda
 
 -   Anymarket notifica via webhook da venda.
 -   Recebe notificação e envia um `POST` para puxar os dados da venda.
 -   Cria novo pedido no woocommerce
--
+-   Recebe os status e atualizações desse pedido
 
 ## Atividades
 
 ### Pré dev
 
--   [ ] Levantamento de campos equvalentes entre as duas plataformas.
--   [ ] Levantamento de campos novos no Woocommerce.
--   [ ] Fazer equivalencia dos campos da Anymarket com os novos campos do Woocommerce.
+-   [x] Levantamento de campos equvalentes entre as duas plataformas.
+-   [x] Levantamento de campos novos no Woocommerce.
+-   [x] Fazer equivalencia dos campos da Anymarket com os novos campos do Woocommerce.
 
 ### Funcionalidades gerais
 
