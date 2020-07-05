@@ -21,6 +21,7 @@ return [
 		\Anymarket\Routing\RouteConditionsServiceProvider::class,
 		\Anymarket\View\ViewServiceProvider::class,
 		\Anymarket\WordPress\AdminServiceProvider::class,
+		\Anymarket\WordPress\FieldsServiceProvider::class,
 		\Anymarket\WordPress\AssetsServiceProvider::class,
 		\Anymarket\WordPress\ContentTypesServiceProvider::class,
 		\Anymarket\WordPress\ShortcodesServiceProvider::class,

@@ -43,8 +43,8 @@ Plugin desenvolvido por onSERP Marketing
 
 ### Produto
 
--   [ ] Adicionar campo de código de barras no produto
--   [ ] Adicionar campo de tempo de garantia (meses) no produto
+-   [x] Adicionar campo de código de barras no produto
+-   [x] Adicionar campo de tempo de garantia (meses) no produto
 -   [ ] Checkbox - "Exportar para o Anymarket?"
 
 ### Status de pedido
@@ -58,7 +58,7 @@ Plugin desenvolvido por onSERP Marketing
 
 ### Dúvidas
 
--   [ ] Integração com NFE e informações de envio
+-   [x] Integração com NFE e informações de envio
 
 ---
 

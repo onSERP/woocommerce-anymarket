@@ -43,6 +43,11 @@ class AdminServiceProvider implements ServiceProviderInterface {
         }
 	}
 
+	/**
+	 * Renders main admin page and loads its assets
+	 *
+	 * @return void
+	 */
 	public function adminIndexPage(){
 		\Anymarket::render('app');
 
