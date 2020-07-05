@@ -3,6 +3,8 @@ import App from './App.vue'
 import router from './router'
 import VTooltip from 'v-tooltip'
 
+import '@styles/admin-vue'
+
 Vue.config.productionTip = false
 
 Vue.use(VTooltip)
