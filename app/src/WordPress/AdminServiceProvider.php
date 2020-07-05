@@ -45,5 +45,8 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 	public function adminIndexPage(){
 		\Anymarket::render('app');
+
+		// enqueue vue assets only to this page
+		AssetsServiceProvider::enqueueAdminVueAssets();
 	}
 }

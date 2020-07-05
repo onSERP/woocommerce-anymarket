@@ -9,14 +9,16 @@ export default new Router({
       path: '/',
       name: 'Home',
       component: () =>
-        import(/* webpackChunkName: "anymarket_home" */ 'admin/pages/Home.vue'),
+        import(
+          /* webpackChunkName: "anymarket_home" */ '@scripts/admin-vue/pages/Home.vue'
+        ),
     },
     {
       path: '/export',
       name: 'Export',
       component: () =>
         import(
-          /* webpackChunkName: "anymarket_export" */ 'admin/pages/Export.vue'
+          /* webpackChunkName: "anymarket_export" */ '@scripts/admin-vue/pages/Export.vue'
         ),
       redirect: '/export/products',
 
@@ -26,7 +28,7 @@ export default new Router({
           name: 'ExportProducts',
           component: () =>
             import(
-              /* webpackChunkName: "anymarket_export_roducts" */ 'admin/pages/Export/ExportProducts.vue'
+              /* webpackChunkName: "anymarket_export_roducts" */ '@scripts/admin-vue/pages/Export/ExportProducts.vue'
             ),
         },
         {
@@ -34,7 +36,7 @@ export default new Router({
           name: 'ExportCategories',
           component: () =>
             import(
-              /* webpackChunkName: "anymarket_export_categories" */ 'admin/pages/Export/ExportCategories.vue'
+              /* webpackChunkName: "anymarket_export_categories" */ '@scripts/admin-vue/pages/Export/ExportCategories.vue'
             ),
         },
         {
@@ -42,7 +44,7 @@ export default new Router({
           name: 'ExportBrands',
           component: () =>
             import(
-              /* webpackChunkName: "anymarket_export_brands" */ 'admin/pages/Export/ExportBrands.vue'
+              /* webpackChunkName: "anymarket_export_brands" */ '@scripts/admin-vue/pages/Export/ExportBrands.vue'
             ),
         },
       ],
@@ -50,7 +52,7 @@ export default new Router({
     {
       path: '/about',
       name: 'About',
-      component: () => import('admin/pages/About.vue'),
+      component: () => import('@scripts/admin-vue/pages/About.vue'),
     },
   ],
 })

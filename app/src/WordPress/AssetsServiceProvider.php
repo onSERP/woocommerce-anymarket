@@ -32,7 +32,7 @@ class AssetsServiceProvider implements ServiceProviderInterface
 	public function enqueueAdminAssets() {
 		// Enqueue scripts.
 		\Anymarket::core()->assets()->enqueueScript(
-			'theme-admin-js-bundle',
+			'anymarket-admin-js-bundle',
 			\Anymarket::core()->assets()->getBundleUrl( 'admin', '.js' ),
 			[ 'jquery' ],
 			true
@@ -43,10 +43,37 @@ class AssetsServiceProvider implements ServiceProviderInterface
 
 		if ( $style ) {
 			\Anymarket::core()->assets()->enqueueStyle(
-				'theme-admin-css-bundle',
+				'anymarket-admin-css-bundle',
 				$style
 			);
 		}
+	}
+
+	/**
+	 * Enqueue admin vue assets.
+	 * Will call this only on menu page callback
+	 *
+	 * @return void
+	 */
+	public static function enqueueAdminVueAssets() {
+
+			// Enqueue scripts.
+			\Anymarket::core()->assets()->enqueueScript(
+				'anymarket-vue-admin-js-bundle',
+				\Anymarket::core()->assets()->getBundleUrl( 'admin-vue', '.js' ),
+				[ 'jquery' ],
+				true
+			);
+
+			// Enqueue styles.
+			$style = \Anymarket::core()->assets()->getBundleUrl( 'admin-vue', '.css' );
+
+			if ( $style ) {
+				\Anymarket::core()->assets()->enqueueStyle(
+					'anymarket-vue-admin-css-bundle',
+					$style
+				);
+			}
 	}
 
 	/**
