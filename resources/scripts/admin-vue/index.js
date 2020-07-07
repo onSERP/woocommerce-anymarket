@@ -22,6 +22,9 @@ import lang from 'element-ui/lib/locale/lang/en'
 import locale from 'element-ui/lib/locale'
 locale.use(lang)
 
+import Toasted from 'vue-toasted'
+Vue.use(Toasted)
+
 new Vue({
   el: '#anymarket__app',
   router,

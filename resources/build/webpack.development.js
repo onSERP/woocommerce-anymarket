@@ -251,9 +251,11 @@ module.exports = {
 
     // Reload on view file changes.
     before: (app, server) => {
-      chokidar.watch(['./views/**/*.php', './*.php']).on('all', () => {
-        server.sockWrite(server.sockets, 'content-changed')
-      })
+      chokidar
+        .watch(['./views/**/*.php', './app/**/*.php', './*.php'])
+        .on('all', () => {
+          server.sockWrite(server.sockets, 'content-changed')
+        })
     },
   },
 }
