@@ -14,19 +14,12 @@ return [
 	'providers'           => [
 		\WPEmergeAppCore\AppCore\AppCoreServiceProvider::class,
 		\WPEmergeAppCore\Assets\AssetsServiceProvider::class,
-		\WPEmergeAppCore\Avatar\AvatarServiceProvider::class,
 		\WPEmergeAppCore\Config\ConfigServiceProvider::class,
-		\WPEmergeAppCore\Image\ImageServiceProvider::class,
-		\WPEmergeAppCore\Sidebar\SidebarServiceProvider::class,
-		\Anymarket\Routing\RouteConditionsServiceProvider::class,
-		\Anymarket\View\ViewServiceProvider::class,
 		\Anymarket\WordPress\AdminServiceProvider::class,
 		\Anymarket\WordPress\FieldsServiceProvider::class,
 		\Anymarket\WordPress\AssetsServiceProvider::class,
 		\Anymarket\WordPress\ContentTypesServiceProvider::class,
-		\Anymarket\WordPress\ShortcodesServiceProvider::class,
 		\Anymarket\WordPress\PluginServiceProvider::class,
-		\Anymarket\WordPress\WidgetsServiceProvider::class,
 	],
 
 	/**
@@ -37,31 +30,12 @@ return [
 	 * the entire 'routes' option.
 	 */
 	'routes'              => [
-		'web'   => [
-			'definitions' => __DIR__ . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'web.php',
-			'attributes'  => [
-				'namespace' => 'Anymarket\\Controllers\\Web\\',
-			],
-		],
-		'admin' => [
-			'definitions' => __DIR__ . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'admin.php',
-			'attributes'  => [
-				'namespace' => 'Anymarket\\Controllers\\Admin\\',
-			],
-		],
 		'ajax'  => [
 			'definitions' => __DIR__ . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'ajax.php',
 			'attributes'  => [
 				'namespace' => 'Anymarket\\Controllers\\Ajax\\',
 			],
 		],
-	],
-
-	/**
-	 * View Composers settings.
-	 */
-	'view_composers'      => [
-		'namespace' => 'Anymarket\\ViewComposers\\',
 	],
 
 	/**
