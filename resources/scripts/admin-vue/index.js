@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import vuetify from './plugins/vuetify'
 
 import '@styles/admin-vue'
 import 'typeface-roboto'
@@ -21,7 +20,6 @@ Vue.use(Toasted, {
 new Vue({
   el: '#anymarket__app',
   router,
-  vuetify,
   render: (h) => h(App),
 })
 
