@@ -3,6 +3,7 @@
 namespace Anymarket\WordPress;
 
 use WPEmerge\ServiceProviders\ServiceProviderInterface;
+use Anymarket\Anymarket\ExportService;
 
 /**
  * Register admin-related entities, like admin menu pages.
@@ -26,10 +27,22 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		add_filter( 'wc_order_statuses', [$this, 'addStatusToWoocommerce']);
 
 		//custom columns on orders
-		add_filter('manage_shop_order_posts_columns', [$this, 'addColumnsToOrder'], 20);
+		add_filter( 'manage_shop_order_posts_columns', [$this, 'addColumnsToOrder'], 20);
 		add_filter( 'manage_edit-shop_order_sortable_columns', [$this, 'makeOrderColumnsSortable']);
 		add_action( 'manage_shop_order_posts_custom_column', [$this, 'populateOrderColumns'], 10, 2);
 		add_action( 'pre_get_posts', [$this, 'orderColumnsOrderby'] );
+
+		//bulk action on product
+		add_filter( 'bulk_actions-edit-product', [$this, 'bulkExport'] );
+		add_filter( 'handle_bulk_actions-edit-products', [$this, 'handleBulkExportProducts'], 10, 3 );
+
+		//bulk action on product categories
+		add_filter( 'bulk_actions-edit-product_cat', [$this, 'bulkExport'] );
+		add_filter( 'handle_bulk_actions-edit-product_cat', [$this, 'handleBulkExportProductCategories'], 10, 3 );
+
+		//admin notices
+		add_action( 'admin_notices', [$this, 'bulkExportNotices'] );
+
 	}
 
 	/**
@@ -170,10 +183,12 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		}
 
 		if( 'see_order_in_anymarket' === $column ){
-			//TODO: Check if is in sandbox
+			$is_dev = get_option( 'anymarket_is_dev_env' );
+			$env = $is_dev === 'true' ? 'sandbox' : 'app';
+
 			if ( carbon_get_post_meta($post_id, 'is_anymarket_order') === 'true' ){
 				$id = carbon_get_post_meta($post_id, 'anymarket_id');
-				echo "<a href=\"http://sandbox.anymarket.com.br/#/orders/edit/${id}\" target=\"_blank\"><b>Ver no Anymarket <span class=\"dashicons dashicons-external\"></span></b></a>";
+				echo "<a href=\"http://${env}.anymarket.com.br/#/orders/edit/${id}\" target=\"_blank\"><b>Ver no Anymarket <span class=\"dashicons dashicons-external\"></span></b></a>";
 			}
 		}
 	}
@@ -205,5 +220,113 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			$query->set( 'orderby', 'meta_value' );
 			$query->set( 'meta_key', '_anymarket_order_marketplace' );
 		  }
+	}
+
+	/**
+	 * Add "export to anymarket" option on bulk
+	 * select menu on wp in products and product categories
+	 *
+	 * @param array $bulk_array
+	 * @return array $bulk_array
+	 */
+	public function bulkExport( $bulk_array ){
+
+		$bulk_array = ['anymarket_bulk_export' => 'Exportar para o Anymarket'] + $bulk_array;
+
+		return $bulk_array;
+	}
+
+	/**
+	 * Handles bulk action to export products to
+	 * Anymarket
+	 *
+	 * @param string 	$redirect
+	 * @param string 	$doaction
+	 * @param array 	$object_ids
+	 * @return string 	$redirect
+	 */
+	public function handleBulkExportProducts( $redirect, $doaction, $object_ids ){
+
+		$redirect = remove_query_arg( [ 'anymarket_export_product_done', 'anymarket_export_product_fail' ], $redirect );
+
+		if( 'anymarket_bulk_export' === $doaction ){
+
+			$exportService = new ExportService;
+			$response = $exportService->bulkExportProductsWp( $object_ids );
+
+			if( is_wp_error($response) ){
+				$redirect = add_query_arg( 'anymarket_export_product_fail', $response->get_error_message(), $redirect );
+			} else{
+				$redirect = add_query_arg( 'anymarket_export_product_done', count( $object_ids ), $redirect );
+			}
+
+		}
+
+		return $redirect;
+
+	}
+
+	/**
+	 * Handles bulk action to export categories to
+	 * Anymarket
+	 *
+	 * @param string 	$redirect
+	 * @param string 	$doaction
+	 * @param array 	$object_ids
+	 * @return string 	$redirect
+	 */
+	public function handleBulkExportProductCategories( $redirect, $doaction, $object_ids ){
+
+		$redirect = remove_query_arg( [ 'anymarket_export_category_done', 'anymarket_export_category_fail' ], $redirect );
+
+		if( 'anymarket_bulk_export' === $doaction ){
+
+			$exportService = new ExportService;
+			$response = $exportService->bulkExportCategoriesWp( $object_ids );
+
+			if( is_wp_error($response) ){
+				$redirect = add_query_arg( [ 'anymarket_export_category_fail', $response->get_error_message() ], $redirect );
+			} else{
+				$redirect = add_query_arg( [ 'anymarket_export_category_done', count( $object_ids ) ], $redirect );
+			}
+
+		}
+
+		return $redirect;
+
+	}
+
+	/**
+	 * Add admin notices for anymarket bulk actions
+	 *
+	 * @return void
+	 */
+	public function bulkExportNotices(){
+
+		if ( !empty( $_REQUEST['anymarket_export_product_done'] ) ) {
+
+			printf( '<div id="message" class="updated notice is-dismissible"><p>' .
+				_n( '%s produto foi exportado com sucesso.',
+					'%s produtos foram exportados com sucesso.',
+					intval( $_REQUEST['anymarket_export_product_done'] ),
+					'anymarket'
+				) .
+				'</p></div>', intval( $_REQUEST['anymarket_export_product_done'] )
+			);
+
+		}
+
+		if ( !empty( $_REQUEST['anymarket_export_category_done'] ) ) {
+
+			printf( '<div id="message" class="updated notice is-dismissible"><p>' .
+				_n( '%s categoria foi exportada com sucesso.',
+					'%s categorias foram exportadas com sucesso.',
+					intval( $_REQUEST['anymarket_export_category_done'] ),
+					'anymarket'
+				) .
+				'</p></div>', intval( $_REQUEST['anymarket_export_category_done'] )
+			);
+
+		}
 	}
 }
