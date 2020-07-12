@@ -37,6 +37,7 @@ if ( ! $load ) {
 }
 
 define( 'ANYMARKET_PLUGIN_FILE', __FILE__ );
+define( 'ANYMARKET_PLUGIN_NAME', 'anymarket');
 
 // Load composer dependencies.
 if ( file_exists( __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php' ) ) {

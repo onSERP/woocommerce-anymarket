@@ -16,7 +16,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	 * {@inheritDoc}
 	 */
 	public function register( $container ) {
-		add_action('carbon_fields_register_fields', [$this, 'productsMeta']);
+		// Nothing to register.
 	}
 
 	/**
@@ -24,6 +24,9 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	 */
 	public function bootstrap( $container ) {
 		add_action( 'after_setup_theme', [$this, 'loadCarbonFields'] );
+
+		add_action('carbon_fields_register_fields', [$this, 'productsMeta']);
+		add_action('carbon_fields_register_fields', [$this, 'ordersMeta']);
 	}
 
 	/**
@@ -33,6 +36,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	 */
 
 	public function loadCarbonFields(){
+		//Carbon Fields already checks if it has been loaded previously to avoid conflict whith existing versions
 		\Carbon_Fields\Carbon_Fields::boot();
 	}
 
@@ -78,5 +82,19 @@ class FieldsServiceProvider implements ServiceProviderInterface
             			'value' => 'true'
 					]] )
 			]);
+	}
+
+	public function ordersMeta(){
+		Container::make( 'post_meta', 'Anymarket' )
+			->where( 'post_type', '=', 'shop_order' )
+			->set_context( 'side' )
+			->add_fields( [
+				Field::make( 'text', 'anymarket_order_marketplace', 'Marketplace' )
+					->set_attribute('readOnly', 'readonly'),
+
+				//hidden fields - will only use internally
+				Field::make( 'hidden', 'anymarket_id'),
+				Field::make( 'hidden', 'is_anymarket_order'),
+			] );
 	}
 }

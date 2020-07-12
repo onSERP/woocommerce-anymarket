@@ -45,14 +45,20 @@ Plugin desenvolvido por onSERP Marketing
 
 -   [x] Adicionar campo de código de barras no produto
 -   [x] Adicionar campo de tempo de garantia (meses) no produto
--   [ ] Checkbox - "Exportar para o Anymarket?"
+-   [x] Checkbox - "Exportar para o Anymarket?"
+
+### Pedido
+
+-   [x] Adicionar campo marketplace
+-   [x] Inserir na visualização de pedidos o nome do marketplace
+-   [x] Link para verificar pedido no ANYMARKET
 
 ### Status de pedido
 
 -   [ ] Pendente - Pagamento Pendente ou Aguardando
--   [ ] Pago - Pago (CRIAR)
--   [ ] Faturado - Faturado (CRIAR)
--   [ ] Enviado - Enviado (CRIAR)
+-   [x] Pago - Pago (CRIAR)
+-   [x] Faturado - Faturado (CRIAR)
+-   [x] Enviado - Enviado (CRIAR)
 -   [ ] Concluído - Concluído
 -   [ ] Cancelado - Cancelado
 
