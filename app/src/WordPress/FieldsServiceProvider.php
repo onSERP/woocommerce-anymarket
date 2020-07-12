@@ -25,8 +25,10 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	public function bootstrap( $container ) {
 		add_action( 'after_setup_theme', [$this, 'loadCarbonFields'] );
 
-		add_action('carbon_fields_register_fields', [$this, 'productsMeta']);
-		add_action('carbon_fields_register_fields', [$this, 'ordersMeta']);
+		add_action( 'carbon_fields_register_fields', [$this, 'productsMeta'] );
+		add_action( 'carbon_fields_register_fields', [$this, 'ordersMeta'] );
+
+		add_action( 'carbon_fields_register_fields', [$this, 'productCategoriesMeta'] );
 	}
 
 	/**
@@ -84,6 +86,11 @@ class FieldsServiceProvider implements ServiceProviderInterface
 			]);
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
 	public function ordersMeta(){
 		Container::make( 'post_meta', 'Anymarket' )
 			->where( 'post_type', '=', 'shop_order' )
@@ -96,5 +103,18 @@ class FieldsServiceProvider implements ServiceProviderInterface
 				Field::make( 'hidden', 'anymarket_id'),
 				Field::make( 'hidden', 'is_anymarket_order'),
 			] );
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	public function productCategoriesMeta(){
+		Container::make( 'term_meta', __( 'Anymarket' ) )
+			->where( 'term_taxonomy', '=', 'product_cat' )
+			->add_fields( [
+				Field::make( 'hidden', 'anymarket_id'),
+		] );
 	}
 }

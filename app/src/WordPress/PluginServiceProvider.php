@@ -65,7 +65,6 @@ class PluginServiceProvider implements ServiceProviderInterface
 	public function setSettings(){
 		$pre = 'anymarket_';
 
-		add_option( $pre . 'onserp_license', '');
 		add_option( $pre . 'token', '');
 		add_option( $pre . 'oi', '');
 		add_option( $pre . 'is_dev_env', false);
