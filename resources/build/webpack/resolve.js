@@ -5,10 +5,11 @@ const utils = require('../lib/utils')
 
 module.exports = {
   modules: [utils.srcScriptsPath(), 'node_modules'],
-  extensions: ['.js', '.jsx', '.vue', '.json', '.css', '.scss'],
+  extensions: ['.js', '.jsx', '.vue', '.json', '.css', '.scss', 'md'],
   alias: {
     vue$: 'vue/dist/vue.esm.js',
     '@config': utils.rootPath('config.json'),
+    '@changelog': utils.rootPath('changelog.md'),
     '@scripts': utils.srcScriptsPath(),
     '@styles': utils.srcStylesPath(),
     '@images': utils.srcImagesPath(),

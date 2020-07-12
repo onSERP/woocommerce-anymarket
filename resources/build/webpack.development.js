@@ -15,6 +15,7 @@ const get = require('lodash/get')
  */
 const utils = require('./lib/utils')
 const configLoader = require('./config-loader')
+const changelog = require('./changelog')
 const spriteSmith = require('./spritesmith')
 const spriteSvg = require('./spritesvg')
 const postcss = require('./postcss')
@@ -125,6 +126,14 @@ module.exports = {
         type: 'javascript/auto',
         test: utils.rootPath('config.json'),
         use: configLoader,
+      },
+
+      /**
+       * Handle changelog.
+       */
+      {
+        test: /\.md$/,
+        use: changelog,
       },
 
       /**

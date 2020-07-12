@@ -13,6 +13,9 @@
  * Text Domain: anymarket
  * Domain Path: /languages
  *
+ * WC requires at least: 5.2
+ * WC tested up to: 4.3
+ *
  * YOU SHOULD NORMALLY NOT NEED TO ADD ANYTHING HERE - any custom functionality unrelated
  * to bootstrapping the theme should go into a service provider or a separate helper file
  * (refer to the directory structure in README.md).
