@@ -1,6 +1,6 @@
 <template>
-  <div class="app-export">
-    <div class="container mt-8 mb-8 sm:mb-16 px-4">
+  <div class="app-export container">
+    <div class="mt-8 mb-8 sm:mb-16 px-4">
       <div class="flex flex-wrap justify-between items-center">
         <img
           class="border-0"
@@ -10,7 +10,7 @@
       </div>
     </div>
 
-    <div class="container">
+    <div class="pt-4">
       <div class="flex">
         <div class="w-3/12 px-4">
           <div

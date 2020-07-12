@@ -1,19 +1,21 @@
 /* Register global styles for vue app */
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
 /* stylelint-disable */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 /* stylelint-enaable */
 
+.container {
+  @apply bg-gray-100 py-4 rounded-lg shadow-md;
+}
+
 #anymarket__app {
   @apply font-sans text-black;
 
-  @media (max-width: 1023px) {
+  @media (max-width: 1280px) {
     .container {
-      width: 100% !important;
+      @apply bg-transparent w-full border-0 shadow-none;
       max-width: 100% !important;
     }
   }
@@ -33,6 +35,10 @@
 
 .btn-base {
   @apply text-base;
+}
+
+.btn-small {
+  @apply text-xs px-2 py-2 rounded;
 }
 
 .form-group {

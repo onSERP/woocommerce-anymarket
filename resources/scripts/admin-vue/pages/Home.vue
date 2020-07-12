@@ -1,7 +1,7 @@
 <template>
-  <div class="home">
+  <div class="home container">
     <loading :active.sync="isLoading" :is-full-page="true"> </loading>
-    <div class="container mt-8 mb-8 sm:mb-16 px-4">
+    <div class="mt-8 mb-8 sm:mb-16 px-4">
       <div class="flex flex-wrap justify-between items-center">
         <img
           class="border-0"
@@ -16,26 +16,11 @@
       </div>
     </div>
     <StatusBar />
-    <div class="container px-4 mt-16">
+    <div class="px-4 mt-16">
       <div class="flex mb-8">
         <p class="title">Configurações</p>
       </div>
       <form class="flex flex-col">
-        <div class="form-group">
-          <label for="onserpLicense">Licensa</label>
-          <div class="input">
-            <input
-              v-model="options.licence"
-              id="onserpLicense"
-              name="onserpLicense"
-              type="text"
-            />
-            <div class="help-text">
-              Se você não tem uma licensa
-              <a>clique aqui para gerar uma</a>
-            </div>
-          </div>
-        </div>
         <div class="form-group">
           <label for="anymarketToken">Token da ANYMARKET</label>
           <div class="input">
@@ -44,6 +29,7 @@
               id="anymarketToken"
               name="anymarketToken"
               type="text"
+              required
             />
           </div>
         </div>
@@ -55,6 +41,7 @@
               id="anymarketOI"
               name="anymarketOI"
               type="text"
+              required
             />
           </div>
         </div>
@@ -63,8 +50,8 @@
           <div class="input relative">
             <toggle-button
               id="env"
-              :value="options.isDevEnv"
-              :sync="true"
+              v-model="options.isDevEnv"
+              sync
               :color="{
                 checked: '#3366FF',
                 unchecked: '#555770',
@@ -124,7 +111,7 @@
 import Loading from 'vue-loading-overlay'
 import StatusBar from '../components/StatusBar'
 import { ToggleButton } from 'vue-js-toggle-button'
-import { api } from '../utils/api'
+import { anymarket } from '../utils/api'
 
 import 'vue-loading-overlay/dist/vue-loading.css'
 
@@ -140,7 +127,6 @@ export default {
       isLoading: false,
       copiedTooltipIsOpen: false,
       options: {
-        licence: '',
         anymarketToken: '',
         anymarketOI: '',
         isDevEnv: false,
@@ -149,8 +135,7 @@ export default {
     }
   },
   mounted() {
-    api.get('options').then((response) => {
-      this.options.licence = response.data.onserp_license
+    anymarket.get('options').then((response) => {
       this.options.anymarketToken = response.data.anymarket_token
       this.options.anymarketOI = response.data.anymarket_oi
       this.options.callbackURL = response.data.callback_url
@@ -171,17 +156,11 @@ export default {
     },
     handleForm(e) {
       this.isLoading = true
-      api.put('options', this.options).then((response) => {
+      anymarket.put('options', this.options).then((response) => {
         if (response.status === 200) {
-          this.$toasted.success('Configurações atualizadas!', {
-            position: 'top-center',
-            duration: 3000,
-          })
+          this.$toasted.success('Configurações atualizadas!')
         } else {
-          this.$toasted.error('Erro ao atualizar as configurações!', {
-            position: 'top-center',
-            duration: 3000,
-          })
+          this.$toasted.error('Erro ao atualizar as configurações!')
         }
         this.isLoading = false
       })
