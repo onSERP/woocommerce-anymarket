@@ -29,9 +29,12 @@ Plugin desenvolvido por onSERP Marketing
 
 ### Funcionalidades gerais
 
--   [ ] Exportação em massa
--   [ ] Exportação individual
--   [ ] Exportação seletiva
+-   [x] Exportação em massa - Categoria
+-   [x] Exportação individual - Categoria
+-   [x] Exportação seletiva - Categoria
+-   [ ] Exportação em massa - Produto
+-   [ ] Exportação individual - Produto
+-   [ ] Exportação seletiva - Produto
 -   [ ] Links nas áreas do woocommerce para o cliente editar algo no Anymarket.
 -   [ ] Tempo de garantia padrão nas configurações do plugin.
 

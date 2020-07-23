@@ -38,6 +38,14 @@ class AssetsServiceProvider implements ServiceProviderInterface
 			true
 		);
 
+		$is_dev_env = get_option( 'anymarket_is_dev_env' );
+
+		$script = ($is_dev_env === true || $is_dev_env === 'true') ? 'var anymarket_is_sandbox = true' : 'var anymarket_is_sandbox = false';
+
+		wp_register_script( 'anymarket-sandbox-check', '' );
+		wp_enqueue_script( 'anymarket-sandbox-check' );
+		wp_add_inline_script( 'anymarket-sandbox-check', $script );
+
 		// Enqueue styles.
 		$style = \Anymarket::core()->assets()->getBundleUrl( 'admin', '.css' );
 
