@@ -92,7 +92,7 @@ class ExportService
 	 * @param array $term_ids
 	 * @return array $report list of successful or unsuccessful exportations
 	 */
-	public function bulkExportCategoriesWp( array $term_ids ){
+	public function exportCategories( array $term_ids ){
 
 		$report = [];
 

@@ -43,6 +43,9 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		//admin notices
 		add_action( 'admin_notices', [$this, 'bulkExportNotices'] );
 
+		//edit/save action on product categories
+		add_action( 'edited_product_cat', [$this, 'saveProductCategories'] );
+
 	}
 
 	/**
@@ -282,7 +285,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		if( 'anymarket_bulk_export' === $doaction ){
 
 			$exportService = new ExportService;
-			$response = $exportService->bulkExportCategoriesWp( $object_ids );
+			$response = $exportService->exportCategories( $object_ids );
 
 			if( is_wp_error($response) ){
 				$redirect = add_query_arg( [ 'anymarket_export_category_fail', $response->get_error_message() ], $redirect );
@@ -345,6 +348,22 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 			endif;
 
+		}
+	}
+
+	/**
+	 * Export term to anymarket when edited
+	 *
+	 * @param int $term_id
+	 * @param int $tt_id
+	 * @return void
+	 */
+	public function saveProductCategories( $term_id ){
+		$is_on_anymarket = carbon_get_term_meta($term_id, 'anymarket_id');
+
+		if( !empty($is_on_anymarket) ) {
+			$exportService = new ExportService;
+			$exportService->exportCategories( [$term_id] );
 		}
 	}
 }
