@@ -31,7 +31,7 @@
     "htmlburger/wpemerge": "~0.16.0",
     "htmlburger/wpemerge-app-core": "~0.16.1",
     "htmlburger/carbon-fields": "^3.1",
-    "guzzlehttp/guzzle": "^7.0"
+    "php-curl-class/php-curl-class": "@dev"
   },
   "require-dev": {
     "filp/whoops": "^2.2",

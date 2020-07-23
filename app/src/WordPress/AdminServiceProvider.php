@@ -287,7 +287,8 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			if( is_wp_error($response) ){
 				$redirect = add_query_arg( [ 'anymarket_export_category_fail', $response->get_error_message() ], $redirect );
 			} else{
-				$redirect = add_query_arg( [ 'anymarket_export_category_done', count( $object_ids ) ], $redirect );
+				$redirect = add_query_arg( 'anymarket_export_category_done', true, $redirect );
+				set_transient( 'anymarket_category_export_result', $response, 60 );
 			}
 
 		}
@@ -318,14 +319,31 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		if ( !empty( $_REQUEST['anymarket_export_category_done'] ) ) {
 
-			printf( '<div id="message" class="updated notice is-dismissible"><p>' .
-				_n( '%s categoria foi exportada com sucesso.',
-					'%s categorias foram exportadas com sucesso.',
-					intval( $_REQUEST['anymarket_export_category_done'] ),
-					'anymarket'
-				) .
-				'</p></div>', intval( $_REQUEST['anymarket_export_category_done'] )
-			);
+			$report = get_transient( 'anymarket_category_export_result' );
+
+			if( !empty($report) ):
+
+				echo '<div id="message" class="updated notice is-dismissible"><p>' ;
+
+				foreach ($report as $item) {
+					if( empty($item['errorCode']) ){
+						printf( __('Categoria <b>%s</b> exportada com sucesso.', 'anymarket'), $item['name'] );
+						print("<br/>");
+					} else{
+						printf( __('A categoria <b>%1$s</b> falhou na exportação. Código do erro: %2$s.', 'anymarket'), $item['name'], $item['errorCode'] );
+
+						if ($item['errorCode'] === 404){
+							echo ' ';
+							_e('Se você excluiu esta categoria no Anymarket, você deverá recriá-la no Woocommerce para refazer a integração', 'anymarket');
+						}
+
+						print("<br/>");
+					}
+				}
+
+				echo '</p></div>';
+
+			endif;
 
 		}
 	}

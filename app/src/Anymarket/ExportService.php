@@ -2,20 +2,23 @@
 
 namespace Anymarket\Anymarket;
 
-use GuzzleHttp\Client;
+use Curl\Curl;
+use Curl\MultiCurl;
 
 /**
  * Export stuff from wp to anymarket
  */
 class ExportService
 {
-	public $client;
-
 	public $protocol;
 
 	public $env;
 
 	public $apiVer = 'v2';
+
+	public $logger;
+
+	public $baseUrl;
 
 	protected $apiToken;
 
@@ -26,10 +29,13 @@ class ExportService
 
 		$this->protocol = get_option('anymarket_is_dev_env') == 'true' ? 'http://' : 'https://';
 
-		$this->client = new Client([
-			'base_uri' => $this->protocol . $this->env . '.anymarket.com.br/' . $this->apiVer . '/',
-			'headers' => ['gumgaToken' => $this->apiToken]
-			]);
+		$this->curl = new Curl();
+		$this->curl->setHeader('gumgaToken', $this->apiToken);
+		$this->curl->setHeader('Content-Type', 'application/json');
+
+		$this->baseUrl = $this->protocol . $this->env . '.anymarket.com.br/' . $this->apiVer . '/';
+
+		$this->logger = wc_get_logger();
 	}
 
 	public function exportAllProducts(){
@@ -52,7 +58,7 @@ class ExportService
 			'include' => $post_ids,
 			'meta_query' => [[
 				'key' => '_anymarket_should_export',
-				'value' => 'false',
+				'value' => 'true',
 				'compare' => '='
 			]]
 		]);
@@ -81,18 +87,88 @@ class ExportService
 	}
 
 	/**
-	 * Undocumented function
+	 * Recieves list of categories ids and export them to anymarket
 	 *
 	 * @param array $term_ids
-	 * @return WP_Error|Boolean
+	 * @return array $report list of successful or unsuccessful exportations
 	 */
 	public function bulkExportCategoriesWp( array $term_ids ){
 
-		//get categories on anymarket and match'em with $term_ids
-		//if category not on anymarket => create it
+		$report = [];
 
-		return 'success';
+		$terms = get_terms([
+			'taxonomy' => 'product_cat',
+			'include' => $term_ids,
+			'orderby' => 'parent',
+			'order' => 'ASC',
+			'hide_empty' => false,
+		]);
+
+
+		foreach( $terms as $key => $term ){
+			$key === 9 && sleep(1);
+
+			$data = [];
+			// if category is not on anymarket
+			if ( empty( carbon_get_term_meta($term->term_id, 'anymarket_id') ) ){
+				// data to send
+				$data['name'] = $term->name;
+				$data['priceFactor'] = 1;
+				$data['definitionPriceScope'] = 'COST';
+
+				// check if category has parent
+				if( 0 !== $term->parent ){
+					$parent_anymarket = carbon_get_term_meta($term->parent, 'anymarket_id');
+					// check if the parent is on anymarket, if not push its 'anymarket id' to data
+					if( !empty($parent_anymarket) ) $data['parent']['id'] = $parent_anymarket;
+				}
+
+				//make the request
+				$this->curl->post($this->baseUrl . 'categories', $data);
+				if($this->curl->error){
+					$report[] = [
+						'name' => $term->name,
+						'id' => $term->term_id,
+						'errorCode' => $this->curl->errorCode,
+						'errorMessage' => $this->curl->errorMessage
+					];
+				} else {
+					$report[] = [
+						'name' => $term->name,
+						'id' => $term->term_id,
+						'response' => $this->curl->response
+					];
+
+					carbon_set_term_meta( $term->term_id, 'anymarket_id', $this->curl->response->id );
+				}
+
+			} else {
+				$anymarket_id = carbon_get_term_meta($term->term_id, 'anymarket_id');
+				$data['name'] = $term->name;
+
+				//make the request
+				$this->curl->put($this->baseUrl . 'categories/' . $anymarket_id, $data);
+				if($this->curl->error){
+					$report[] = [
+						'name' => $term->name,
+						'id' => $term->term_id,
+						'errorCode' => $this->curl->errorCode,
+						'errorMessage' => $this->curl->errorMessage
+					];
+				} else {
+					$report[] = [
+						'name' => $term->name,
+						'id' => $term->term_id,
+						'response' => $this->curl->response
+					];
+				}
+			}
+		}
+
+		if( get_option('anymarket_is_dev_env') == 'true' ){
+			$this->logger->debug( print_r($report, true) , ['source' => 'woocommerce-anymarket'] );
+		}
+
+		return $report;
 	}
-
-
 }
