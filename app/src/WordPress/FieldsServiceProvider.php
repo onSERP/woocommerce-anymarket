@@ -30,6 +30,10 @@ class FieldsServiceProvider implements ServiceProviderInterface
 
 		add_action( 'carbon_fields_register_fields', [$this, 'productCategoriesMeta'] );
 
+		//custom field on simple product - barcode
+		add_action( 'woocommerce_product_options_general_product_data', [$this, 'addCustomFieldToSimpleProduct'] );
+		add_action( 'woocommerce_process_product_meta', [$this, 'saveCustomFieldToSimpleProduct'], 10, 2 );
+
 		//custom field on product variation - barcode
 		add_action( 'woocommerce_variation_options_pricing', [$this, 'addCustomFieldToVariations'], 10, 3 );
 		add_action( 'woocommerce_save_product_variation', [$this, 'saveCustomFieldVariations'], 10, 2 );
@@ -80,7 +84,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	}
 
 	/**
-	 * Undocumented function
+	 * Create fields on Orders
 	 *
 	 * @return void
 	 */
@@ -99,7 +103,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	}
 
 	/**
-	 * Undocumented function
+	 * Create fields on product categories
 	 *
 	 * @return void
 	 */
@@ -111,20 +115,63 @@ class FieldsServiceProvider implements ServiceProviderInterface
 		] );
 	}
 
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	public function addCustomFieldToSimpleProduct() {
+		woocommerce_wp_text_input( [
+			'id' => 'anymarket_simple_barcode',
+			'class' => 'short',
+			'desc_tip' => true,
+			'label' => __( 'Código de barras', 'anymarket' ),
+			'description' => __('Campo obrigatório para o Anymarket', 'anymarket'),
+		] );
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $id
+	 * @param [type] $post
+	 * @return void
+	 */
+	public function saveCustomFieldToSimpleProduct( $id, $post ) {
+		$anymarket_barcode = $_POST['anymarket_simple_barcode'];
+		if( isset( $anymarket_barcode ) )  update_post_meta( $id, 'anymarket_simple_barcode', $_POST['super_product'] );
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $loop
+	 * @param [type] $variation_data
+	 * @param [type] $variation
+	 * @return void
+	 */
 	public function addCustomFieldToVariations( $loop, $variation_data, $variation ) {
 		woocommerce_wp_text_input( [
-			'id' => 'anymarket_barcode[' . $loop . ']',
+			'id' => 'anymarket_variable_barcode[' . $loop . ']',
 			'class' => 'short',
 			'wrapper_class' => 'form-row',
 			'label' => __( 'Código de barras', 'anymarket' ),
 			'description' => __('Campo obrigatório para o Anymarket', 'anymarket'),
-			'value' => get_post_meta( $variation->ID, 'anymarket_barcode', true )
+			'value' => get_post_meta( $variation->ID, 'anymarket_variable_barcode', true )
 			]
 		);
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $variation_id
+	 * @param [type] $i
+	 * @return void
+	 */
 	public function saveCustomFieldVariations( $variation_id, $i ) {
-		$anymarket_barcode = $_POST['anymarket_barcode'][$i];
-		if ( isset( $anymarket_barcode ) ) update_post_meta( $variation_id, 'anymarket_barcode', esc_attr( $anymarket_barcode ) );
+		$anymarket_barcode = $_POST['anymarket_variable_barcode'][$i];
+		if ( isset( $anymarket_barcode ) ) update_post_meta( $variation_id, 'anymarket_variable_barcode', esc_attr( $anymarket_barcode ) );
 	}
 }
