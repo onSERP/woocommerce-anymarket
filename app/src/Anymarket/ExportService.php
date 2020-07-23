@@ -38,21 +38,13 @@ class ExportService
 		$this->logger = wc_get_logger();
 	}
 
-	public function exportAllProducts(){
-
-	}
-
-	public function exportAllCategories(){
-
-	}
-
 	/**
 	 * Undocumented function
 	 *
 	 * @param array $post_ids
 	 * @return WP_Error|Boolean
 	 */
-	public function bulkExportProductsWp( array $post_ids ){
+	public function exportProducts( array $post_ids ){
 
 		$products = wc_get_products([
 			'include' => $post_ids,

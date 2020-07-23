@@ -255,7 +255,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		if( 'anymarket_bulk_export' === $doaction ){
 
 			$exportService = new ExportService;
-			$response = $exportService->bulkExportProductsWp( $object_ids );
+			$response = $exportService->exportProducts( $object_ids );
 
 			if( is_wp_error($response) ){
 				$redirect = add_query_arg( 'anymarket_export_product_fail', $response->get_error_message(), $redirect );
