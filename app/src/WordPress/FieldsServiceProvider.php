@@ -70,7 +70,6 @@ class FieldsServiceProvider implements ServiceProviderInterface
 				 ] ),
 
 				//hidden fields - will only use internally
-				Field::make( 'hidden', 'exported_to_anymarket'),
 				Field::make( 'hidden', 'anymarket_id'),
 
 				Field::make( 'text', 'anymarket_warranty_time', __('Garantia (meses)', 'anymarket') )
@@ -140,7 +139,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	 */
 	public function saveCustomFieldToSimpleProduct( $id, $post ) {
 		$anymarket_barcode = $_POST['anymarket_simple_barcode'];
-		if( isset( $anymarket_barcode ) )  update_post_meta( $id, 'anymarket_simple_barcode', $_POST['super_product'] );
+		if( isset( $anymarket_barcode ) )  update_post_meta( $id, 'anymarket_simple_barcode', esc_attr( $anymarket_barcode ) );
 	}
 
 	/**

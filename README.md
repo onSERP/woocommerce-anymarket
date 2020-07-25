@@ -32,13 +32,12 @@ Plugin desenvolvido por onSERP Marketing
 -   [x] Exportação em massa - Categoria
 -   [x] Exportação individual - Categoria
 -   [x] Exportação seletiva - Categoria
--   [ ] Exportação em massa - Produto
+-   [x] Exportação em massa - Produto
 -   [ ] Exportação individual - Produto
--   [ ] Exportação seletiva - Produto
+-   [x] Exportação seletiva - Produto
 -   [ ] Links nas áreas do woocommerce para o cliente editar algo no Anymarket.
--   [ ] Tempo de garantia padrão nas configurações do plugin.
 
-### Opções de Preço
+### Opções de Preço - (Morre?)
 
 -   [ ] Preço automático (Custo + Markup)
 -   [ ] Preço manual por anúncio (Editado somente na Anymarket)

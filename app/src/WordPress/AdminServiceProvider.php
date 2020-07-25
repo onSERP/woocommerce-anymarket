@@ -33,11 +33,11 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		add_action( 'pre_get_posts', [$this, 'orderColumnsOrderby'] );
 
 		//bulk action on product
-		add_filter( 'bulk_actions-edit-product', [$this, 'bulkExport'] );
-		add_filter( 'handle_bulk_actions-edit-products', [$this, 'handleBulkExportProducts'], 10, 3 );
+		add_filter( 'bulk_actions-edit-product', [$this, 'bulkExportProducts'] );
+		add_filter( 'handle_bulk_actions-edit-product', [$this, 'handleBulkExportProducts'], 10, 3 );
 
 		//bulk action on product categories
-		add_filter( 'bulk_actions-edit-product_cat', [$this, 'bulkExport'] );
+		add_filter( 'bulk_actions-edit-product_cat', [$this, 'bulkExportProductCategories'] );
 		add_filter( 'handle_bulk_actions-edit-product_cat', [$this, 'handleBulkExportProductCategories'], 10, 3 );
 
 		//admin notices
@@ -227,14 +227,28 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 	/**
 	 * Add "export to anymarket" option on bulk
-	 * select menu on wp in products and product categories
+	 * select menu on wp in products
 	 *
 	 * @param array $bulk_array
 	 * @return array $bulk_array
 	 */
-	public function bulkExport( $bulk_array ){
+	public function bulkExportProducts( $bulk_array ){
 
-		$bulk_array = ['anymarket_bulk_export' => 'Exportar para o Anymarket'] + $bulk_array;
+		$bulk_array = ['anymarket_bulk_export_products' => 'Exportar para o Anymarket'] + $bulk_array;
+
+		return $bulk_array;
+	}
+
+	/**
+	 * Add "export to anymarket" option on bulk
+	 * select menu on wp in product categories
+	 *
+	 * @param array $bulk_array
+	 * @return array $bulk_array
+	 */
+	public function bulkExportProductCategories( $bulk_array ){
+
+		$bulk_array = ['anymarket_bulk_export_product_categories' => 'Exportar para o Anymarket'] + $bulk_array;
 
 		return $bulk_array;
 	}
@@ -252,7 +266,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		$redirect = remove_query_arg( [ 'anymarket_export_product_done', 'anymarket_export_product_fail' ], $redirect );
 
-		if( 'anymarket_bulk_export' === $doaction ){
+		if( 'anymarket_bulk_export_products' === $doaction ){
 
 			$exportService = new ExportService;
 			$response = $exportService->exportProducts( $object_ids );
@@ -282,7 +296,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		$redirect = remove_query_arg( [ 'anymarket_export_category_done', 'anymarket_export_category_fail' ], $redirect );
 
-		if( 'anymarket_bulk_export' === $doaction ){
+		if( 'anymarket_bulk_export_product_categories' === $doaction ){
 
 			$exportService = new ExportService;
 			$response = $exportService->exportCategories( $object_ids );
