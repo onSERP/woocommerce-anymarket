@@ -29,22 +29,16 @@ function createButton(page) {
  * Append button on page
  *
  * @param {string} obj object of params
- * @param {string} obj.path path
- * @param {string} obj.param query param
- * @param {string} obj.value query value
+ * @param {string} obj.page pagenow
+ * @param {string} obj.admin admin page
  * @param {string} obj.dest destination
  *
  * @returns {void}
  */
 export default function buttonOnPage(obj) {
-  const searchParams = new URL(document.location).searchParams
-  const pathname = '/wp-admin/' + obj.path
-
-  if (
-    window.location.pathname === pathname &&
-    searchParams.get(obj.param) === obj.value
-  ) {
+  if (pagenow === obj.page && adminpage === obj.admin) {
     const headingInline = document.querySelector('.wp-heading-inline')
-    headingInline.after(createButton(obj.dest))
+
+    if (headingInline) headingInline.after(createButton(obj.dest))
   }
 }

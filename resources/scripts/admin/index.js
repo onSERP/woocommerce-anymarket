@@ -6,16 +6,14 @@ import buttonOnPage from './createButton'
 
 // button on product categories
 buttonOnPage({
-  path: 'edit-tags.php',
-  param: 'taxonomy',
-  value: 'product_cat',
+  admin: 'edit-tags-php',
+  page: 'edit-product_cat',
   dest: 'categories',
 })
 
 // button on products list
 buttonOnPage({
-  path: 'edit.php',
-  param: 'post_type',
-  value: 'product',
+  admin: 'edit-php',
+  page: 'edit-product',
   dest: 'products/list',
 })
