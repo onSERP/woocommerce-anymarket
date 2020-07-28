@@ -22,29 +22,33 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function bootstrap( $container ) {
 		add_action( 'admin_menu', [$this, 'registerAdminPages'] );
 
-		//order statuses
+		// order statuses
 		add_action( 'init', [$this, 'registerPostStatus'] );
 		add_filter( 'wc_order_statuses', [$this, 'addStatusToWoocommerce']);
 
-		//custom columns on orders
+		// custom columns on orders
 		add_filter( 'manage_shop_order_posts_columns', [$this, 'addColumnsToOrder'], 20);
 		add_filter( 'manage_edit-shop_order_sortable_columns', [$this, 'makeOrderColumnsSortable']);
 		add_action( 'manage_shop_order_posts_custom_column', [$this, 'populateOrderColumns'], 10, 2);
 		add_action( 'pre_get_posts', [$this, 'orderColumnsOrderby'] );
 
-		//bulk action on product
+		// bulk action on product
 		add_filter( 'bulk_actions-edit-product', [$this, 'bulkExportProducts'] );
 		add_filter( 'handle_bulk_actions-edit-product', [$this, 'handleBulkExportProducts'], 10, 3 );
 
-		//bulk action on product categories
+		// bulk action on product categories
 		add_filter( 'bulk_actions-edit-product_cat', [$this, 'bulkExportProductCategories'] );
 		add_filter( 'handle_bulk_actions-edit-product_cat', [$this, 'handleBulkExportProductCategories'], 10, 3 );
 
-		//admin notices
+		// admin notices
 		add_action( 'admin_notices', [$this, 'bulkExportNotices'] );
+		add_action( 'admin_notices', [$this, 'productNotices'] );
 
-		//edit/save action on product categories
+		// edit/save action on product categories
 		add_action( 'edited_product_cat', [$this, 'saveProductCategories'] );
+
+		// edit/save products
+		add_action( 'save_post', [$this, 'saveProduct'], 10, 3 );
 
 	}
 
@@ -274,7 +278,8 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			if( is_wp_error($response) ){
 				$redirect = add_query_arg( 'anymarket_export_product_fail', $response->get_error_message(), $redirect );
 			} else{
-				$redirect = add_query_arg( 'anymarket_export_product_done', count( $object_ids ), $redirect );
+				$redirect = add_query_arg( 'anymarket_export_product_done', $redirect );
+				set_transient( 'anymarket_product_export_result', $response, 60 );
 			}
 
 		}
@@ -323,14 +328,31 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		if ( !empty( $_REQUEST['anymarket_export_product_done'] ) ) {
 
-			printf( '<div id="message" class="updated notice is-dismissible"><p>' .
-				_n( '%s produto foi exportado com sucesso.',
-					'%s produtos foram exportados com sucesso.',
-					intval( $_REQUEST['anymarket_export_product_done'] ),
-					'anymarket'
-				) .
-				'</p></div>', intval( $_REQUEST['anymarket_export_product_done'] )
-			);
+			$report = get_transient( 'anymarket_product_export_result' );
+
+			if( !empty($report) ):
+
+				echo '<div class="updated notice is-dismissible"><p>' ;
+
+				foreach ($report as $item) {
+					if( empty($item['errorCode']) ){
+						printf( __('Produto <b>%s</b> exportado com sucesso.', 'anymarket'), $item['name'] );
+						print("<br/>");
+					} else{
+						printf( __('O produto <b>%1$s</b> falhou na exportação. Código do erro: %2$s.', 'anymarket'), $item['name'], $item['errorCode'] );
+
+						if ($item['errorCode'] === 404){
+							echo ' ';
+							_e('Se você excluiu este produto no Anymarket, você deverá desativar e reativar a integração do produto novamente', 'anymarket');
+						}
+
+						print("<br/>");
+					}
+				}
+
+				echo '</p></div>';
+
+			endif;
 
 		}
 
@@ -340,7 +362,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 			if( !empty($report) ):
 
-				echo '<div id="message" class="updated notice is-dismissible"><p>' ;
+				echo '<div class="updated notice is-dismissible"><p>' ;
 
 				foreach ($report as $item) {
 					if( empty($item['errorCode']) ){
@@ -369,7 +391,6 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 * Export term to anymarket when edited
 	 *
 	 * @param int $term_id
-	 * @param int $tt_id
 	 * @return void
 	 */
 	public function saveProductCategories( $term_id ){
@@ -378,6 +399,54 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		if( !empty($is_on_anymarket) ) {
 			$exportService = new ExportService;
 			$exportService->exportCategories( [$term_id] );
+		}
+	}
+
+	/**
+	 * Export product to anymarket when edited
+	 *
+	 * @param [type] $post_id
+	 * @param [type] $post
+	 * @param [type] $updated
+	 * @return void
+	 */
+	public function saveProduct( $post_id, $post, $updated ){
+
+		if ( wp_is_post_revision( $post_id ) ) return;
+		if ( wp_is_post_autosave( $post_id ) ) return;
+
+		if ( 'product' === get_post_type( $post_id ) ) {
+
+			add_action( 'updated_postmeta', function() use ($post_id){
+				$should_export = carbon_get_post_meta( $post_id, 'anymarket_should_export' );
+
+				if( 'true' === $should_export ) {
+					$exportService = new ExportService;
+					$exportService->exportProducts( [$post_id] );
+				} else {
+					carbon_set_post_meta( $post_id, 'anymarket_id', '' );
+				}
+			});
+
+		}
+
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	public function productNotices(){
+		$is_dev = get_option( 'anymarket_is_dev_env' );
+		$env = $is_dev === 'true' ? 'sandbox' : 'app';
+
+		$screen = get_current_screen();
+		if( 'post' === $screen->base && 'product' === $screen->post_type ){
+			echo '<div class="notice is-dismissible notice-warning"><p>';
+			echo __('<b>Importante:</b> Antes de adicionar variações você deve criá-las no anymarket.', 'anymarket');
+			echo " <a href=\"http://${env}.anymarket.com.br/#/variations/list\" target=\"_blank\"><b>Para criar clique aqui <span class=\"dashicons dashicons-external\"></span></b></a>";
+			echo '</p></div>';
 		}
 	}
 }

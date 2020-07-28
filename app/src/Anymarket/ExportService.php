@@ -81,24 +81,26 @@ class ExportService
 
 		$this->multiCurl->success(function ($instance) use (&$report) {
 			$report[] = [
+				'name' => $instance->productName,
 				'id' => $instance->productId,
 				'type' => $instance->type,
-				'data' => $instance->data,
-				'response' => $instance->response
+				'data' => json_encode($instance->data, JSON_UNESCAPED_UNICODE),
 			];
 
 			if( $instance->type === 'Create' ){
-				carbon_set_post_meta( $id, 'anymarket_should_export', 'true' );
+				carbon_set_post_meta( $instance->productId, 'anymarket_should_export', 'true' );
+				carbon_set_post_meta( $instance->productId, 'anymarket_id', $instance->response->id );
 			}
 		});
 
 		$this->multiCurl->error(function ($instance) use (&$report) {
 			$report[] = [
+				'name' => $instance->productName,
 				'id' => $instance->productId,
 				'type' => $instance->type,
-				'data' => $instance->data,
 				'errorCode' => $instance->errorCode,
-				'errorMessage' => $instance->errorMessage
+				'errorMessage' => $instance->response->message,
+				'data' => json_encode($instance->data, JSON_UNESCAPED_UNICODE),
 			];
 		});
 
@@ -109,6 +111,7 @@ class ExportService
 				'description' => $product->get_description(),
 				'category' => $this->formatProductCategories( $product ),
 				'warrantyTime' => carbon_get_post_meta( $product->get_id(), 'anymarket_warranty_time' ),
+				'priceFactor' => carbon_get_post_meta( $product->get_id(), 'anymarket_markup' ),
 				'height' => $product->get_height(),
 				'width' => $product->get_width(),
 				'weight' => $product->get_weight(),
@@ -120,21 +123,22 @@ class ExportService
 
 			// if product is not on anymarket
 			if( empty( carbon_get_post_meta($product->get_id(), 'anymarket_id') ) ){
-				$data['priceFactor'] = 1;
 				$data['origin']['id'] = 0;
 
 				// add to queue
 				$instance = $this->multiCurl->addPost($this->baseUrl . 'products', json_encode($data, JSON_UNESCAPED_UNICODE));
 				$instance->productId = $product->get_id();
+				$instance->productName = $product->get_name();
 				$instance->type = 'Create';
 				$instance->data = $data;
 
 			} else{
-				$anymarket_id = carbon_get_post_meta($product->id, 'anymarket_id');
+				$anymarket_id = carbon_get_post_meta($product->get_id(), 'anymarket_id');
 
 				//add to queue
-				$instance = $this->multiCurl->addPut($this->baseUrl . 'product/' . $anymarket_id, json_encode($data, JSON_UNESCAPED_UNICODE));
+				$instance = $this->multiCurl->addPut($this->baseUrl . 'products/' . $anymarket_id, json_encode($data, JSON_UNESCAPED_UNICODE));
 				$instance->productId = $product->get_id();
+				$instance->productName = $product->get_name();
 				$instance->type = 'Update';
 				$instance->data = $data;
 			}
@@ -194,14 +198,17 @@ class ExportService
 					$report[] = [
 						'name' => $term->name,
 						'id' => $term->term_id,
+						'type' => 'Create',
 						'errorCode' => $this->curl->errorCode,
-						'errorMessage' => $this->curl->errorMessage
+						'errorMessage' => $this->curl->errorMessage,
+						'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
 					];
 				} else {
 					$report[] = [
 						'name' => $term->name,
 						'id' => $term->term_id,
-						'response' => $this->curl->response
+						'type' => 'Create',
+						'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
 					];
 
 					carbon_set_term_meta( $term->term_id, 'anymarket_id', $this->curl->response->id );
@@ -216,14 +223,16 @@ class ExportService
 					$report[] = [
 						'name' => $term->name,
 						'id' => $term->term_id,
+						'type' => 'Update',
 						'errorCode' => $this->curl->errorCode,
-						'errorMessage' => $this->curl->errorMessage
+						'errorMessage' => $this->curl->response->message
 					];
 				} else {
 					$report[] = [
 						'name' => $term->name,
 						'id' => $term->term_id,
-						'response' => $this->curl->response
+						'type' => 'Update',
+						'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
 					];
 				}
 			}
@@ -346,7 +355,7 @@ class ExportService
 				$attr_array = [];
 
 				foreach ( $product_variation['attributes'] as $key => $attr ){
-					$newKey = str_replace('attribute_', '', $key);
+					$newKey = str_replace( '-', ' ', str_replace('attribute_', '', $key ) );
 
 					$attr_array = [ $newKey => $attr ] + $attr_array;
 				}
@@ -356,18 +365,19 @@ class ExportService
 					'price' => $product_variation['display_price'],
 					'amount' => $product_variation['max_qty'],
 					'partnerId' => $product_variation['sku'],
+					'ean' => get_post_meta( $product_variation['variation_id'], 'anymarket_variable_barcode', true ),
 					'variations' => $attr_array
 				];
 			}
 
 		} elseif ( $product instanceof \WC_Product_Simple || $product->get_type() === 'simple ') {
 
-			$skus = [
+			$skus[] = [
 				'title' => $product->get_name(),
 				'partnerId' => $product->get_sku(),
 				'amount' => $product->get_stock_quantity(),
 				'price' => $product->get_price(),
-				'ean' => get_post_meta( $product->get_id(), 'anymarket_simple_barcode' )
+				'ean' => get_post_meta( $product->get_id(), 'anymarket_simple_barcode', true )
 			];
 		}
 
