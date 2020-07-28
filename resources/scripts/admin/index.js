@@ -17,3 +17,17 @@ buttonOnPage({
   page: 'edit-product',
   dest: 'products/list',
 })
+
+// wait for wp domready event to get field id
+wp.domReady(function () {
+  const id = document.querySelector('input[name*="_anymarket_id"]')
+
+  if (id) {
+    // button on product edit page
+    buttonOnPage({
+      admin: 'post-php',
+      page: 'product',
+      dest: 'products/edit/' + id.value,
+    })
+  }
+})
