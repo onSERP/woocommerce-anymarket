@@ -3,7 +3,9 @@
 namespace Anymarket\WordPress;
 
 use WPEmerge\ServiceProviders\ServiceProviderInterface;
-use Anymarket\Anymarket\ExportService;
+use Anymarket\Anymarket\ExportProducts;
+use Anymarket\Anymarket\ExportCategories;
+use Anymarket\Anymarket\ExportStock;
 
 /**
  * Register admin-related entities, like admin menu pages.
@@ -14,6 +16,14 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function register( $container ) {
 		// Nothing to register.
+
+		add_action( 'admin_init', function(){
+			$stock = new ExportStock;
+			$p = wc_get_product( 29 );
+
+				//$stock->testVariation( $p->get_available_variations());
+
+		} );
 	}
 
 	/**
@@ -50,6 +60,8 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		// edit/save products
 		add_action( 'save_post', [$this, 'saveProduct'], 10, 3 );
 
+		// new order
+		add_action( 'woocommerce_new_order', [$this, 'stockDiscount'] );
 	}
 
 	/**
@@ -268,18 +280,15 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function handleBulkExportProducts( $redirect, $doaction, $object_ids ){
 
-		$redirect = remove_query_arg( [ 'anymarket_export_product_done', 'anymarket_export_product_fail' ], $redirect );
-
 		if( 'anymarket_bulk_export_products' === $doaction ){
 
-			$exportService = new ExportService;
-			$response = $exportService->exportProducts( $object_ids );
+			$exportProducts = new ExportProducts;
+			$response = $exportProducts->export( $object_ids );
 
 			if( is_wp_error($response) ){
-				$redirect = add_query_arg( 'anymarket_export_product_fail', $response->get_error_message(), $redirect );
+				set_transient( 'anymarket_export_product_fail', $response->get_error_message(), 3 );
 			} else{
-				$redirect = add_query_arg( 'anymarket_export_product_done', $redirect );
-				set_transient( 'anymarket_product_export_result', $response, 60 );
+				set_transient( 'anymarket_product_export_result', $response, 3 );
 			}
 
 		}
@@ -299,18 +308,15 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function handleBulkExportProductCategories( $redirect, $doaction, $object_ids ){
 
-		$redirect = remove_query_arg( [ 'anymarket_export_category_done', 'anymarket_export_category_fail' ], $redirect );
-
 		if( 'anymarket_bulk_export_product_categories' === $doaction ){
 
-			$exportService = new ExportService;
-			$response = $exportService->exportCategories( $object_ids );
+			$exportCategories = new ExportCategories;
+			$response = $exportCategories->export( $object_ids );
 
 			if( is_wp_error($response) ){
-				$redirect = add_query_arg( [ 'anymarket_export_category_fail', $response->get_error_message() ], $redirect );
+				set_transient( 'anymarket_category_export_fail', $response->get_error_message(), 3 );
 			} else{
-				$redirect = add_query_arg( 'anymarket_export_category_done', true, $redirect );
-				set_transient( 'anymarket_category_export_result', $response, 60 );
+				set_transient( 'anymarket_category_export_result', $response, 3 );
 			}
 
 		}
@@ -326,65 +332,57 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function bulkExportNotices(){
 
-		if ( !empty( $_REQUEST['anymarket_export_product_done'] ) ) {
+		$report = get_transient( 'anymarket_product_export_result' );
 
-			$report = get_transient( 'anymarket_product_export_result' );
+		if( !empty($report) ):
 
-			if( !empty($report) ):
+			echo '<div class="updated notice is-dismissible"><p>' ;
 
-				echo '<div class="updated notice is-dismissible"><p>' ;
+			foreach ($report as $item) {
+				if( empty($item['errorCode']) ){
+					printf( __('Produto <b>%s</b> exportado com sucesso.', 'anymarket'), $item['name'] );
+					print("<br/>");
+				} else{
+					printf( __('O produto <b>%1$s</b> falhou na exportação. Código do erro: %2$s.', 'anymarket'), $item['name'], $item['errorCode'] );
 
-				foreach ($report as $item) {
-					if( empty($item['errorCode']) ){
-						printf( __('Produto <b>%s</b> exportado com sucesso.', 'anymarket'), $item['name'] );
-						print("<br/>");
-					} else{
-						printf( __('O produto <b>%1$s</b> falhou na exportação. Código do erro: %2$s.', 'anymarket'), $item['name'], $item['errorCode'] );
-
-						if ($item['errorCode'] === 404){
-							echo ' ';
-							_e('Se você excluiu este produto no Anymarket, você deverá desativar e reativar a integração do produto novamente', 'anymarket');
-						}
-
-						print("<br/>");
+					if ($item['errorCode'] === 404){
+						echo ' ';
+						_e('Se você excluiu este produto no Anymarket, você deverá desativar e reativar a integração do produto novamente', 'anymarket');
 					}
+
+					print("<br/>");
 				}
+			}
 
-				echo '</p></div>';
+			echo '</p></div>';
 
-			endif;
+		endif;
 
-		}
+		$report = get_transient( 'anymarket_category_export_result' );
 
-		if ( !empty( $_REQUEST['anymarket_export_category_done'] ) ) {
+		if( !empty($report) ):
 
-			$report = get_transient( 'anymarket_category_export_result' );
+			echo '<div class="updated notice is-dismissible"><p>' ;
 
-			if( !empty($report) ):
+			foreach ($report as $item) {
+				if( empty($item['errorCode']) ){
+					printf( __('Categoria <b>%s</b> exportada com sucesso.', 'anymarket'), $item['name'] );
+					print("<br/>");
+				} else{
+					printf( __('A categoria <b>%1$s</b> falhou na exportação. Código do erro: %2$s.', 'anymarket'), $item['name'], $item['errorCode'] );
 
-				echo '<div class="updated notice is-dismissible"><p>' ;
-
-				foreach ($report as $item) {
-					if( empty($item['errorCode']) ){
-						printf( __('Categoria <b>%s</b> exportada com sucesso.', 'anymarket'), $item['name'] );
-						print("<br/>");
-					} else{
-						printf( __('A categoria <b>%1$s</b> falhou na exportação. Código do erro: %2$s.', 'anymarket'), $item['name'], $item['errorCode'] );
-
-						if ($item['errorCode'] === 404){
-							echo ' ';
-							_e('Se você excluiu esta categoria no Anymarket, você deverá recriá-la no Woocommerce para refazer a integração', 'anymarket');
-						}
-
-						print("<br/>");
+					if ($item['errorCode'] === 404){
+						echo ' ';
+						_e('Se você excluiu esta categoria no Anymarket, você deverá recriá-la no Woocommerce para refazer a integração', 'anymarket');
 					}
+
+					print("<br/>");
 				}
+			}
 
-				echo '</p></div>';
+			echo '</p></div>';
 
-			endif;
-
-		}
+		endif;
 	}
 
 	/**
@@ -397,8 +395,8 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		$is_on_anymarket = carbon_get_term_meta($term_id, 'anymarket_id');
 
 		if( !empty($is_on_anymarket) ) {
-			$exportService = new ExportService;
-			$exportService->exportCategories( [$term_id] );
+			$exportCategories = new ExportCategories();
+			$exportCategories->export( [$term_id] );
 		}
 	}
 
@@ -417,19 +415,56 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		if ( 'product' === get_post_type( $post_id ) ) {
 
-			add_action( 'updated_postmeta', function() use ($post_id){
-				$should_export = carbon_get_post_meta( $post_id, 'anymarket_should_export' );
-
-				if( 'true' === $should_export ) {
-					$exportService = new ExportService;
-					$exportService->exportProducts( [$post_id] );
-				} else {
-					carbon_set_post_meta( $post_id, 'anymarket_id', '' );
-				}
-			});
+			// kinda hacky, tho ಠ_ಠ
+			add_action( 'updated_postmeta', [$this, 'saveProductPostMeta'], 10, 4);
 
 		}
 
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $meta_id
+	 * @param [type] $post_id
+	 * @param [type] $meta_key
+	 * @param [type] $meta_value
+	 * @return void
+	 */
+	public function saveProductPostMeta($meta_id, $post_id, $meta_key, $meta_value){
+		//avoid loop
+		remove_action( 'save_post',  [$this, 'saveProduct'] );
+		remove_action( 'updated_postmeta', [$this, 'saveProductPostMeta'] );
+
+		$response;
+		$should_export = carbon_get_post_meta( $post_id, 'anymarket_should_export' );
+
+		if( 'true' === $should_export ) {
+			$exportProducts = new ExportProducts();
+			$response = $exportProducts->export( [$post_id] );
+
+			if( is_wp_error($response) ){
+				set_transient( 'anymarket_product_export_fail', $response->get_error_message(), 3 );
+			} else{
+				set_transient( 'anymarket_product_export_result', $response, 3 );
+			}
+
+		} else {
+			carbon_set_post_meta( $post_id, 'anymarket_id', '' );
+
+			$product = wc_get_product( $post_id );
+			if ($product instanceof \WC_Product_Variable || $product->get_type() === 'variable'){
+
+				$children = $product->get_children();
+				foreach ($children as $child) {
+					update_post_meta( $child, 'anymarket_variation_id', '' );
+				}
+			}
+		}
+
+		//avoid loop
+		add_action( 'updated_postmeta', [$this, 'saveProductPostMeta'] );
+		add_action( 'save_post', [$this, 'saveProduct'] );
 	}
 
 	/**
@@ -448,5 +483,18 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			echo " <a href=\"http://${env}.anymarket.com.br/#/variations/list\" target=\"_blank\"><b>Para criar clique aqui <span class=\"dashicons dashicons-external\"></span></b></a>";
 			echo '</p></div>';
 		}
+	}
+
+	/**
+	 * remove stock from anymarket on new order
+	 *
+	 * @param [type] $order
+	 * @return void
+	 */
+	public function discountStock( $order_id ){
+
+		$exportStock = new exportStock;
+		$exportStock->export( $order_id );
+
 	}
 }
