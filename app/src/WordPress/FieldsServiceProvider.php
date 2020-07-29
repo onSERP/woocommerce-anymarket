@@ -34,7 +34,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 		add_action( 'woocommerce_product_options_general_product_data', [$this, 'addCustomFieldToSimpleProduct'] );
 		add_action( 'woocommerce_process_product_meta', [$this, 'saveCustomFieldToSimpleProduct'], 10, 2 );
 
-		//custom field on product variation - barcode
+		//custom field on product variation - barcode and anymarket id
 		add_action( 'woocommerce_variation_options_pricing', [$this, 'addCustomFieldToVariations'], 10, 3 );
 		add_action( 'woocommerce_save_product_variation', [$this, 'saveCustomFieldVariations'], 10, 2 );
 
@@ -162,10 +162,20 @@ class FieldsServiceProvider implements ServiceProviderInterface
 		woocommerce_wp_text_input( [
 			'id' => 'anymarket_variable_barcode[' . $loop . ']',
 			'class' => 'short',
-			'wrapper_class' => 'form-row',
+			'wrapper_class' => 'form-row form-row-first',
 			'label' => __( 'Código de barras', 'anymarket' ),
 			'description' => __('Campo obrigatório para o Anymarket', 'anymarket'),
 			'value' => get_post_meta( $variation->ID, 'anymarket_variable_barcode', true )
+			]
+		);
+
+		woocommerce_wp_text_input( [
+			'id' => 'anymarket_variation_id[' . $loop . ']',
+			'class' => 'short disabled',
+			'custom_attributes' => ['readonly' => 'readonly'],
+			'wrapper_class' => 'form-row form-row-last',
+			'label' => __( 'ID do SKU no Anymarket', 'anymarket' ),
+			'value' => get_post_meta( $variation->ID, 'anymarket_variation_id', true )
 			]
 		);
 	}
@@ -180,5 +190,8 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	public function saveCustomFieldVariations( $variation_id, $i ) {
 		$anymarket_barcode = $_POST['anymarket_variable_barcode'][$i];
 		if ( isset( $anymarket_barcode ) ) update_post_meta( $variation_id, 'anymarket_variable_barcode', esc_attr( $anymarket_barcode ) );
+
+		$anymarket_variation_id = $_POST['anymarket_variation_id'][$i];
+		if ( isset( $anymarket_variation_id ) ) update_post_meta( $variation_id, 'anymarket_variation_id', esc_attr( $anymarket_variation_id ) );
 	}
 }
