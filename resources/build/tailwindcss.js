@@ -1,11 +1,15 @@
 const utils = require('./lib/utils')
 
 module.exports = {
-  purge: [
-    `${utils.rootPath}/**/*.php`,
-    '@scripts/**/*.vue',
-    '@scripts/**/*.js',
-  ],
+  purge: {
+    enabled: utils.detectEnv.isProduction,
+    content: [
+      './resources/scripts/**/*.js',
+      './resources/scripts/**/*.vue',
+      './app/**/*.php',
+      './views/**/*.php',
+    ],
+  },
   target: 'relaxed',
   prefix: '',
   important: false,

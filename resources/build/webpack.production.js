@@ -4,6 +4,7 @@
 const { ProvidePlugin, WatchIgnorePlugin } = require('webpack')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const ImageminPlugin = require('imagemin-webpack-plugin').default
 const ManifestPlugin = require('webpack-manifest-plugin')
 
@@ -29,11 +30,20 @@ const babelLoader = {
   loader: 'babel-loader',
   options: {
     cacheDirectory: false,
-    comments: false,
     presets: [
-      'env',
-      // airbnb not included as stage-2 already covers it
-      'stage-2',
+      [
+        '@babel/preset-env',
+        {
+          targets: '> 1%, last 2 versions',
+        },
+      ],
+    ],
+    plugins: [
+      '@babel/plugin-syntax-dynamic-import',
+      ['@babel/plugin-proposal-class-properties', { loose: true }],
+      '@babel/plugin-proposal-object-rest-spread',
+      '@babel/plugin-proposal-json-strings',
+      '@babel/plugin-syntax-import-meta',
     ],
   },
 }
@@ -55,6 +65,7 @@ const plugins = [
   }),
   spriteSmith,
   spriteSvg,
+  new VueLoaderPlugin(),
   new ImageminPlugin({
     optipng: {
       optimizationLevel: 7,
@@ -111,7 +122,14 @@ module.exports = {
   /**
    * The output.
    */
-  output: require('./webpack/output'),
+  output: {
+    ...require('./webpack/output'),
+    ...(env.isProduction
+      ? {
+          publicPath: '/wp-content/plugins/woocommerce-anymarket-release/dist/',
+        }
+      : {}),
+  },
 
   /**
    * Resolve utilities.
@@ -133,7 +151,7 @@ module.exports = {
        */
       {
         enforce: 'pre',
-        test: /\.(js|jsx|css|scss|sass)$/,
+        test: /\.(js|jsx|css|scss|sass|vue)$/,
         use: 'import-glob',
       },
 
@@ -183,7 +201,6 @@ module.exports = {
               publicPath: '../',
             },
           },
-          'vue-style-loader',
           'css-loader',
           {
             loader: 'postcss-loader',
@@ -212,6 +229,7 @@ module.exports = {
               name: (file) =>
                 `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
               outputPath: 'images',
+              esModule: false,
             },
           },
         ],
