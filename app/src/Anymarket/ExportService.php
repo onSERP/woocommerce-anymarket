@@ -187,4 +187,19 @@ class ExportService
 
 		return $skus;
 	}
+
+	protected function formatStock( \WC_Order $order ){
+		$stock = [];
+
+		foreach ($order->get_items() as $order_item){
+
+			$stock[] = [
+				'item_id' => $order_item->get_product_id(),
+				'variation_id' =>  $order_item->get_variation_id(),
+				'quantity' => $order_item->get_quantity(),
+			];
+		}
+
+		return $stock;
+	}
 }

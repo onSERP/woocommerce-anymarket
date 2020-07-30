@@ -78,7 +78,8 @@ class ExportCategories extends ExportService implements ExportInterface
 						'id' => $term->term_id,
 						'type' => 'Update',
 						'errorCode' => $this->curl->errorCode,
-						'errorMessage' => $this->curl->response->message
+						'errorMessage' => $this->curl->response->message,
+						'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
 					];
 				} else {
 					$report[] = [

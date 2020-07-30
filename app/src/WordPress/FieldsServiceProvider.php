@@ -71,6 +71,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 
 				//hidden fields - will only use internally
 				Field::make( 'hidden', 'anymarket_id'),
+				Field::make( 'hidden', 'anymarket_sku_id'),
 
 				Field::make( 'text', 'anymarket_warranty_time', __('Garantia (meses)', 'anymarket') )
 					->set_attribute('type', 'number')

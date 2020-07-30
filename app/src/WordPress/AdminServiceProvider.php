@@ -17,13 +17,11 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function register( $container ) {
 		// Nothing to register.
 
-		add_action( 'admin_init', function(){
-			$stock = new ExportStock;
-			$p = wc_get_product( 29 );
+		/* add_action( 'admin_init', function(){
+			$order = wc_get_order( 84 );
+			print_r($order);
 
-				//$stock->testVariation( $p->get_available_variations());
-
-		} );
+		} ); */
 	}
 
 	/**
@@ -61,7 +59,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		add_action( 'save_post', [$this, 'saveProduct'], 10, 3 );
 
 		// new order
-		add_action( 'woocommerce_new_order', [$this, 'stockDiscount'] );
+		add_action( 'woocommerce_thankyou', [$this, 'discountStock'] );
 	}
 
 	/**
@@ -494,7 +492,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function discountStock( $order_id ){
 
 		$exportStock = new exportStock;
-		$exportStock->export( $order_id );
+		$exportStock->export( [$order_id] );
 
 	}
 }

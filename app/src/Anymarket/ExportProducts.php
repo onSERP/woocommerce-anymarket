@@ -56,11 +56,15 @@ class ExportProducts extends ExportService implements ExportInterface
 				// set values for variations
 				$skus = $instance->response->skus;
 
-				foreach ($skus as $key => $sku) {
-					// TODO: is this reliable enough?
-					// maybe it should be done by checking sku, but it would have some other implications...
-					$variation_id = $instance->data['skus'][$key]['internalId'];
-					update_post_meta( $variation_id, 'anymarket_variation_id', $sku->id );
+				if( count($skus) > 1 ){
+					foreach ($skus as $key => $sku) {
+						// TODO: is this reliable enough?
+						// maybe it should be done by checking sku, but it would have some other implications...
+						$variation_id = $instance->data['skus'][$key]['internalId'];
+						update_post_meta( $variation_id, 'anymarket_variation_id', $sku->id );
+					}
+				} else{
+					carbon_set_post_meta( $instance->productId, 'anymarket_sku_id', $skus[0]->id );
 				}
 			}
 		});
@@ -78,12 +82,21 @@ class ExportProducts extends ExportService implements ExportInterface
 
 		foreach ($products as $product) {
 
+			$priceFactor;
+
+			if( empty( carbon_get_post_meta( $product->get_id(), 'anymarket_markup' ) ) ){
+				carbon_set_post_meta( $product->get_id(), 'anymarket_markup', '1' );
+				$priceFactor = 1;
+			} else {
+				$priceFactor = carbon_get_post_meta( $product->get_id(), 'anymarket_markup' );
+			}
+
 			$data = [
 				'title' => $product->get_name(),
 				'description' => $product->get_description(),
 				'category' => $this->formatProductCategories( $product ),
 				'warrantyTime' => carbon_get_post_meta( $product->get_id(), 'anymarket_warranty_time' ),
-				'priceFactor' => carbon_get_post_meta( $product->get_id(), 'anymarket_markup' ),
+				'priceFactor' => $priceFactor,
 				'height' => $product->get_height(),
 				'width' => $product->get_width(),
 				'weight' => $product->get_weight(),
