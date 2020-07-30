@@ -188,6 +188,12 @@ class ExportService
 		return $skus;
 	}
 
+	/**
+	 * Format stocks data
+	 *
+	 * @param \WC_Order $order
+	 * @return array $stock
+	 */
 	protected function formatStock( \WC_Order $order ){
 		$stock = [];
 
@@ -201,5 +207,64 @@ class ExportService
 		}
 
 		return $stock;
+	}
+
+	/**
+	 * Get the id of which stock local should be discounted
+	 *
+	 * @param integer $skuId
+	 * @return array|boolean $stockLocal
+	 */
+	protected function getStockLocalId( int $skuId, int $quantity ){
+		$stockLocal = [];
+
+		$url = $this->baseUrl . 'stocks' . '?idSku=' . $skuId . '&limit=99';
+		$this->curl->get( $url );
+
+		$report = [];
+		$response;
+
+		if($this->curl->error){
+			$report[] = [
+				'type' => 'Get Stock local id',
+				'errorCode' => $this->curl->errorCode,
+				'errorMessage' => $this->curl->response->message,
+			];
+
+			return false;
+		} else {
+			$response = $this->curl->response;
+			$report[] = [
+				'type' => 'Get Stock local id',
+				'response' => $response
+			];
+		}
+
+		// check if a certain sku has 1 or more stock locals
+		// if there is only one, return its id
+		// else, return the id of the first local that has more
+		// than the quantity of items that we want to discount
+		if( count($response->content) > 1 ) {
+
+			foreach ( $response->content as $stockItem ) {
+				if ( $stockItem->amount > $quantity ){
+					$stockLocal['id'] = $stockItem->stockLocal->id;
+					$stockLocal['amount'] = $stockItem->amount;
+					break;
+				}
+			}
+
+		} else {
+			$stockLocal['id'] = $response->content[0]->stockLocal->id;
+			$stockLocal['amount'] = $response->content[0]->amount;
+		}
+
+		if( get_option('anymarket_is_dev_env') == 'true' ){
+			$this->logger->debug( print_r($report, true), ['source' => 'woocommerce-anymarket']);
+			$this->logger->debug( print_r($stockLocal, true), ['source' => 'woocommerce-anymarket']);
+		}
+
+		return $stockLocal;
+
 	}
 }

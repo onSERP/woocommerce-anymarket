@@ -27,7 +27,10 @@ class ExportStock extends ExportService implements ExportInterface
 
 			$quantity = $product_variation !== 0 ? $product_variation->get_stock_quantity() : $product->get_stock_quantity();
 
-			if( !empty($id) ){
+			// returns [id, amount] or false
+			//$stockLocalId = $this->getStockLocalId( $id, $quantity );
+
+			if( !empty($id) && !empty($stockLocalId) ){
 				$data[] = [
 					'id' => intval($id),
 					'quantity' => $quantity,
@@ -39,7 +42,7 @@ class ExportStock extends ExportService implements ExportInterface
 
 		if( empty( $data) ) return;
 
-		$this->curl->post($this->baseUrl . 'stocks', json_encode($data, JSON_UNESCAPED_UNICODE));
+		$this->curl->put($this->baseUrl . 'stocks', json_encode($data, JSON_UNESCAPED_UNICODE));
 
 		$report = [];
 
