@@ -52,7 +52,10 @@ export default new Router({
     {
       path: '/about',
       name: 'About',
-      component: () => import('@scripts/admin-vue/pages/About.vue'),
+      component: () =>
+        import(
+          /* webpackChunkName: "anymarket_about" */ '@scripts/admin-vue/pages/About.vue'
+        ),
     },
   ],
 })
