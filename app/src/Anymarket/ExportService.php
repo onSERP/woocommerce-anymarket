@@ -20,9 +20,9 @@ class ExportService
 
 	public $baseUrl;
 
-	protected $curl;
+	public $curl;
 
-	protected $multiCurl;
+	public $multiCurl;
 
 	protected $apiToken;
 

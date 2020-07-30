@@ -8,6 +8,12 @@ namespace Anymarket\Controllers\Rest;
 class OptionController
 {
 
+	/**
+	 * Undocumented function
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return void
+	 */
 	public static function index( \WP_REST_Request $request ){
 
 		$data = [
@@ -25,6 +31,12 @@ class OptionController
 
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return void
+	 */
 	public static function edit( \WP_REST_Request $request ){
 
 		$onserp_license = sanitize_text_field( $request['licence'] );

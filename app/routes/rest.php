@@ -31,3 +31,12 @@ register_rest_route( 'anymarket/v1', '/options', [
 		return current_user_can( 'manage_options' );
 		}
 ] );
+
+//register status routes
+register_rest_route( 'anymarket/v1', '/status', [
+    'methods' => WP_REST_Server::READABLE,
+	'callback' =>['\\Anymarket\\Controllers\\Rest\\StatusController', 'index'],
+	'permission_callback' => function () {
+		return current_user_can( 'manage_options' );
+		}
+] );

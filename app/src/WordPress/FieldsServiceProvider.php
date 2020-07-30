@@ -65,8 +65,8 @@ class FieldsServiceProvider implements ServiceProviderInterface
 				//condition
 				Field::make( 'radio', 'anymarket_should_export', __( 'Integrar com o Anymarket?', 'anymarket' ) )
 				->set_options( [
-					'true' => __('Sim', 'anymarket'),
 					'false' => __('Não', 'anymarket'),
+					'true' => __('Sim', 'anymarket'),
 				 ] ),
 
 				//hidden fields - will only use internally
