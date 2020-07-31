@@ -2,19 +2,23 @@
   <div class="px-4">
     <div class="flex flex-wrap">
       <StatusBox
+        :loaded="loaded"
         title="Status da integração"
         :dataText="active === true ? 'ATIVA' : 'INATIVA'"
         :alert-color="active === true ? 'green' : 'red'"
       />
       <StatusBox
+        :loaded="loaded"
         title="Produtos exportados"
         :dataText="`${exportedProducts}/${totalProducts}`"
       />
       <StatusBox
+        :loaded="loaded"
         title="Categorias exportadas"
         :dataText="`${exportedCategories}/${totalCategories}`"
       />
       <StatusBox
+        :loaded="loaded"
         title="Marcas exportadas"
         :dataText="`${exportedBrands}/${totalBrands}`"
       />
@@ -39,6 +43,7 @@ export default {
       exportedProducts: 0,
       exportedCategories: 0,
       exportedBrands: 0,
+      loaded: false,
     }
   },
   mounted() {
@@ -54,6 +59,7 @@ export default {
         this.exportedProducts = response.data.exportedProducts
         this.exportedCategories = response.data.exportedCategories
         this.exportedBrands = response.data.exportedBrands
+        this.loaded = true
 
         if (!response.data.isValidToken)
           this.$toasted.error('Erro ao validar o Token')
