@@ -4,7 +4,7 @@
  * Plugin URI: https://onserp.com.br/integracao-anymarket
  * Description: Integração entre o Woocommerce e a plataforma de marketplaces ANYMARKET.
  * Version: 1.0.0
- * Requires at least: 4.7
+ * Requires at least: 5.2
  * Requires PHP: 7.3.2
  * Author: onSERP Marketing
  * Author URI: https://onserp.com.br
@@ -13,8 +13,8 @@
  * Text Domain: anymarket
  * Domain Path: /languages
  *
- * WC requires at least: 5.2
- * WC tested up to: 4.3
+ * WC requires at least: 4.3
+ * WC tested up to: 4.7
  *
  * YOU SHOULD NORMALLY NOT NEED TO ADD ANYTHING HERE - any custom functionality unrelated
  * to bootstrapping the theme should go into a service provider or a separate helper file

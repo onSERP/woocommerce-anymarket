@@ -23,7 +23,7 @@ class StatusController
 			'status' => 'publish'
 		]) );
 
-		$exportedProducts = count( new \WP_Query([
+		$exportedProducts = count( get_posts([
 			'post_type' => 'product',
 			'meta_query' => [
 				'relation' => 'AND',

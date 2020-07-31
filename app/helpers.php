@@ -10,6 +10,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Load helpers.
-// phpcs:ignore
-// require_once __DIR__ . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'myhelper.php';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'split_name.php';
