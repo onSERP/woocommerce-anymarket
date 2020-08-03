@@ -64,7 +64,7 @@ class ExportProducts extends ExportService implements ExportInterface
 						update_post_meta( $variation_id, 'anymarket_variation_id', $sku->id );
 					}
 				} else{
-					carbon_set_post_meta( $instance->productId, 'anymarket_sku_id', $skus[0]->id );
+					carbon_set_post_meta( $instance->productId, 'anymarket_variation_id', $skus[0]->id );
 				}
 			}
 		});

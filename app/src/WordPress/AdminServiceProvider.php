@@ -16,12 +16,6 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function register( $container ) {
 		// Nothing to register.
-
-		/* add_action( 'admin_init', function(){
-			$order = wc_get_order( 84 );
-			print_r($order);
-
-		} ); */
 	}
 
 	/**
@@ -43,6 +37,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		// bulk action on product
 		add_filter( 'bulk_actions-edit-product', [$this, 'bulkExportProducts'] );
 		add_filter( 'handle_bulk_actions-edit-product', [$this, 'handleBulkExportProducts'], 10, 3 );
+		add_filter( 'handle_bulk_actions-edit-product', [$this, 'handleRemoveIntegrationProducts'], 10, 3 );
 
 		// bulk action on product categories
 		add_filter( 'bulk_actions-edit-product_cat', [$this, 'bulkExportProductCategories'] );
@@ -102,18 +97,8 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 * @return void
 	 */
 	public function registerPostStatus(){
-		//PAID
-		register_post_status( 'anymarket-paid', [
-			'label' => _x('Pago', 'WooCommerce Order status', 'anymarket'),
-			'public' => true,
-			'exclude_from_search' => false,
-			'show_in_admin_all_list' => true,
-			'show_in_admin_status_list' => true,
-			'label_count' => _n_noop( 'Pago <span class="count">(%s)</span>', 'Pago <span class="count">(%s)</span>' )
-		]);
-
 		//BILLED
-		register_post_status( 'anymarket-billed', [
+		register_post_status( 'wc-anymarket-billed', [
 			'label' => _x('Faturado', 'WooCommerce Order status','anymarket'),
 			'public' => true,
 			'exclude_from_search' => false,
@@ -123,7 +108,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		]);
 
 		//SHIPPED
-		register_post_status( 'anymarket-shipped', [
+		register_post_status( 'wc-anymarket-shipped', [
 			'label' => _x('Enviado', 'WooCommerce Order status','anymarket'),
 			'public' => true,
 			'exclude_from_search' => false,
@@ -150,9 +135,8 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 			//insert them after wc-on-hold
 			if ( 'wc-on-hold' === $key ) {
-				$new_order_statuses['anymarket-paid'] = _x( 'Pago', 'WooCommerce Order status', 'anymarket' );
-				$new_order_statuses['anymarket-billed'] = _x( 'Faturado', 'WooCommerce Order status', 'anymarket' );
-				$new_order_statuses['anymarket-shipped'] = _x( 'Enviado', 'WooCommerce Order status', 'anymarket' );
+				$new_order_statuses['wc-anymarket-billed'] = _x( 'Faturado', 'WooCommerce Order status', 'anymarket' );
+				$new_order_statuses['wc-anymarket-shipped'] = _x( 'Enviado', 'WooCommerce Order status', 'anymarket' );
 			}
 		}
 
@@ -249,6 +233,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function bulkExportProducts( $bulk_array ){
 
 		$bulk_array = ['anymarket_bulk_export_products' => 'Exportar para o Anymarket'] + $bulk_array;
+		$bulk_array = ['anymarket_bulk_remove_integration_products' => 'Remover da Integração com Anymarket'] + $bulk_array;
 
 		return $bulk_array;
 	}
@@ -293,6 +278,45 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		return $redirect;
 
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param string 	$redirect
+	 * @param string 	$doaction
+	 * @param array 	$object_ids
+	 * @return string 	$redirect
+	 */
+	public function handleRemoveIntegrationProducts( $redirect, $doaction, $object_ids ){
+		if( 'anymarket_bulk_remove_integration_products' === $doaction ){
+
+			foreach( $object_ids as $object_id ){
+				carbon_set_post_meta( $object_id, 'anymarket_id', '' );
+				carbon_set_post_meta( $object_id, 'anymarket_variation_id', '' );
+				carbon_set_post_meta( $object_id, 'anymarket_should_export', 'false' );
+
+				$product = wc_get_product( $object_id );
+
+				if ($product instanceof \WC_Product_Variable || $product->get_type() === 'variable'){
+
+					$children = $product->get_children();
+					foreach ($children as $child) {
+						update_post_meta( $child, 'anymarket_variation_id', '' );
+						update_post_meta( $child, 'anymarket_variation_id', '' );
+					}
+				}
+			}
+
+			$posts = get_posts([
+				'include' => $object_ids
+			]);
+
+			set_transient( 'anymarket_remove_integration_product_done', $posts, 3 );
+
+		}
+
+		return $redirect;
 	}
 
 	/**
@@ -341,7 +365,12 @@ class AdminServiceProvider implements ServiceProviderInterface {
 					printf( __('Produto <b>%s</b> exportado com sucesso.', 'anymarket'), $item['name'] );
 					print("<br/>");
 				} else{
-					printf( __('O produto <b>%1$s</b> falhou na exportação. Código do erro: %2$s.', 'anymarket'), $item['name'], $item['errorCode'] );
+					if( $item['errorMessage'] == 'Amount must not be null' ){
+						printf( __('O produto <b>%1$s</b> falhou na exportação. Você precisa ativar o gerenciamento de estoque no produto.', 'anymarket'), $item['name'] );
+					} else {
+						printf( __('O produto <b>%1$s</b> falhou na exportação. Mensagem do erro: %2$s.', 'anymarket'), $item['name'], $item['errorMessage'] );
+					}
+
 
 					if ($item['errorCode'] === 404){
 						echo ' ';
@@ -353,7 +382,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			}
 
 			echo '</p></div>';
-
+			return;
 		endif;
 
 		$report = get_transient( 'anymarket_category_export_result' );
@@ -379,8 +408,23 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			}
 
 			echo '</p></div>';
-
+			return;
 		endif;
+
+		$report = get_transient( 'anymarket_remove_integration_product_done' );
+
+		if( !empty($report) ):
+			echo '<div class="updated notice is-dismissible"><p>' ;
+
+			foreach ($report as $item) {
+					printf( __('Produto <b>%s</b> removido da integração com sucesso.', 'anymarket'), $item->post_title );
+					print("<br/>");
+			}
+
+			echo '</p></div>';
+			return;
+		endif;
+
 	}
 
 	/**
@@ -456,8 +500,17 @@ class AdminServiceProvider implements ServiceProviderInterface {
 				$children = $product->get_children();
 				foreach ($children as $child) {
 					update_post_meta( $child, 'anymarket_variation_id', '' );
+					update_post_meta( $child, 'anymarket_variation_id', '' );
 				}
 			}
+
+			return;
+		}
+
+		if( is_wp_error($response) ){
+			set_transient( 'anymarket_product_export_fail', $response->get_error_message(), 3 );
+		} else{
+			set_transient( 'anymarket_product_export_result', $response, 3 );
 		}
 
 		//avoid loop
@@ -486,12 +539,12 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	/**
 	 * remove stock from anymarket on new order
 	 *
-	 * @param [type] $order
+	 * @param int $order_id
 	 * @return void
 	 */
 	public function discountStock( $order_id ){
 
-		$exportStock = new exportStock;
+		$exportStock = new ExportStock;
 		$exportStock->export( [$order_id] );
 
 	}

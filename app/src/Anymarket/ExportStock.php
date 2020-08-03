@@ -23,14 +23,14 @@ class ExportStock extends ExportService implements ExportInterface
 
 			$product_price = $product_variation === 0 ? $product->get_price() : $product_variation->get_price();
 
-			$id = $product_variation !== 0 ? get_post_meta($stock_item['variation_id'], 'anymarket_variation_id', true) : carbon_get_post_meta( $stock_item['item_id'], 'anymarket_sku_id' );
+			$id = $product_variation !== 0 ? get_post_meta($stock_item['variation_id'], 'anymarket_variation_id', true) : carbon_get_post_meta( $stock_item['item_id'], 'anymarket_variation_id' );
 
 			$quantity = $product_variation !== 0 ? $product_variation->get_stock_quantity() : $product->get_stock_quantity();
 
 			// returns [id, amount] or false
 			//$stockLocalId = $this->getStockLocalId( $id, $quantity );
 
-			if( !empty($id) && !empty($stockLocalId) ){
+			if( !empty($id) ){
 				$data[] = [
 					'id' => intval($id),
 					'quantity' => $quantity,

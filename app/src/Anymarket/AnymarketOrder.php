@@ -52,7 +52,12 @@ class AnymarketOrder extends ExportService {
 		$anyOrder = $this->getOrderData( $id )['response'];
 		$wcOrder = wc_get_order( $orderPost->ID );
 
-		$assignResult = $this->assignToOrder( $anyOrder, $wcOrder );
+		if ( empty( $anyOrder ) ) {
+			$this->logger->debug( print_r($this->getOrderData( $id )['report'], true), ['source' => 'woocommerce-anymarket']);
+			return new \WP_Error ('could_not_connect', 'Could not connect to anymarket servers', ['status' => 503]);
+		}
+
+		$assignResult = $this->assignToOrder( $anyOrder, $wcOrder, true );
 
 		return $assignResult;
 	}
@@ -66,7 +71,12 @@ class AnymarketOrder extends ExportService {
 	protected function createOrder( int $id ){
 		$anyOrder = $this->getOrderData( $id )['response'];
 
-		$assignResut = $this->assignToOrder( $anyOrder, wc_create_order() );
+		if ( empty( $anyOrder ) ) {
+			return new \WP_Error ('could_not_connect', 'Could not connect to anymarket servers', ['status' => 503]);
+			$this->logger->debug( print_r($this->getOrderData( $id )['report'], true), ['source' => 'woocommerce-anymarket']);
+		}
+
+		$assignResult = $this->assignToOrder( $anyOrder, wc_create_order(), false );
 
 		return $assignResult;
 	}
@@ -102,7 +112,7 @@ class AnymarketOrder extends ExportService {
 		return ['report' => $report, 'response' => $this->curl->response];
 	}
 
-	protected function assignToOrder(object $oldOrder, \WC_Order $newOrder ){
+	protected function assignToOrder(object $oldOrder, \WC_Order $newOrder, $updated = true ){
 		$shippingFname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[0];
 		$shippingLname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[1];
 
@@ -110,42 +120,81 @@ class AnymarketOrder extends ExportService {
 		$newOrder->set_shipping_last_name( $shippingLname );
 
 		//formatar endereço - shipping
-		$newOrder->set_shipping_address_1( '' );
-		$newOrder->set_shipping_city( '' );
-		$newOrder->set_shipping_state( '' );
-		$newOrder->set_shipping_postcode( '' );
-		$newOrder->set_shipping_country( '' );
+		$newOrder->set_shipping_address_1( $oldOrder->shipping->street );
+		$newOrder->set_shipping_city( $oldOrder->shipping->city );
+		$newOrder->set_shipping_state( $oldOrder->shipping->stateNameNormalized );
+		$newOrder->set_shipping_postcode( $oldOrder->shipping->zipCode );
+		$newOrder->set_shipping_country( $oldOrder->shipping->countryNameNormalized );
 
-		$newOrder->set_billing_first_name( '' );
-		$newOrder->set_billing_last_name( '' );
-		$newOrder->set_billing_company( '' );
-		$newOrder->set_billing_address_1( '' );
-		$newOrder->set_billing_address_2( '' );
-		$newOrder->set_billing_city( '' );
-		$newOrder->set_billing_state( '' );
-		$newOrder->set_billing_postcode( '' );
-		$newOrder->set_billing_country( '' );
-		$newOrder->set_billing_email( '' );
-		$newOrder->set_billing_phone( '' );
+		$billingFname = anymarket_split_name( $oldOrder->buyer->name )[0];
+		$billingLname = anymarket_split_name( $oldOrder->buyer->name )[1];
 
-		$newOrder->set_created_via( '' );
-		$newOrder->set_payment_method_title( '' );
-		$newOrder->set_currency('');
+		$newOrder->set_billing_first_name( $billingFname );
+		$newOrder->set_billing_last_name( $billingLname );
+		$newOrder->set_billing_address_1( $oldOrder->billingAddress->street );
+		$newOrder->set_billing_city( $oldOrder->billingAddress->city );
+		$newOrder->set_billing_state( $oldOrder->billingAddress->stateNameNormalized );
+		$newOrder->set_billing_postcode( $oldOrder->billingAddress->zipCode );
+		$newOrder->set_billing_country( $oldOrder->billingAddress->country );
+		$newOrder->set_billing_email( $oldOrder->buyer->email );
+		$newOrder->set_billing_phone( $oldOrder->buyer->phone );
 
-		$newOrder->add_product( $product, $qty, $args);
+		$newOrder->set_created_via( $oldOrder->marketPlace );
+		$newOrder->set_payment_method_title( $oldOrder->payments[0]->paymentMethodNormalized );
+		$newOrder->set_currency('BRL');
 
-		$newOrder->set_shipping_tax('');
-		$newOrder->set_discount_total('');
+		if( false === $updated ){
+		//add products
+			foreach ($oldOrder->items as $orderItem ){
+				$products = get_posts( [
+					'post_type' => ['product', 'product_variation'],
+					'meta_query' => [
+						'relation' => 'AND',
+						[
+							'key' => '_anymarket_variation_id',
+							'compare' => '=',
+							'value' => $orderItem->sku->id
+						],
+					],
+					'status' => 'publish'
+				]);
+
+				if( !empty($products) )
+					$newOrder->add_product( wc_get_product($products[0]->ID), $orderItem->amount );
+			}
+		}
+
+		$newOrder->set_shipping_tax( $oldOrder->freight );
+		$newOrder->set_discount_total( $oldOrder->discount );
 
 		$newOrder->calculate_totals();
-		$newOrder->update_status("Completed", 'Imported order', TRUE);
+
+		$orderStatuses = [
+			'PENDING' => 'pending',
+			'PAID_WAITING_SHIP' => 'processing',
+			'INVOICED' => 'anymarket-billed',
+			'PAID_AWAITING_DELIVERY' => 'anymarket-shipped',
+			'CONCLUDED' => 'completed',
+			'CANCELED' => 'cancelled'
+		];
+
+		$newOrder->update_status( $orderStatuses[$oldOrder->marketPlaceStatus],
+					__('Pedido importado do Anymarket', 'anymarket'));
 
 		$newOrder->save();
 
 		//meta fields that are not officialy part of WP_Order
-		update_post_meta($newOrder->get_id(), '_billing_cpf', 'value');
-		update_post_meta($newOrder->get_id(), '_billing_neighborhood', 'value');
-		update_post_meta($newOrder->get_id(), '_billing_number', 'value');
-		update_post_meta($newOrder->get_id(), '_billing_cellphone', 'value');
+		$documentType =  $oldOrder->buyer->documentType === 'CPF' ? 'cpf' : 'cnpj';
+		$cpfCnpj = anymarket_formatCnpjCpf( $oldOrder->buyer->documentNumberNormalized );
+		update_post_meta($newOrder->get_id(), '_billing_' . $documentType, $cpfCnpj );
+
+		update_post_meta($newOrder->get_id(), '_billing_neighborhood', $oldOrder->billingAddress->neighborhood);
+		update_post_meta($newOrder->get_id(), '_billing_number', $oldOrder->billingAddress->number);
+		update_post_meta($newOrder->get_id(), '_billing_cellphone', $oldOrder->buyer->phone);
+
+		//carbon meta fields
+		carbon_set_post_meta($newOrder->get_id(), 'anymarket_order_marketplace', $oldOrder->marketPlace);
+		carbon_set_post_meta($newOrder->get_id(), 'is_anymarket_order', 'true');
+		carbon_set_post_meta($newOrder->get_id(), 'anymarket_id', $oldOrder->id);
 	}
 }
