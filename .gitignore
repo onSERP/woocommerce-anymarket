@@ -30,3 +30,6 @@ drone.json
 ehthumbs.db
 Thumbs.db
 .idea
+
+#custom config
+anymarket-config.php

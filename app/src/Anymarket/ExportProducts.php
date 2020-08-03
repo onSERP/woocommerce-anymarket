@@ -96,6 +96,7 @@ class ExportProducts extends ExportService implements ExportInterface
 				'description' => $product->get_description(),
 				'category' => $this->formatProductCategories( $product ),
 				'warrantyTime' => carbon_get_post_meta( $product->get_id(), 'anymarket_warranty_time' ),
+				'model' => carbon_get_post_meta( $product->get_id(), 'anymarket_model' ),
 				'priceFactor' => $priceFactor,
 				'height' => $product->get_height(),
 				'width' => $product->get_width(),

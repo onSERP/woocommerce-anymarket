@@ -81,6 +81,13 @@ class FieldsServiceProvider implements ServiceProviderInterface
             			'value' => 'true'
 					]] ),
 
+				Field::make( 'text', 'anymarket_model', __('Modelo', 'anymarket') )
+					->set_help_text(__('Campo obrigatório para o Anymarket.', 'anymarket'))
+					->set_conditional_logic( [[
+						'field' => 'anymarket_should_export',
+            			'value' => 'true'
+					]] ),
+
 				Field::make( 'text', 'anymarket_markup', __('Markup', 'anymarket') )
 					->set_attribute('type', 'number')
 					->set_help_text(__('Campo obrigatório para o Anymarket. Se não preenchido, será enviado "1"', 'anymarket'))
