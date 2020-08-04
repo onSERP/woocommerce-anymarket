@@ -108,11 +108,14 @@ class ExportProducts extends ExportService implements ExportInterface
 				'width' => $product->get_width(),
 				'weight' => $product->get_weight(),
 				'length' => $product->get_length(),
-				'images' => $this->formatProductImages( $product ),
 				'characteristics' => $this->formatProductAttributes( $product ),
 				'skus' => $this->formatProductVariations( $product ),
 				'brand' => $this->formatProductBrands( $product ),
 			];
+
+			if ( $this->formatProductImages( $product ) ) {
+				$data['images'] = $this->formatProductImages( $product );
+			}
 
 			// if product is not on anymarket
 			if( empty( carbon_get_post_meta($product->get_id(), 'anymarket_id') ) ){
