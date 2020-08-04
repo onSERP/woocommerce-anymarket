@@ -111,6 +111,35 @@ input[type='text'] {
   }
 }
 
+.select-menu {
+  @apply .relative;
+
+  .btn {
+    @apply block;
+  }
+  ul {
+    @apply hidden .absolute;
+  }
+
+  li {
+    @apply bg-white border-b m-0 block;
+
+    a {
+      @apply .cursor-pointer py-4 px-2 block .relative;
+
+      &:hover {
+        @apply bg-gray-100;
+      }
+    }
+  }
+
+  &:hover {
+    ul {
+      @apply block;
+    }
+  }
+}
+
 /* ================= Tooltip styles ================ */
 
 .toplevel_page_anymarket {

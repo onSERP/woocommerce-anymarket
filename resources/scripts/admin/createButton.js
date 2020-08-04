@@ -5,8 +5,8 @@
  * @returns {object} a
  */
 function createButton(page) {
-  const protocol = anymarket_is_sandbox ? 'http://' : 'https://'
-  const subdomain = anymarket_is_sandbox ? 'sandbox' : 'api'
+  const protocol = anymarket.sandbox ? 'http://' : 'https://'
+  const subdomain = anymarket.sandbox ? 'sandbox' : 'api'
   const link = `${protocol}${subdomain}.anymarket.com.br/#/${page}`
 
   const a = document.createElement('a')

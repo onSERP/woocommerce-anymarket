@@ -38,9 +38,10 @@ class AssetsServiceProvider implements ServiceProviderInterface
 			true
 		);
 
-		$is_dev_env = get_option( 'anymarket_is_dev_env' );
+		$isDev = get_option( 'anymarket_is_dev_env' );
+		$anymarketToken = get_option( 'anymarket_token' );
 
-		$script = ($is_dev_env === true || $is_dev_env === 'true') ? 'var anymarket_is_sandbox = true;' : 'var anymarket_is_sandbox = false;';
+		$script = "var anymarket = { sandbox: ${isDev}, token: '${anymarketToken}' }";
 
 		wp_register_script( 'anymarket-sandbox-check', '' );
 		wp_enqueue_script( 'anymarket-sandbox-check' );
@@ -54,6 +55,25 @@ class AssetsServiceProvider implements ServiceProviderInterface
 				'anymarket-admin-css-bundle',
 				$style
 			);
+		}
+
+		$currentScreen = get_current_screen();
+		if( $currentScreen->post_type === 'shop_order' && $currentScreen->base === 'post' ){
+			\Anymarket::core()->assets()->enqueueScript(
+				'anymarket-admin-order-js-bundle',
+				\Anymarket::core()->assets()->getBundleUrl( 'order-vue', '.js' ),
+				[ 'jquery' ],
+				true
+			);
+
+			$styleOrder = \Anymarket::core()->assets()->getBundleUrl( 'order-vue', '.css' );
+
+			if ( $styleOrder ) {
+				\Anymarket::core()->assets()->enqueueStyle(
+					'anymarket-admin-order-css-bundle',
+					$styleOrder
+				);
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 {
-  "bundles": ["admin", "admin-vue"],
+  "bundles": ["admin", "admin-vue", "order-vue"],
   "variables": {},
   "development": {
     "url": "http://woo.local/",

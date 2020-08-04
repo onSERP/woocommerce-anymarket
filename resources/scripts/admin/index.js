@@ -37,3 +37,43 @@ wp.domReady(function () {
     })
   }
 })
+
+//block everything on anymarket order
+wp.domReady(function () {
+  if (
+    pagenow === 'shop_order' &&
+    adminpage === 'post-php' &&
+    document.querySelector('input[name*="_anymarket_id"]').value !== ''
+  ) {
+    document.querySelector('#postcustom').style.display = 'none'
+    document.querySelector('#woocommerce-order-actions').style.display = 'none'
+    document.querySelector('#wc_correios').style.display = 'none'
+    document.querySelector('#woocommerce-order-downloads').style.display =
+      'none'
+    document.querySelector('#woocommerce-order-items').style.display = 'none'
+
+    document.querySelectorAll('#order_data input').forEach((item) => {
+      item.setAttribute('readonly', 'readonly')
+      item.setAttribute('disabled', 'disabled')
+    })
+
+    document.querySelectorAll('#order_data textarea').forEach((item) => {
+      item.setAttribute('readonly', 'readonly')
+      item.setAttribute('disabled', 'disabled')
+    })
+
+    document.querySelectorAll('#order_data button').forEach((item) => {
+      item.setAttribute('readonly', 'readonly')
+      item.setAttribute('disabled', 'disabled')
+    })
+
+    document.querySelectorAll('#order_data select').forEach((item) => {
+      item.setAttribute('readonly', 'readonly')
+      item.setAttribute('disabled', 'disabled')
+    })
+
+    document.querySelectorAll('#order_data a.edit_address').forEach((item) => {
+      item.style.display = 'none'
+    })
+  }
+})

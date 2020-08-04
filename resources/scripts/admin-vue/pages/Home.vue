@@ -9,9 +9,24 @@
           alt="Anymarket"
         />
         <div>
-          <router-link to="export" class="btn btn-base mt-6 sm:mt-0">
-            Exportar em massa
-          </router-link>
+          <div class="select-menu">
+            <div class="btn btn-base mt-6 sm:mt-0">Exportar em massa</div>
+            <ul>
+              <li>
+                <a
+                  href="/wp-admin/edit-tags.php?taxonomy=product_cat&post_type=product"
+                >
+                  1º PASSO - Exportar Categorias
+                </a>
+              </li>
+              <!-- <li><a href="">2º PASSO - Exportar Marcas</a></li> -->
+              <li>
+                <a href="/wp-admin/edit.php?post_type=product">
+                  2º PASSO - Exportar Produtos
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

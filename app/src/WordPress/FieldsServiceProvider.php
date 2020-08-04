@@ -118,6 +118,10 @@ class FieldsServiceProvider implements ServiceProviderInterface
 				Field::make( 'hidden', 'anymarket_id'),
 				Field::make( 'hidden', 'is_anymarket_order'),
 			] );
+
+		Container::make( 'post_meta', 'order_data_vue', 'Dados do Pedido no Anymarket' )
+			->where( 'post_type', '=', 'shop_order' )
+			->set_priority('core');
 	}
 
 	/**
