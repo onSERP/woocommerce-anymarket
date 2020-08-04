@@ -28,6 +28,7 @@ class ExportProducts extends ExportService implements ExportInterface
 		// get products
 		$products = wc_get_products([
 			'include' => $post_ids,
+			'limit' => -1
 		]);
 
 		// export categories
@@ -113,7 +114,7 @@ class ExportProducts extends ExportService implements ExportInterface
 				'brand' => $this->formatProductBrands( $product ),
 			];
 
-			if ( $this->formatProductImages( $product ) ) {
+			if ( !empty( $this->formatProductImages( $product ) ) ) {
 				$data['images'] = $this->formatProductImages( $product );
 			}
 

@@ -112,6 +112,14 @@ class AnymarketOrder extends ExportService {
 		return ['report' => $report, 'response' => $this->curl->response];
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @param object $oldOrder
+	 * @param \WC_Order $newOrder
+	 * @param boolean $updated
+	 * @return void
+	 */
 	protected function assignToOrder(object $oldOrder, \WC_Order $newOrder, $updated = true ){
 		$shippingFname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[0];
 		$shippingLname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[1];
@@ -196,5 +204,7 @@ class AnymarketOrder extends ExportService {
 		carbon_set_post_meta($newOrder->get_id(), 'anymarket_order_marketplace', $oldOrder->marketPlace);
 		carbon_set_post_meta($newOrder->get_id(), 'is_anymarket_order', 'true');
 		carbon_set_post_meta($newOrder->get_id(), 'anymarket_id', $oldOrder->id);
+
+		return $newOrder;
 	}
 }
