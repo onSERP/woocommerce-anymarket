@@ -34,6 +34,12 @@ class ExportProducts extends ExportService implements ExportInterface
 		$exportCat = new ExportCategories();
 		$exportCat->export( $this->getAllCategories( $products ) );
 
+		// export categories
+		if( defined('ANYMARKET_BRAND_CPT') ){
+			$exportBrand = new ExportBrands();
+			$exportBrand->export( $this->getAllBrands( $products ) );
+		}
+
 		//delay script execution for 1 sec
 		sleep(1);
 
@@ -104,7 +110,8 @@ class ExportProducts extends ExportService implements ExportInterface
 				'length' => $product->get_length(),
 				'images' => $this->formatProductImages( $product ),
 				'characteristics' => $this->formatProductAttributes( $product ),
-				'skus' => $this->formatProductVariations( $product )
+				'skus' => $this->formatProductVariations( $product ),
+				'brand' => $this->formatProductBrands( $product ),
 			];
 
 			// if product is not on anymarket

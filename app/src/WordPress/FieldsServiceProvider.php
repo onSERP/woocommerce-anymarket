@@ -30,6 +30,9 @@ class FieldsServiceProvider implements ServiceProviderInterface
 
 		add_action( 'carbon_fields_register_fields', [$this, 'productCategoriesMeta'] );
 
+		if ( defined('ANYMARKET_BRAND_CPT') ) {
+			add_action( 'carbon_fields_register_fields', [$this, 'productBrandsMeta'] );
+		}
 		//custom field on simple product - barcode
 		add_action( 'woocommerce_product_options_general_product_data', [$this, 'addCustomFieldToSimpleProduct'] );
 		add_action( 'woocommerce_process_product_meta', [$this, 'saveCustomFieldToSimpleProduct'], 10, 2 );
@@ -125,6 +128,19 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	public function productCategoriesMeta(){
 		Container::make( 'term_meta', __( 'Anymarket' ) )
 			->where( 'term_taxonomy', '=', 'product_cat' )
+			->add_fields( [
+				Field::make( 'hidden', 'anymarket_id'),
+		] );
+	}
+
+	/**
+	 * Create fields on product brands
+	 *
+	 * @return void
+	 */
+	public function productBrandsMeta(){
+		Container::make( 'term_meta', __( 'Anymarket' ) )
+			->where( 'term_taxonomy', '=', ANYMARKET_BRAND_CPT )
 			->add_fields( [
 				Field::make( 'hidden', 'anymarket_id'),
 		] );

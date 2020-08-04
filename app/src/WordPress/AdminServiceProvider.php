@@ -5,6 +5,7 @@ namespace Anymarket\WordPress;
 use WPEmerge\ServiceProviders\ServiceProviderInterface;
 use Anymarket\Anymarket\ExportProducts;
 use Anymarket\Anymarket\ExportCategories;
+use Anymarket\Anymarket\ExportBrands;
 use Anymarket\Anymarket\ExportStock;
 
 /**
@@ -42,6 +43,12 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		// bulk action on product categories
 		add_filter( 'bulk_actions-edit-product_cat', [$this, 'bulkExportProductCategories'] );
 		add_filter( 'handle_bulk_actions-edit-product_cat', [$this, 'handleBulkExportProductCategories'], 10, 3 );
+
+		if ( defined('ANYMARKET_BRAND_CPT') ){
+			// bulk action on product brands
+			add_filter( 'bulk_actions-edit-' . ANYMARKET_BRAND_CPT, [$this, 'bulkExportProductBrands'] );
+			add_filter( 'handle_bulk_actions-edit-' . ANYMARKET_BRAND_CPT, [$this, 'handleBulkExportProductBrands'], 10, 3 );
+		}
 
 		// admin notices
 		add_action( 'admin_notices', [$this, 'bulkExportNotices'] );
@@ -253,6 +260,20 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	}
 
 	/**
+	 * Add "export to anymarket" option on bulk
+	 * select menu on wp in product brands
+	 *
+	 * @param array $bulk_array
+	 * @return array $bulk_array
+	 */
+	public function bulkExportProductBrands( $bulk_array ){
+
+		$bulk_array = ['anymarket_bulk_export_product_brands' => 'Exportar para o Anymarket'] + $bulk_array;
+
+		return $bulk_array;
+	}
+
+	/**
 	 * Handles bulk action to export products to
 	 * Anymarket
 	 *
@@ -348,6 +369,34 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	}
 
 	/**
+	 * Handles bulk action to export categories to
+	 * Anymarket
+	 *
+	 * @param string 	$redirect
+	 * @param string 	$doaction
+	 * @param array 	$object_ids
+	 * @return string 	$redirect
+	 */
+	public function handleBulkExportProductBrands( $redirect, $doaction, $object_ids ){
+
+		if( 'anymarket_bulk_export_product_brands' === $doaction ){
+
+			$exportBrands = new ExportBrands;
+			$response = $exportBrands->export( $object_ids );
+
+			if( is_wp_error($response) ){
+				set_transient( 'anymarket_brand_export_fail', $response->get_error_message(), 3 );
+			} else{
+				set_transient( 'anymarket_brand_export_result', $response, 3 );
+			}
+
+		}
+
+		return $redirect;
+
+	}
+
+	/**
 	 * Add admin notices for anymarket bulk actions
 	 *
 	 * @return void
@@ -401,6 +450,32 @@ class AdminServiceProvider implements ServiceProviderInterface {
 					if ($item['errorCode'] === 404){
 						echo ' ';
 						_e('Se você excluiu esta categoria no Anymarket, você deverá recriá-la no Woocommerce para refazer a integração', 'anymarket');
+					}
+
+					print("<br/>");
+				}
+			}
+
+			echo '</p></div>';
+			return;
+		endif;
+
+		$report = get_transient( 'anymarket_brand_export_result' );
+
+		if( !empty($report) ):
+
+			echo '<div class="updated notice is-dismissible"><p>' ;
+
+			foreach ($report as $item) {
+				if( empty($item['errorCode']) ){
+					printf( __('Marca <b>%s</b> exportada com sucesso.', 'anymarket'), $item['name'] );
+					print("<br/>");
+				} else{
+					printf( __('A marca <b>%1$s</b> falhou na exportação. Código do erro: %2$s.', 'anymarket'), $item['name'], $item['errorCode'] );
+
+					if ($item['errorCode'] === 404){
+						echo ' ';
+						_e('Se você excluiu esta marca no Anymarket, você deverá recriá-la no Woocommerce para refazer a integração', 'anymarket');
 					}
 
 					print("<br/>");

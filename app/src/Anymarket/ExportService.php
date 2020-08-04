@@ -64,6 +64,24 @@ class ExportService
 	}
 
 	/**
+	 * Get the frst item from product categories array,
+	 * then get its related anymarket id.
+	 *
+	 * @param \WC_Product $product
+	 * @return array $anymarket_category_ids
+	 */
+	protected function formatProductBrands( \WC_Product $product ){
+
+		$brands = get_the_terms($product->get_id(), ANYMARKET_BRAND_CPT);
+		$brand_id = $brands[0]->term_id;
+
+		$id = carbon_get_term_meta($brand_id, 'anymarket_id');
+		$anymarket_brand_id = ['id' => $id];
+
+		return $anymarket_brand_id;
+	}
+
+	/**
 	 * Format product images.
 	 * Makes the first one the main image.
 	 *
@@ -110,6 +128,32 @@ class ExportService
 		}
 
 		return $categories_array;
+	}
+
+	/**
+	 * Receives an array of products and returns
+	 * all brands related to them.
+	 *
+	 * @param array $products
+	 * @return array $brands_array
+	 */
+	protected function getAllBrands( array $products ){
+		$brands_array = [];
+
+		foreach ( $products as $product ) {
+
+			// loop through products and check its brands
+			// create an array of all brands to export
+			$brands = get_the_terms($product->get_id(), ANYMARKET_BRAND_CPT);
+			foreach ( $brands as $brand ){
+				if( !in_array($brand->term_id, $brands_array) ){
+					$brands_array[] = $brand->term_id;
+				}
+			}
+
+		}
+
+		return $brands_array;
 	}
 
 	/**

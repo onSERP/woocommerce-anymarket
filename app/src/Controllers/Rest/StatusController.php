@@ -66,6 +66,30 @@ class StatusController
 			'hide_empty' => false,
 		]) );
 
+		if( defined('ANYMARKET_BRAND_CPT') ){
+			$totalBrands = count( get_terms([
+				'taxonomy' => ANYMARKET_BRAND_CPT,
+				'hide_empty' => false,
+			]) );
+
+			$exportedBrands = count( get_terms([
+				'taxonomy' => ANYMARKET_BRAND_CPT,
+				'meta_query' => [
+					'relation' => 'AND',
+					[
+						'key' => '_anymarket_id',
+						'compare' => '!=',
+						'value' => ''
+					],
+					[
+						'key' => '_anymarket_id',
+						'compare' => 'EXISTS',
+					],
+				],
+				'hide_empty' => false,
+			]) );
+		}
+
 		$exportService = new ExportService;
 		$baseUrl = $exportService->baseUrl;
 		$exportService->curl->get( $baseUrl . 'products' );
@@ -80,10 +104,10 @@ class StatusController
 			'isValidToken' => $isValidToken,
 			'totalProducts' => $totalProducts,
 			'totalCategories' => $totalCategories,
-			'totalBrands' => 0,
+			'totalBrands' => isset($totalBrands) ? $totalBrands : 0,
 			'exportedProducts' => $exportedProducts,
 			'exportedCategories' => $exportedCategories,
-			'exportedBrands' => 0,
+			'exportedBrands' => isset($exportedBrands) ? $exportedBrands : 0,
 		];
 
 		$response = new \WP_REST_Response( $data );

@@ -42,6 +42,9 @@ if ( ! $load ) {
 define( 'ANYMARKET_PLUGIN_FILE', __FILE__ );
 define( 'ANYMARKET_PLUGIN_NAME', 'anymarket');
 
+//custom configs file
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'anymarket-config.php';
+
 // Load composer dependencies.
 if ( file_exists( __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php' ) ) {
 	require_once __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
