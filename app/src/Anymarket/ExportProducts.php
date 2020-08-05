@@ -64,7 +64,7 @@ class ExportProducts extends ExportService implements ExportInterface
 				$skus = $instance->response->skus;
 
 				if( count($skus) > 1 ){
-					foreach ($skus as $key => $sku) {
+					foreach ($skus as $sku) {
 						// TODO: is this reliable enough?
 						// maybe it should be done by checking sku, but it would have some other implications...
 						$variation_id = $instance->data['skus'][$key]['internalId'];
@@ -96,6 +96,7 @@ class ExportProducts extends ExportService implements ExportInterface
 				$priceFactor = 1;
 			} else {
 				$priceFactor = carbon_get_post_meta( $product->get_id(), 'anymarket_markup' );
+				$priceFactor = str_replace(',', '.', $priceFactor);
 			}
 
 			$data = [
@@ -110,33 +111,40 @@ class ExportProducts extends ExportService implements ExportInterface
 				'weight' => $product->get_weight(),
 				'length' => $product->get_length(),
 				'characteristics' => $this->formatProductAttributes( $product ),
-				'skus' => $this->formatProductVariations( $product ),
 				'brand' => $this->formatProductBrands( $product ),
 			];
-
-			if ( !empty( $this->formatProductImages( $product ) ) ) {
-				$data['images'] = $this->formatProductImages( $product );
-			}
 
 			// if product is not on anymarket
 			if( empty( carbon_get_post_meta($product->get_id(), 'anymarket_id') ) ){
 				$data['origin']['id'] = 0;
+				$data['skus'] = $this->formatProductVariations( $product );
+				if ( !empty( $this->formatProductImages( $product ) ) ) {
+					$data['images'] = $this->formatProductImages( $product );
+				}
 
 				// add to queue
 				$instance = $this->multiCurl->addPost($this->baseUrl . 'products', json_encode($data, JSON_UNESCAPED_UNICODE));
 				$instance->productId = $product->get_id();
 				$instance->productName = $product->get_name();
-				$instance->type = 'Create';
+				$instance->type = 'Create produt';
 				$instance->data = $data;
 
 			} else{
 				$anymarket_id = carbon_get_post_meta($product->get_id(), 'anymarket_id');
 
-				//add to queue
+				//images
+				$exportImages = new ExportImages();
+				$exportImages->export( $product, $anymarket_id );
+
+				//skus
+				$exportSkus = new ExportSkus();
+				$exportSkus->export( $product, $anymarket_id );
+
+				//product
 				$instance = $this->multiCurl->addPut($this->baseUrl . 'products/' . $anymarket_id, json_encode($data, JSON_UNESCAPED_UNICODE));
 				$instance->productId = $product->get_id();
 				$instance->productName = $product->get_name();
-				$instance->type = 'Update';
+				$instance->type = 'Update product';
 				$instance->data = $data;
 			}
 

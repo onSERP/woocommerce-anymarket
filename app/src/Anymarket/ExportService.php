@@ -93,7 +93,7 @@ class ExportService
 
 		$main_image = $product->get_image_id();
 		$main_image_url = wp_get_attachment_url( $main_image );
-		if ( true === $main_image_url ){
+		if ( !empty($main_image_url) ){
 			$images_array[] = ['url' => $main_image_url, 'main' => true ];
 		}
 
@@ -101,7 +101,7 @@ class ExportService
 		$image_gallery = $product->get_gallery_image_ids();
 		foreach ($image_gallery as $image_id) {
 			$image_url = wp_get_attachment_url( $image_id );
-			if ( true === $image_url ){
+			if ( !empty($image_url) ){
 				$images_array[] = ['url' => $image_url];
 			}
 

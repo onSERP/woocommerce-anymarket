@@ -51,7 +51,7 @@ class ExportCategories extends ExportService implements ExportInterface
 					$report[] = [
 						'name' => $term->name,
 						'id' => $term->term_id,
-						'type' => 'Create',
+						'type' => 'Create categories',
 						'errorCode' => $this->curl->errorCode,
 						'errorMessage' => $this->curl->errorMessage,
 						'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
@@ -60,7 +60,7 @@ class ExportCategories extends ExportService implements ExportInterface
 					$report[] = [
 						'name' => $term->name,
 						'id' => $term->term_id,
-						'type' => 'Create',
+						'type' => 'Create categories',
 						'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
 					];
 
@@ -76,7 +76,7 @@ class ExportCategories extends ExportService implements ExportInterface
 					$report[] = [
 						'name' => $term->name,
 						'id' => $term->term_id,
-						'type' => 'Update',
+						'type' => 'Update categories',
 						'errorCode' => $this->curl->errorCode,
 						'errorMessage' => $this->curl->response->message,
 						'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
@@ -85,7 +85,7 @@ class ExportCategories extends ExportService implements ExportInterface
 					$report[] = [
 						'name' => $term->name,
 						'id' => $term->term_id,
-						'type' => 'Update',
+						'type' => 'Update categories',
 						'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
 					];
 				}
