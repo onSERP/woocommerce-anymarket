@@ -20,9 +20,9 @@ buttonOnPage({
 
 // wait for wp domready event to get field id
 wp.domReady(function () {
-  const id = document.querySelector('input[name*="_anymarket_id"]')
+  const id = document.querySelector('input[name*="_anymarket_id"]').value
 
-  if (id) {
+  if (id !== '') {
     // button on product edit page
     buttonOnPage({
       admin: 'post-php',

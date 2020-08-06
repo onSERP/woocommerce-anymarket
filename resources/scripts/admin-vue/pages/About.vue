@@ -15,20 +15,16 @@
         </p>
 
         <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quos aliquid
-          facere soluta veniam similique voluptatibus nostrum vel sed minus
-          culpa a harum ratione inventore necessitatibus, laboriosam repellat
-          explicabo exercitationem odit.
-        </p>
-
-        <p>
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-          Exercitationem tempora quos doloribus id, at consequatur aliquid
-          ducimus cum aut, explicabo, cupiditate doloremque reprehenderit eos
-          asperiores modi totam accusantium! Voluptatibus tenetur reprehenderit
-          sunt quis. Praesentium illo culpa consequuntur placeat adipisci nihil
-          doloremque consectetur velit asperiores pariatur, voluptas nam qui at
-          delectus.
+          Ao usar este plugin você aceita e concorda com os nossos
+          <a href="https://onserp.com.br/anymarket-plugin-termos">
+            termos de uso
+          </a>
+          e com a nossa
+          <a
+            href="https://onserp.com.br/anymarket-plugin-politica-de-privacidade"
+          >
+            política de privacidade
+          </a>
         </p>
       </main>
 
@@ -54,19 +50,36 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-.wysiwyg {
-  p {
-    @apply text-base;
+<style lang="scss">
+.app-about {
+  main {
+    p {
+      @apply text-base;
+    }
+  }
+  .wysiwyg {
+    a {
+      @apply text-blue-600;
+    }
   }
 
-  a {
-    @apply text-blue-600;
-  }
-}
+  .changelog {
+    max-height: 320px;
+    @apply font-mono overflow-y-scroll bg-gray-300 rounded mb-8 py-6 px-4;
 
-.changelog {
-  max-height: 320px;
-  @apply font-mono text-sm overflow-y-scroll bg-gray-300 rounded mb-8 py-6 px-4;
+    p,
+    ul,
+    li {
+      @apply text-sm;
+    }
+
+    h1 {
+      @apply text-xl;
+    }
+
+    h2 {
+      @apply text-base;
+    }
+  }
 }
 </style>
