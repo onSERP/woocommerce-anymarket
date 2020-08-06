@@ -1,5 +1,5 @@
 <template>
-	<div>Olá brands</div>
+  <div>Olá instruções</div>
 </template>
 
 <script>

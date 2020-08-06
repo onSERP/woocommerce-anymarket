@@ -14,40 +14,12 @@ export default new Router({
         ),
     },
     {
-      path: '/export',
-      name: 'Export',
+      path: '/instructions',
+      name: 'Instructions',
       component: () =>
         import(
-          /* webpackChunkName: "anymarket_export" */ '@scripts/admin-vue/pages/Export.vue'
+          /* webpackChunkName: "anymarket_instructions" */ '@scripts/admin-vue/pages/Instructions.vue'
         ),
-      redirect: '/export/products',
-
-      children: [
-        {
-          path: 'products',
-          name: 'ExportProducts',
-          component: () =>
-            import(
-              /* webpackChunkName: "anymarket_export_roducts" */ '@scripts/admin-vue/pages/Export/ExportProducts.vue'
-            ),
-        },
-        {
-          path: 'categories',
-          name: 'ExportCategories',
-          component: () =>
-            import(
-              /* webpackChunkName: "anymarket_export_categories" */ '@scripts/admin-vue/pages/Export/ExportCategories.vue'
-            ),
-        },
-        {
-          path: 'brands',
-          name: 'ExportBrands',
-          component: () =>
-            import(
-              /* webpackChunkName: "anymarket_export_brands" */ '@scripts/admin-vue/pages/Export/ExportBrands.vue'
-            ),
-        },
-      ],
     },
     {
       path: '/about',
