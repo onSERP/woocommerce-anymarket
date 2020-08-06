@@ -51,11 +51,13 @@ class ExportProducts extends ExportService implements ExportInterface
 			$report[] = [
 				'name' => $instance->productName,
 				'id' => $instance->productId,
+				'skus' => json_encode($instance->response->skus, JSON_UNESCAPED_UNICODE),
 				'type' => $instance->type,
 				'data' => json_encode($instance->data, JSON_UNESCAPED_UNICODE),
+				'response' => json_encode($instance->response, JSON_UNESCAPED_UNICODE),
+				'responseCode' => $instance->httpStatusCode
 			];
 
-			if( $instance->type === 'Create' ){
 				// set values for product
 				carbon_set_post_meta( $instance->productId, 'anymarket_should_export', 'true' );
 				carbon_set_post_meta( $instance->productId, 'anymarket_id', $instance->response->id );
@@ -64,7 +66,7 @@ class ExportProducts extends ExportService implements ExportInterface
 				$skus = $instance->response->skus;
 
 				if( count($skus) > 1 ){
-					foreach ($skus as $sku) {
+					foreach ($skus as $key => $sku) {
 						// TODO: is this reliable enough?
 						// maybe it should be done by checking sku, but it would have some other implications...
 						$variation_id = $instance->data['skus'][$key]['internalId'];
@@ -73,7 +75,6 @@ class ExportProducts extends ExportService implements ExportInterface
 				} else{
 					carbon_set_post_meta( $instance->productId, 'anymarket_variation_id', $skus[0]->id );
 				}
-			}
 		});
 
 		$this->multiCurl->error(function ($instance) use (&$report) {
@@ -112,12 +113,12 @@ class ExportProducts extends ExportService implements ExportInterface
 				'length' => $product->get_length(),
 				'characteristics' => $this->formatProductAttributes( $product ),
 				'brand' => $this->formatProductBrands( $product ),
+				'skus' => $this->formatProductVariations( $product )
 			];
 
 			// if product is not on anymarket
 			if( empty( carbon_get_post_meta($product->get_id(), 'anymarket_id') ) ){
 				$data['origin']['id'] = 0;
-				$data['skus'] = $this->formatProductVariations( $product );
 				if ( !empty( $this->formatProductImages( $product ) ) ) {
 					$data['images'] = $this->formatProductImages( $product );
 				}
@@ -126,7 +127,7 @@ class ExportProducts extends ExportService implements ExportInterface
 				$instance = $this->multiCurl->addPost($this->baseUrl . 'products', json_encode($data, JSON_UNESCAPED_UNICODE));
 				$instance->productId = $product->get_id();
 				$instance->productName = $product->get_name();
-				$instance->type = 'Create produt';
+				$instance->type = 'Create product';
 				$instance->data = $data;
 
 			} else{

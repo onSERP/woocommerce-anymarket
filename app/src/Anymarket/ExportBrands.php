@@ -59,6 +59,7 @@ class ExportBrands extends ExportService implements ExportInterface
 						'id' => $term->term_id,
 						'type' => 'Create brand',
 						'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
+						'response' => json_encode($this->curl->response, JSON_UNESCAPED_UNICODE),
 					];
 
 					carbon_set_term_meta( $term->term_id, 'anymarket_id', $this->curl->response->id );

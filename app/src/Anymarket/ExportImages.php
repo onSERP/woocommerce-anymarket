@@ -22,6 +22,7 @@ class ExportImages extends ExportService
 				'name' => $product->get_name(),
 				'id' => $product->get_id(),
 				'type' => 'Get images',
+				'url' => $this->curl->url,
 				'errorCode' => $this->curl->errorCode,
 				'errorMessage' => $this->curl->errorMessage,
 			];
@@ -33,7 +34,9 @@ class ExportImages extends ExportService
 				'name' => $product->get_name(),
 				'id' => $product->get_id(),
 				'type' => 'Get images',
-				'response' => json_encode($this->curl->response, JSON_UNESCAPED_UNICODE)
+				'url' => $this->curl->url,
+				'response' => json_encode($this->curl->response, JSON_UNESCAPED_UNICODE),
+				'responseCode' => json_encode($this->curl->httpStatusCode, JSON_UNESCAPED_UNICODE)
 			];
 
 			$imagesFromAnymarket = $this->curl->response;
@@ -45,8 +48,9 @@ class ExportImages extends ExportService
 				'name' => $product->get_name(),
 				'id' => $product->get_id(),
 				'type' => 'Delete images',
-				'errorCode' => $this->multiCurl->errorCode,
-				'errorMessage' => $this->multiCurl->errorMessage,
+				'url' => $instance->url,
+				'errorCode' => $instance->errorCode,
+				'errorMessage' => $instance->response->message,
 			];
 
 			$this->logger->debug( print_r($report, true), ['source' => 'woocommerce-anymarket']);
@@ -58,7 +62,9 @@ class ExportImages extends ExportService
 				'name' => $product->get_name(),
 				'id' => $product->get_id(),
 				'type' => 'Delete images',
-				'response' => json_encode($this->multiCurl->response, JSON_UNESCAPED_UNICODE)
+				'url' => $instance->url,
+				'response' => json_encode($instance->response, JSON_UNESCAPED_UNICODE),
+				'responseCode' => json_encode($instance->httpStatusCode, JSON_UNESCAPED_UNICODE)
 			];
 		});
 
@@ -76,8 +82,10 @@ class ExportImages extends ExportService
 				'name' => $product->get_name(),
 				'id' => $product->get_id(),
 				'type' => 'Create images',
-				'errorCode' => $this->multiCurl->errorCode,
-				'errorMessage' => $this->multiCurl->errorMessage,
+				'url' => $instance->url,
+				'errorCode' => $instance->errorCode,
+				'errorMessage' => $instance->errorMessage,
+				'data' => json_encode($instance->data, JSON_UNESCAPED_UNICODE),
 			];
 		});
 
@@ -86,8 +94,10 @@ class ExportImages extends ExportService
 				'name' => $product->get_name(),
 				'id' => $product->get_id(),
 				'type' => 'Create images',
-				'data' => $instance->data,
-				'response' => json_encode($this->multiCurl->response, JSON_UNESCAPED_UNICODE)
+				'data' => json_encode($instance->data, JSON_UNESCAPED_UNICODE),
+				'url' => $instance->url,
+				'response' => json_encode($instance->response, JSON_UNESCAPED_UNICODE),
+				'responseCode' => json_encode($instance->httpStatusCode, JSON_UNESCAPED_UNICODE)
 			];
 		});
 
