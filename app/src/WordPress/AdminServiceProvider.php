@@ -55,10 +55,13 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		add_action( 'admin_notices', [$this, 'productNotices'] );
 
 		// edit/save action on product categories
-		add_action( 'edited_product_cat', [$this, 'saveProductCategories'] );
+		add_action( 'edited_term', [$this, 'saveProductCategories'], 10, 3 );
 
 		// edit/save products
 		add_action( 'save_post', [$this, 'saveProduct'], 10, 3 );
+
+		// delete category on anymarket
+		add_action( 'init', [$this, 'deleteCategoryOnAnymarket'] );
 
 		// new order
 		add_action( 'woocommerce_thankyou', [$this, 'discountStock'] );
@@ -499,29 +502,84 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			return;
 		endif;
 
+		$report = get_transient( 'anymarket_category_delete_error' );
+
+		if( !empty($report) ):
+			echo '<div class="updated notice is-dismissible"><p>' ;
+
+			foreach ($report as $item) {
+					printf( __('Erro ao remover a categoria <b>%s</b> do anymarket', 'anymarket'), $item->name );
+					print("<br/>");
+			}
+
+			echo '</p></div>';
+			return;
+		endif;
+
+		$report = get_transient( 'anymarket_category_delete_success' );
+
+		if( !empty($report) ):
+			echo '<div class="updated notice is-dismissible"><p>' ;
+
+			foreach ($report as $item) {
+					printf( __('Categoria <b>%s</b> removida do anymarket', 'anymarket'), $item->name );
+					print("<br/>");
+			}
+
+			echo '</p></div>';
+			return;
+		endif;
+
 	}
 
 	/**
 	 * Export term to anymarket when edited
 	 *
 	 * @param int $term_id
+	 * @param int $tt_id
+	 * @param string $taxonomy
 	 * @return void
 	 */
-	public function saveProductCategories( $term_id ){
-		$is_on_anymarket = carbon_get_term_meta($term_id, 'anymarket_id');
+	public function saveProductCategories( $term_id, $tt_id, $taxonomy ){
 
-		if( !empty($is_on_anymarket) ) {
-			$exportCategories = new ExportCategories();
-			$exportCategories->export( [$term_id] );
+		if( $taxonomy = 'product_cat'){
+
+			$this->currentEditingTerm = $term_id;
+			add_action('carbon_fields_term_meta_container_saved', [$this, 'saveProductCategoriesTermsMeta'] );
+
 		}
 	}
 
 	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	public function saveProductCategoriesTermsMeta(){
+		//avoid loop
+		remove_action( 'edited_term', [$this, 'saveProductCategories'] );
+		remove_action('carbon_fields_term_meta_container_saved', [$this, 'saveProductCategoriesTermsMeta'] );
+
+		$is_on_anymarket = carbon_get_term_meta($this->currentEditingTerm, 'anymarket_id');
+
+		if( !empty($is_on_anymarket) ) {
+			$exportCategories = new ExportCategories();
+			$exportCategories->export( [$this->currentEditingTerm] );
+		}
+
+		add_action('carbon_fields_term_meta_container_saved', [$this, 'saveProductCategoriesTermsMeta'] );
+		add_action( 'edited_term', [$this, 'saveProductCategories'], 10, 3 );
+	}
+
+
+
+
+	/**
 	 * Export product to anymarket when edited
 	 *
-	 * @param [type] $post_id
-	 * @param [type] $post
-	 * @param [type] $updated
+	 * @param int $post_id
+	 * @param \WP_Post $post
+	 * @param boolean $updated
 	 * @return void
 	 */
 	public function saveProduct( $post_id, $post, $updated ){
@@ -541,10 +599,10 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	/**
 	 * Undocumented function
 	 *
-	 * @param [type] $meta_id
-	 * @param [type] $post_id
-	 * @param [type] $meta_key
-	 * @param [type] $meta_value
+	 * @param int $meta_id
+	 * @param int $post_id
+	 * @param int $meta_key
+	 * @param string $meta_value
 	 * @return void
 	 */
 	public function saveProductPostMeta($meta_id, $post_id, $meta_key, $meta_value){
@@ -620,5 +678,31 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		$exportStock = new ExportStock;
 		$exportStock->export( [$order_id] );
 
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
+	public function deleteCategoryOnAnymarket(){
+
+		if ( isset( $_GET['anymarket_action'])
+		&& $_GET['anymarket_action'] === 'delete_category'
+		&& current_user_can('manage_options') ){
+
+			$deleteCategory = new ExportCategories();
+			$deleted = $deleteCategory->delete( $_GET['tag_ID'] );
+
+			if( is_wp_error($deleted) ){
+				set_transient( 'anymarket_category_delete_error', $report, 3);
+			} else {
+				set_transient( 'anymarket_category_delete_success', $report, 3);
+			}
+
+			wp_safe_redirect( remove_query_arg( 'anymarket_action' ) );
+		}
+
+		return;
 	}
 }

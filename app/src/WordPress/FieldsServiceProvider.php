@@ -78,6 +78,8 @@ class FieldsServiceProvider implements ServiceProviderInterface
 
 				Field::make( 'text', 'anymarket_warranty_time', __('Garantia (meses)', 'anymarket') )
 					->set_attribute('type', 'number')
+					->set_attribute('min', '0')
+					->set_attribute('step', 'any')
 					->set_help_text(__('Campo obrigatório para o Anymarket', 'anymarket'))
 					->set_conditional_logic( [[
 						'field' => 'anymarket_should_export',
@@ -93,10 +95,23 @@ class FieldsServiceProvider implements ServiceProviderInterface
 
 				Field::make( 'text', 'anymarket_markup', __('Markup', 'anymarket') )
 					->set_attribute('type', 'number')
+					->set_attribute('min', '0')
+					->set_attribute('step', 'any')
 					->set_help_text(__('Campo obrigatório para o Anymarket. Se não preenchido, será enviado "1"', 'anymarket'))
 					->set_conditional_logic( [[
 						'field' => 'anymarket_should_export',
             			'value' => 'true'
+					]] ),
+
+				Field::make( 'select', 'anymarket_definition_price_scope', __('Cálculo de preço', 'anymarket') )
+					->set_options([
+						'COST' => __('Automático, pela mudança do custo', 'anymarket'),
+						'SKU' => __('Manual, eu controlo o preço pelo SKU', 'anymarket'),
+						'SKU_MARKETPLACE' => __('Manual, eu controlo o preço pelo anúncio', 'anymarket'),
+					])
+					->set_conditional_logic( [[
+						'field' => 'anymarket_should_export',
+						'value' => 'true'
 					]] ),
 			]);
 	}
@@ -130,10 +145,20 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	 * @return void
 	 */
 	public function productCategoriesMeta(){
-		Container::make( 'term_meta', __( 'Anymarket' ) )
+		Container::make( 'term_meta', __( 'Campos do Anymarket', 'anymarket' ) )
 			->where( 'term_taxonomy', '=', 'product_cat' )
 			->add_fields( [
-				Field::make( 'hidden', 'anymarket_id'),
+				Field::make( 'text', 'anymarket_category_markup', 'Markup' )
+					->set_attribute('type', 'number')
+					->set_attribute('min', '0')
+					->set_attribute('step', 'any')
+					->set_help_text(__('Obrigatório para o Anymarket. Se não específicado será enviado como "1"', 'anymarket') ),
+				Field::make( 'text', 'anymarket_id')
+					->set_attribute('readOnly', 'readonly'),
+				Field::make( 'html', 'anymarket_delete_category' )
+					->set_html('<a id="button-delete-category" class="button anymarket-button-delete" href="'. esc_url( add_query_arg( [
+						'anymarket_action' => 'delete_category'
+					] ) ) .'">Deletar categoria no Anymarket</a>')
 		] );
 	}
 

@@ -47,3 +47,21 @@
 .cf-hidden {
   display: none;
 }
+
+//fix for wrong positioning on term meta
+.term-php
+  .cf-container__fields
+  > .cf-field:not(.cf-field--has-width)
+  > .cf-field__head {
+  margin-left: 20px;
+}
+
+.anymarket-button-delete {
+  background: #dd2828 !important;
+  border-color: #dd2828 !important;
+  color: #fff !important;
+
+  &:hover {
+    background: #cb1d1d !important;
+  }
+}

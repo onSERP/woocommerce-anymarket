@@ -38,6 +38,11 @@ class AssetsServiceProvider implements ServiceProviderInterface
 			true
 		);
 
+		wp_localize_script('anymarket-admin-js-bundle', 'anymarketAjax', array(
+			'url' => admin_url('admin-ajax.php'),
+			'nonce' => wp_create_nonce('anymarket-ajax-nonce')
+		));
+
 		$isDev = get_option( 'anymarket_is_dev_env' );
 		$anymarketToken = get_option( 'anymarket_token' );
 

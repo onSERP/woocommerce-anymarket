@@ -113,7 +113,8 @@ class ExportProducts extends ExportService implements ExportInterface
 				'length' => $product->get_length(),
 				'characteristics' => $this->formatProductAttributes( $product ),
 				'brand' => $this->formatProductBrands( $product ),
-				'skus' => $this->formatProductVariations( $product )
+				'skus' => $this->formatProductVariations( $product ),
+				'definitionPriceScope' => carbon_get_post_meta($product->id, 'anymarket_definition_price_scope')
 			];
 
 			// if product is not on anymarket
@@ -140,6 +141,10 @@ class ExportProducts extends ExportService implements ExportInterface
 				//skus
 				$exportSkus = new ExportSkus();
 				$exportSkus->export( $product, $anymarket_id );
+
+				//stocks
+				$exportStock = new ExportStock();
+				$exportStock->export( [$product] );
 
 				//product
 				$instance = $this->multiCurl->addPut($this->baseUrl . 'products/' . $anymarket_id, json_encode($data, JSON_UNESCAPED_UNICODE));

@@ -23,69 +23,6 @@ return [
 	],
 
 	/**
-	 * Array of route group definitions and default attributes.
-	 * All of these are optional so if we are not using
-	 * a certain group of routes we can skip it.
-	 * If we are not using routing at all we can skip
-	 * the entire 'routes' option.
-	 */
-	'routes'              => [
-		'ajax'  => [
-			'definitions' => __DIR__ . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'ajax.php',
-			'attributes'  => [
-				'namespace' => 'Anymarket\\Controllers\\Ajax\\',
-			],
-		],
-	],
-
-	/**
-	 * Register middleware class aliases.
-	 * Use fully qualified middleware class names.
-	 *
-	 * Internal aliases that you should avoid overriding:
-	 * - 'flash'
-	 * - 'old_input'
-	 * - 'csrf'
-	 * - 'user.logged_in'
-	 * - 'user.logged_out'
-	 * - 'user.can'
-	 */
-	'middleware'          => [
-		// phpcs:ignore
-		// 'mymiddleware' => \Anymarket\Middleware\MyMiddleware::class,
-	],
-
-	/**
-	 * Register middleware groups.
-	 * Use fully qualified middleware class names or registered aliases.
-	 * There are a couple built-in groups that you may override:
-	 * - 'web'      - Automatically applied to web routes.
-	 * - 'admin'    - Automatically applied to admin routes.
-	 * - 'ajax'     - Automatically applied to ajax routes.
-	 * - 'global'   - Automatically applied to all of the above.
-	 * - 'wpemerge' - Internal group applied the same way 'global' is.
-	 *
-	 * Warning: The 'wpemerge' group contains some internal WP Emerge
-	 * middleware which you should avoid overriding.
-	 */
-	'middleware_groups'   => [
-		'global' => [],
-		'web'    => [],
-		'ajax'   => [],
-		'admin'  => [],
-	],
-
-	/**
-	 * Optionally specify middleware execution order.
-	 * Use fully qualified middleware class names.
-	 */
-	'middleware_priority' => [
-		// phpcs:ignore
-		// \Anymarket\Middleware\MyMiddlewareThatShouldRunFirst::class,
-		// \Anymarket\Middleware\MyMiddlewareThatShouldRunSecond::class,
-	],
-
-	/**
 	 * Custom directories to search for views.
 	 * Use absolute paths or leave blank to disable.
 	 * Applies only to the default PhpViewEngine.

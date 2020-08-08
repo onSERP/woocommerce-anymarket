@@ -26,7 +26,7 @@ class ExportSkus extends ExportService
 					'errorMessage' => $this->curl->response->message,
 				];
 
-				$this->logger->debug( print_r($report, true), ['source' => 'woocommerce-anymarket']);
+				$this->logger->error( print_r($report, true), ['source' => 'woocommerce-anymarket']);
 				return false;
 
 			} else {
@@ -111,7 +111,7 @@ class ExportSkus extends ExportService
 		} else {
 			//update current sku
 			$skuInAnymarket = carbon_get_post_meta( $skusFromWP[0]['internalId'], 'anymarket_variation_id');
-			$this->curl->put($this->baseUrl . 'products/' . $anymarket_id . '/skus' . '/' . $skuInAnymarket, $skusFromWP);
+			$this->curl->put($this->baseUrl . 'products/' . $anymarket_id . '/skus' . '/' . $skuInAnymarket, $skusFromWP[0]);
 
 			if( $this->curl->error ){
 				$report[] = [
@@ -119,6 +119,7 @@ class ExportSkus extends ExportService
 					'product_id' => $product->get_id(),
 					'type' => 'Update sku',
 					'url' => $this->curl->url,
+					'data' => json_encode($skusFromWP[SIMPLEPIE_TYPE_ATOM_03], JSON_UNESCAPED_UNICODE),
 					'errorCode' => $this->curl->errorCode,
 					'errorMessage' => $this->curl->response->message,
 				];
@@ -132,6 +133,7 @@ class ExportSkus extends ExportService
 					'product_id' => $product->get_id(),
 					'type' => 'Update sku',
 					'url' => $this->curl->url,
+					'data' => json_encode($skusFromWP[0], JSON_UNESCAPED_UNICODE),
 					'response' => json_encode($this->curl->response, JSON_UNESCAPED_UNICODE),
 					'responseCode' => $this->curl->httpStatusCode
 				];
