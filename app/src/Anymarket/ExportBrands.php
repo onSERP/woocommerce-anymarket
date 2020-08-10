@@ -5,7 +5,7 @@ namespace Anymarket\Anymarket;
 /**
  * Export brands
  */
-class ExportBrands extends ExportService implements ExportInterface
+class ExportBrands extends ExportService
 {
 	/**
 	 * Recieves list of categories ids and export them to anymarket.
@@ -13,7 +13,7 @@ class ExportBrands extends ExportService implements ExportInterface
 	 * @param array $term_ids
 	 * @return array $report list of successful or unsuccessful exportations
 	 */
-	public function export( array $term_ids ){
+	public function export( array $term_ids, bool $update = true ){
 
 		$report = [];
 
@@ -66,6 +66,8 @@ class ExportBrands extends ExportService implements ExportInterface
 				}
 
 			} else {
+				if (false === $update) return;
+
 				$anymarket_id = carbon_get_term_meta($term->term_id, 'anymarket_id');
 
 				//make the request

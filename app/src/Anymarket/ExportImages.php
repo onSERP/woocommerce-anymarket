@@ -42,6 +42,8 @@ class ExportImages extends ExportService
 			$imagesFromAnymarket = $this->curl->response;
 		}
 
+		// TODO:match images to avoid making these requests
+
 		//delete images
 		$this->multiCurl->error(function ($instance) use (&$report, $product){
 			$report[] = [

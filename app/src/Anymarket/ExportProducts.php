@@ -33,12 +33,12 @@ class ExportProducts extends ExportService implements ExportInterface
 
 		// export categories
 		$exportCat = new ExportCategories();
-		$exportCat->export( $this->getAllCategories( $products ) );
+		$exportCat->export( $this->getAllCategories( $products ), false );
 
 		// export categories
 		if( defined('ANYMARKET_BRAND_CPT') ){
 			$exportBrand = new ExportBrands();
-			$exportBrand->export( $this->getAllBrands( $products ) );
+			$exportBrand->export( $this->getAllBrands( $products ), false );
 		}
 
 		//delay script execution for 1 sec
@@ -114,7 +114,7 @@ class ExportProducts extends ExportService implements ExportInterface
 				'characteristics' => $this->formatProductAttributes( $product ),
 				'brand' => $this->formatProductBrands( $product ),
 				'skus' => $this->formatProductVariations( $product ),
-				'definitionPriceScope' => carbon_get_post_meta($product->id, 'anymarket_definition_price_scope')
+				'definitionPriceScope' => carbon_get_post_meta($product->get_id(), 'anymarket_definition_price_scope')
 			];
 
 			// if product is not on anymarket
@@ -144,7 +144,7 @@ class ExportProducts extends ExportService implements ExportInterface
 
 				//stocks
 				$exportStock = new ExportStock();
-				$exportStock->export( [$product] );
+				$exportStock->exportProductStock( [$product] );
 
 				//product
 				$instance = $this->multiCurl->addPut($this->baseUrl . 'products/' . $anymarket_id, json_encode($data, JSON_UNESCAPED_UNICODE));
