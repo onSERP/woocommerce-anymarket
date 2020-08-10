@@ -7,6 +7,7 @@ use Anymarket\Anymarket\ExportProducts;
 use Anymarket\Anymarket\ExportCategories;
 use Anymarket\Anymarket\ExportBrands;
 use Anymarket\Anymarket\ExportStock;
+use Anymarket\Anymarket\AnymarketOrder;
 
 /**
  * Register admin-related entities, like admin menu pages.
@@ -65,6 +66,9 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		// new order
 		add_action( 'woocommerce_thankyou', [$this, 'discountStock'] );
+
+		// on order change status
+		add_action( 'woocommerce_order_status_changed', [$this, 'updateStatus'], 10, 3);
 	}
 
 	/**
@@ -676,7 +680,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function discountStock( $order_id ){
 
 		$exportStock = new ExportStock;
-		$exportStock->export( [$order_id] );
+		$exportStock->exportFromOrder( [$order_id] );
 
 	}
 
@@ -704,5 +708,20 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		}
 
 		return;
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $order_id
+	 * @param [type] $old_status
+	 * @param [type] $new_status
+	 * @return void
+	 */
+	public function updateStatus( $order_id, $old_status, $new_status ){
+
+		$order = new AnymarketOrder;
+		$order->updateStatus( $order_id, $new_status );
+
 	}
 }

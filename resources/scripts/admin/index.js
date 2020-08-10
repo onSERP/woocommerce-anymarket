@@ -45,9 +45,6 @@ wp.domReady(function () {
     adminpage === 'post-php' &&
     document.querySelector('input[name*="_anymarket_id"]').value !== ''
   ) {
-    document.querySelector('#postcustom').style.display = 'none'
-    document.querySelector('#woocommerce-order-actions').style.display = 'none'
-    document.querySelector('#wc_correios').style.display = 'none'
     document.querySelector('#woocommerce-order-downloads').style.display =
       'none'
 
@@ -62,11 +59,6 @@ wp.domReady(function () {
     })
 
     document.querySelectorAll('#order_data button').forEach((item) => {
-      item.setAttribute('readonly', 'readonly')
-      item.setAttribute('disabled', 'disabled')
-    })
-
-    document.querySelectorAll('#order_data select').forEach((item) => {
       item.setAttribute('readonly', 'readonly')
       item.setAttribute('disabled', 'disabled')
     })

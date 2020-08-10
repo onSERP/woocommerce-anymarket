@@ -44,6 +44,74 @@ class AnymarketOrder extends ExportService {
 	/**
 	 * Undocumented function
 	 *
+	 * @param [type] $order_id
+	 * @param [type] $status
+	 * @return void
+	 */
+	public function updateStatus( int $order_id, string $status ){
+		// INVOICED, PAID_WAITING_DELIVERY, CONCLUDED
+		$data;
+		$order_anymarket_id = carbon_get_post_meta($order_id, 'anymarket_id');
+
+		switch ($status){
+			case 'anymarket-billed':
+				$data['status'] = 'INVOICED';
+				$data['invoice']['accessKey'] = carbon_get_post_meta($order_id, 'anymarket_nfe_access_key');
+				$data['invoice']['date'] = anymarket_format_date( carbon_get_post_meta($order_id, 'anymarket_nfe_datetime'));
+
+			break;
+
+			case 'anymarket-shipped':
+				$data['status'] = 'PAID_WAITING_DELIVERY';
+				$data['tracking']['carrier'] = carbon_get_post_meta($order_id, 'anymarket_tracking_carrier');
+				$data['tracking']['carrierDocument'] = carbon_get_post_meta($order_id, 'anymarket_tracking_carrier_document');
+				$data['tracking']['estimateDate'] = anymarket_format_date( carbon_get_post_meta($order_id, 'anymarket_tracking_estimate'));
+				$data['tracking']['shippedDate'] = anymarket_format_date( carbon_get_post_meta($order_id, 'anymarket_tracking_shipped'));
+			break;
+
+			case 'completed':
+				$data['status'] = 'CONCLUDED';
+				$data['tracking']['deliveredDate'] = anymarket_format_date( carbon_get_post_meta($order_id, 'anymarket_tracking_delivered'));
+			break;
+
+		}
+
+		$this->logger->debug( $status, ['source' => 'woocommerce-anymarket']);
+		if( empty($data) ) return;
+
+		$this->curl->put($this->baseUrl . 'orders/' . $order_anymarket_id, json_encode($data, JSON_UNESCAPED_UNICODE));
+		$report = [];
+
+		if($this->curl->error){
+			$report[] = [
+				'order' => $order_id,
+				'type' => 'Update order status',
+				'status' => $status,
+				'url' => $this->curl->url,
+				'errorCode' => $this->curl->errorCode,
+				'errorMessage' => $this->curl->response->message,
+				'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
+			];
+		} else {
+			$report[] = [
+				'order' => $order_id,
+				'type' => 'Update order status',
+				'status' => $status,
+				'url' => $this->curl->url,
+				'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
+				'response' => json_encode($this->curl->response, JSON_UNESCAPED_UNICODE),
+				'responseCode' => $this->curl->httpStatusCode
+			];
+		}
+
+		if( get_option('anymarket_is_dev_env') == 'true' ){
+			$this->logger->debug( print_r($report, true), ['source' => 'woocommerce-anymarket']);
+		}
+	}
+
+	/**
+	 * Undocumented function
+	 *
 	 * @param \WP_Post $orderPost
 	 * @param integer $id
 	 * @return void
@@ -121,38 +189,39 @@ class AnymarketOrder extends ExportService {
 	 * @return void
 	 */
 	protected function assignToOrder(object $oldOrder, \WC_Order $newOrder, $updated = true ){
-		$shippingFname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[0];
-		$shippingLname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[1];
-
-		$newOrder->set_shipping_first_name( $shippingFname );
-		$newOrder->set_shipping_last_name( $shippingLname );
-
-		//formatar endereço - shipping
-		$newOrder->set_shipping_address_1( $oldOrder->shipping->street );
-		$newOrder->set_shipping_city( $oldOrder->shipping->city );
-		$newOrder->set_shipping_state( $oldOrder->shipping->stateNameNormalized );
-		$newOrder->set_shipping_postcode( $oldOrder->shipping->zipCode );
-		$newOrder->set_shipping_country( $oldOrder->shipping->countryNameNormalized );
-
-		$billingFname = anymarket_split_name( $oldOrder->buyer->name )[0];
-		$billingLname = anymarket_split_name( $oldOrder->buyer->name )[1];
-
-		$newOrder->set_billing_first_name( $billingFname );
-		$newOrder->set_billing_last_name( $billingLname );
-		$newOrder->set_billing_address_1( $oldOrder->billingAddress->street );
-		$newOrder->set_billing_city( $oldOrder->billingAddress->city );
-		$newOrder->set_billing_state( $oldOrder->billingAddress->stateNameNormalized );
-		$newOrder->set_billing_postcode( $oldOrder->billingAddress->zipCode );
-		$newOrder->set_billing_country( $oldOrder->billingAddress->country );
-		$newOrder->set_billing_email( $oldOrder->buyer->email );
-		$newOrder->set_billing_phone( $oldOrder->buyer->phone );
-
-		$newOrder->set_created_via( $oldOrder->marketPlace );
-		$newOrder->set_payment_method_title( $oldOrder->payments[0]->paymentMethodNormalized );
-		$newOrder->set_currency('BRL');
 
 		if( false === $updated ){
-		//add products
+			$shippingFname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[0];
+			$shippingLname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[1];
+
+			$newOrder->set_shipping_first_name( $shippingFname );
+			$newOrder->set_shipping_last_name( $shippingLname );
+
+			//formatar endereço - shipping
+			$newOrder->set_shipping_address_1( $oldOrder->shipping->street );
+			$newOrder->set_shipping_city( $oldOrder->shipping->city );
+			$newOrder->set_shipping_state( $oldOrder->shipping->stateNameNormalized );
+			$newOrder->set_shipping_postcode( $oldOrder->shipping->zipCode );
+			$newOrder->set_shipping_country( $oldOrder->shipping->countryNameNormalized );
+
+			$billingFname = anymarket_split_name( $oldOrder->buyer->name )[0];
+			$billingLname = anymarket_split_name( $oldOrder->buyer->name )[1];
+
+			$newOrder->set_billing_first_name( $billingFname );
+			$newOrder->set_billing_last_name( $billingLname );
+			$newOrder->set_billing_address_1( $oldOrder->billingAddress->street );
+			$newOrder->set_billing_city( $oldOrder->billingAddress->city );
+			$newOrder->set_billing_state( $oldOrder->billingAddress->stateNameNormalized );
+			$newOrder->set_billing_postcode( $oldOrder->billingAddress->zipCode );
+			$newOrder->set_billing_country( $oldOrder->billingAddress->country );
+			$newOrder->set_billing_email( $oldOrder->buyer->email );
+			$newOrder->set_billing_phone( $oldOrder->buyer->phone );
+
+			$newOrder->set_created_via( $oldOrder->marketPlace );
+			$newOrder->set_payment_method_title( $oldOrder->payments[0]->paymentMethodNormalized );
+			$newOrder->set_currency('BRL');
+
+			//add products
 			foreach ($oldOrder->items as $orderItem ){
 				$products = get_posts( [
 					'post_type' => ['product', 'product_variation'],
@@ -178,14 +247,15 @@ class AnymarketOrder extends ExportService {
 						'total' => $orderItem->total
 					] );
 			}
+
+
+			$newOrder->set_shipping_tax( $oldOrder->freight );
+			$newOrder->set_discount_total( $oldOrder->discount );
+
+			$newOrder->calculate_totals();
 		}
 
-		$newOrder->set_shipping_tax( $oldOrder->freight );
-		$newOrder->set_discount_total( $oldOrder->discount );
-
-		$newOrder->calculate_totals();
-
-		$orderStatuses = [
+			$orderStatuses = [
 			'PENDING' => 'pending',
 			'PAID_WAITING_SHIP' => 'processing',
 			'INVOICED' => 'anymarket-billed',
@@ -194,7 +264,7 @@ class AnymarketOrder extends ExportService {
 			'CANCELED' => 'cancelled'
 		];
 
-		$newOrder->update_status( $orderStatuses[$oldOrder->marketPlaceStatus],
+		$newOrder->update_status( $orderStatuses[$oldOrder->status],
 					__('Pedido importado do Anymarket', 'anymarket'));
 
 		$newOrder->save();

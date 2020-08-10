@@ -27,7 +27,7 @@ class NotificationController
 		$order = new AnymarketOrder;
 		$orderResponse = $order->make( $request['content']['id'] );
 
-		$logger->debug( print_r($orderResponse, true) , ['source' => 'woocommerce-anymarket'] );
+		$logger->debug( json_encode($orderResponse, JSON_UNESCAPED_UNICODE) , ['source' => 'woocommerce-anymarket'] );
 
 		if ( is_wp_error($orderResponse) ) return $orderResponse;
 

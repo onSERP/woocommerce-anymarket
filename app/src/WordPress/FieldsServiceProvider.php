@@ -132,6 +132,17 @@ class FieldsServiceProvider implements ServiceProviderInterface
 				//hidden fields - will only use internally
 				Field::make( 'hidden', 'anymarket_id'),
 				Field::make( 'hidden', 'is_anymarket_order'),
+
+				Field::make( 'text', 'anymarket_nfe_access_key', __('Chave de acesso da NF', 'anymarket')),
+				Field::make( 'date_time', 'anymarket_nfe_datetime', __('Data de emissão da NF', 'anymarket')),
+
+				Field::make( 'text', 'anymarket_tracking_carrier', __('Transportadora', 'anymarket')),
+				Field::make( 'text', 'anymarket_tracking_carrier_document', __('CNPJ da transportadora', 'anymarket')),
+				Field::make( 'date', 'anymarket_tracking_estimate', __('Estimativa de entrega', 'anymarket')),
+				Field::make( 'date', 'anymarket_tracking_shipped', __('Data em que foi entregue à transportadora', 'anymarket')),
+
+				Field::make( 'date', 'anymarket_tracking_delivered', __('Data em que foi entregue ao cliente', 'anymarket')),
+
 			] );
 
 		Container::make( 'post_meta', 'order_data_vue', 'Dados do Pedido no Anymarket' )
