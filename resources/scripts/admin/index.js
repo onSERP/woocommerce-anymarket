@@ -27,13 +27,13 @@ wp.domReady(function () {
     buttonOnPage({
       admin: 'post-php',
       page: 'product',
-      dest: 'products/edit/' + id.value,
+      dest: 'products/edit/' + id,
     })
 
     buttonOnPage({
       admin: 'post-php',
       page: 'shop_order',
-      dest: 'orders/edit/' + id.value,
+      dest: 'orders/edit/' + id,
     })
   }
 })
@@ -50,7 +50,6 @@ wp.domReady(function () {
     document.querySelector('#wc_correios').style.display = 'none'
     document.querySelector('#woocommerce-order-downloads').style.display =
       'none'
-    document.querySelector('#woocommerce-order-items').style.display = 'none'
 
     document.querySelectorAll('#order_data input').forEach((item) => {
       item.setAttribute('readonly', 'readonly')

@@ -115,9 +115,9 @@ class AnymarketOrder extends ExportService {
 	/**
 	 * Undocumented function
 	 *
-	 * @param object $oldOrder
-	 * @param \WC_Order $newOrder
-	 * @param boolean $updated
+	 * @param object $oldOrder order from anymarket
+	 * @param \WC_Order $newOrder woocommerce order object
+	 * @param boolean $updated whether or not is updating order
 	 * @return void
 	 */
 	protected function assignToOrder(object $oldOrder, \WC_Order $newOrder, $updated = true ){
@@ -157,9 +157,14 @@ class AnymarketOrder extends ExportService {
 				$products = get_posts( [
 					'post_type' => ['product', 'product_variation'],
 					'meta_query' => [
-						'relation' => 'AND',
+						'relation' => 'OR',
 						[
 							'key' => '_anymarket_variation_id',
+							'compare' => '=',
+							'value' => $orderItem->sku->id
+						],
+						[
+							'key' => 'anymarket_variation_id',
 							'compare' => '=',
 							'value' => $orderItem->sku->id
 						],
@@ -168,7 +173,10 @@ class AnymarketOrder extends ExportService {
 				]);
 
 				if( !empty($products) )
-					$newOrder->add_product( wc_get_product($products[0]->ID), $orderItem->amount );
+					$newOrder->add_product( wc_get_product($products[0]->ID), $orderItem->amount, [
+						'subtotal' => $orderItem->total,
+						'total' => $orderItem->total
+					] );
 			}
 		}
 
