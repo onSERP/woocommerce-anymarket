@@ -69,6 +69,9 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		// on order change status
 		add_action( 'woocommerce_order_status_changed', [$this, 'updateStatus'], 10, 3);
+
+		// allow xml uploads
+		add_filter( 'upload_mimes', [$this, 'uploadXML'] );
 	}
 
 	/**
@@ -723,5 +726,18 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		$order = new AnymarketOrder;
 		$order->updateStatus( $order_id, $new_status );
 
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $mimes
+	 * @return void
+	 */
+	public function uploadXML($mimes) {
+		if( !current_user_can( 'edit_posts' )) return $mimes;
+
+		$mimes = array_merge($mimes, ['xml' => 'text/xml']);
+		return $mimes;
 	}
 }

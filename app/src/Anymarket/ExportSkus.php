@@ -76,6 +76,7 @@ class ExportSkus extends ExportService
 
 					if( $anymarketSkuId == $skuFromAnymarket->id ){
 						$skuData = $skuFromWP;
+						unset($skuData['amount']);
 						break;
 					}
 				}
@@ -109,9 +110,14 @@ class ExportSkus extends ExportService
 			$this->multiCurl->start();
 
 		} else {
+
+			$currentSKU = $skusFromWP[0];
+			unset($currentSKU['amount']);
+
 			//update current sku
-			$skuInAnymarket = carbon_get_post_meta( $skusFromWP[0]['internalId'], 'anymarket_variation_id');
-			$this->curl->put($this->baseUrl . 'products/' . $anymarket_id . '/skus' . '/' . $skuInAnymarket, $skusFromWP[0]);
+			$skuInAnymarket = carbon_get_post_meta( $currentSKU['internalId'], 'anymarket_variation_id');
+
+			$this->curl->put($this->baseUrl . 'products/' . $anymarket_id . '/skus' . '/' . $skuInAnymarket, $currentSKU);
 
 			if( $this->curl->error ){
 				$report[] = [
@@ -119,7 +125,7 @@ class ExportSkus extends ExportService
 					'product_id' => $product->get_id(),
 					'type' => 'Update sku',
 					'url' => $this->curl->url,
-					'data' => json_encode($skusFromWP[SIMPLEPIE_TYPE_ATOM_03], JSON_UNESCAPED_UNICODE),
+					'data' => json_encode($currentSKU, JSON_UNESCAPED_UNICODE),
 					'errorCode' => $this->curl->errorCode,
 					'errorMessage' => $this->curl->response->message,
 				];
@@ -133,7 +139,7 @@ class ExportSkus extends ExportService
 					'product_id' => $product->get_id(),
 					'type' => 'Update sku',
 					'url' => $this->curl->url,
-					'data' => json_encode($skusFromWP[0], JSON_UNESCAPED_UNICODE),
+					'data' => json_encode($currentSKU, JSON_UNESCAPED_UNICODE),
 					'response' => json_encode($this->curl->response, JSON_UNESCAPED_UNICODE),
 					'responseCode' => $this->curl->httpStatusCode
 				];

@@ -51,6 +51,8 @@ class AnymarketOrder extends ExportService {
 	public function updateStatus( int $order_id, string $status ){
 		// INVOICED, PAID_WAITING_DELIVERY, CONCLUDED
 		$data;
+		$nfe;
+		$report = [];
 		$order_anymarket_id = carbon_get_post_meta($order_id, 'anymarket_id');
 
 		switch ($status){
@@ -59,10 +61,22 @@ class AnymarketOrder extends ExportService {
 				$data['invoice']['accessKey'] = carbon_get_post_meta($order_id, 'anymarket_nfe_access_key');
 				$data['invoice']['date'] = anymarket_format_date( carbon_get_post_meta($order_id, 'anymarket_nfe_datetime'));
 
+				$data['invoice']['series'] = carbon_get_post_meta($order_id, 'anymarket_nfe_series');
+				$data['invoice']['number'] = carbon_get_post_meta($order_id, 'anymarket_nfe_number');
+				$data['invoice']['cfop'] = carbon_get_post_meta($order_id, 'anymarket_nfe_cfop');
+				$data['invoice']['linkNfe'] = carbon_get_post_meta($order_id, 'anymarket_nfe_link');
+				$data['invoice']['invoiceLink'] = carbon_get_post_meta($order_id, 'anymarket_nfe_link_xml');
+				$data['invoice']['extraDescription'] = carbon_get_post_meta($order_id, 'anymarket_nfe_extra_description');
+
+				$nfe = carbon_get_post_meta($order_id, 'anymarket_nfe_xml');
+				$nfe = htmlentities(file_get_contents( $nfe ));
+
 			break;
 
 			case 'anymarket-shipped':
 				$data['status'] = 'PAID_WAITING_DELIVERY';
+				$data['tracking']['url'] = carbon_get_post_meta($order_id, 'anymarket_tracking_url');
+				$data['tracking']['number'] = carbon_get_post_meta($order_id, 'anymarket_tracking_number');
 				$data['tracking']['carrier'] = carbon_get_post_meta($order_id, 'anymarket_tracking_carrier');
 				$data['tracking']['carrierDocument'] = carbon_get_post_meta($order_id, 'anymarket_tracking_carrier_document');
 				$data['tracking']['estimateDate'] = anymarket_format_date( carbon_get_post_meta($order_id, 'anymarket_tracking_estimate'));
@@ -73,36 +87,52 @@ class AnymarketOrder extends ExportService {
 				$data['status'] = 'CONCLUDED';
 				$data['tracking']['deliveredDate'] = anymarket_format_date( carbon_get_post_meta($order_id, 'anymarket_tracking_delivered'));
 			break;
-
 		}
 
-		$this->logger->debug( $status, ['source' => 'woocommerce-anymarket']);
-		if( empty($data) ) return;
+		if( empty($data) ) return false;
 
-		$this->curl->put($this->baseUrl . 'orders/' . $order_anymarket_id, json_encode($data, JSON_UNESCAPED_UNICODE));
-		$report = [];
+		$this->multiCurl->beforeSend( function($instance){
+			if ($instance->type === 'Update NFe' ){
+				$instance->removeHeader('Content-Type');
+				$instance->setHeader('Content-Type', 'application/xml');
+			}
+		});
 
-		if($this->curl->error){
+		$this->multiCurl->error( function($instance) use (&$report, $order_id, $status) {
 			$report[] = [
 				'order' => $order_id,
-				'type' => 'Update order status',
+				'type' => $instance->type,
 				'status' => $status,
-				'url' => $this->curl->url,
-				'errorCode' => $this->curl->errorCode,
-				'errorMessage' => $this->curl->response->message,
-				'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
+				'url' => $instance->url,
+				'errorCode' => $instance->errorCode,
+				'errorMessage' => $instance->response->message,
+				'data' => $instance->data,
 			];
-		} else {
+		});
+
+		$this->multiCurl->success( function($instance) use (&$report, $order_id, $status) {
 			$report[] = [
 				'order' => $order_id,
-				'type' => 'Update order status',
+				'type' => $instance->type,
 				'status' => $status,
-				'url' => $this->curl->url,
-				'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
-				'response' => json_encode($this->curl->response, JSON_UNESCAPED_UNICODE),
-				'responseCode' => $this->curl->httpStatusCode
+				'url' => $instance->url,
+				'data' => $instance->data,
+				'response' => json_encode($instance->response, JSON_UNESCAPED_UNICODE),
+				'responseCode' => $instance->httpStatusCode
 			];
+		});
+
+		if ( !empty( $nfe ) ){
+			$instance = $this->multiCurl->addPut($this->baseUrl . 'orders/' . $order_anymarket_id . '/nfe', $nfe);
+			$instance->type = 'Update NFe';
+			$instance->data = $nfe;
 		}
+
+		$instance = $this->multiCurl->addPut($this->baseUrl . 'orders/' . $order_anymarket_id, json_encode($data, JSON_UNESCAPED_UNICODE));
+		$instance->type = 'Update order status';
+		$instance->data = json_encode($data, JSON_UNESCAPED_UNICODE);
+
+		$this->multiCurl->start();
 
 		if( get_option('anymarket_is_dev_env') == 'true' ){
 			$this->logger->debug( print_r($report, true), ['source' => 'woocommerce-anymarket']);
@@ -189,6 +219,11 @@ class AnymarketOrder extends ExportService {
 	 * @return void
 	 */
 	protected function assignToOrder(object $oldOrder, \WC_Order $newOrder, $updated = true ){
+
+		// first - carbon meta fields
+		carbon_set_post_meta($newOrder->get_id(), 'anymarket_order_marketplace', $oldOrder->marketPlace);
+		carbon_set_post_meta($newOrder->get_id(), 'is_anymarket_order', 'true');
+		carbon_set_post_meta($newOrder->get_id(), 'anymarket_id', $oldOrder->id);
 
 		if( false === $updated ){
 			$shippingFname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[0];
@@ -277,11 +312,6 @@ class AnymarketOrder extends ExportService {
 		update_post_meta($newOrder->get_id(), '_billing_neighborhood', $oldOrder->billingAddress->neighborhood);
 		update_post_meta($newOrder->get_id(), '_billing_number', $oldOrder->billingAddress->number);
 		update_post_meta($newOrder->get_id(), '_billing_cellphone', $oldOrder->buyer->phone);
-
-		//carbon meta fields
-		carbon_set_post_meta($newOrder->get_id(), 'anymarket_order_marketplace', $oldOrder->marketPlace);
-		carbon_set_post_meta($newOrder->get_id(), 'is_anymarket_order', 'true');
-		carbon_set_post_meta($newOrder->get_id(), 'anymarket_id', $oldOrder->id);
 
 		return $newOrder;
 	}

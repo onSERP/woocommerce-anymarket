@@ -113,12 +113,12 @@ class ExportProducts extends ExportService implements ExportInterface
 				'length' => $product->get_length(),
 				'characteristics' => $this->formatProductAttributes( $product ),
 				'brand' => $this->formatProductBrands( $product ),
-				'skus' => $this->formatProductVariations( $product ),
 				'definitionPriceScope' => carbon_get_post_meta($product->get_id(), 'anymarket_definition_price_scope')
 			];
 
 			// if product is not on anymarket
 			if( empty( carbon_get_post_meta($product->get_id(), 'anymarket_id') ) ){
+				$data['skus'] = $this->formatProductVariations( $product );
 				$data['origin']['id'] = 0;
 				if ( !empty( $this->formatProductImages( $product ) ) ) {
 					$data['images'] = $this->formatProductImages( $product );
