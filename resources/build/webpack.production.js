@@ -1,25 +1,27 @@
 /**
  * The external dependencies.
  */
-const { ProvidePlugin, WatchIgnorePlugin } = require('webpack');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const ImageminPlugin = require('imagemin-webpack-plugin').default;
-const ManifestPlugin = require('webpack-manifest-plugin');
+const { ProvidePlugin, WatchIgnorePlugin } = require('webpack')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const ImageminPlugin = require('imagemin-webpack-plugin').default
+const ManifestPlugin = require('webpack-manifest-plugin')
 
 /**
  * The internal dependencies.
  */
-const utils = require('./lib/utils');
-const configLoader = require('./config-loader');
-const spriteSmith = require('./spritesmith');
-const spriteSvg = require('./spritesvg');
-const postcss = require('./postcss');
+const utils = require('./lib/utils')
+const configLoader = require('./config-loader')
+const changelog = require('./changelog')
+const spriteSmith = require('./spritesmith')
+const spriteSvg = require('./spritesvg')
+const postcss = require('./postcss')
 
 /**
  * Setup the env.
  */
-const env = utils.detectEnv();
+const env = utils.detectEnv()
 
 /**
  * Setup babel loader.
@@ -28,14 +30,23 @@ const babelLoader = {
   loader: 'babel-loader',
   options: {
     cacheDirectory: false,
-    comments: false,
     presets: [
-      'env',
-      // airbnb not included as stage-2 already covers it
-      'stage-2',
+      [
+        '@babel/preset-env',
+        {
+          targets: '> 1%, last 2 versions',
+        },
+      ],
+    ],
+    plugins: [
+      '@babel/plugin-syntax-dynamic-import',
+      ['@babel/plugin-proposal-class-properties', { loose: true }],
+      '@babel/plugin-proposal-object-rest-spread',
+      '@babel/plugin-proposal-json-strings',
+      '@babel/plugin-syntax-import-meta',
     ],
   },
-};
+}
 
 /**
  * Setup webpack plugins.
@@ -54,6 +65,7 @@ const plugins = [
   }),
   spriteSmith,
   spriteSvg,
+  new VueLoaderPlugin(),
   new ImageminPlugin({
     optipng: {
       optimizationLevel: 7,
@@ -87,13 +99,15 @@ const plugins = [
     ],
   }),
   new ManifestPlugin(),
-];
+]
 
 // When doing a combined build, only clean up the first time.
 if (process.env.WPEMERGE_COMBINED_BUILD && env.isDebug) {
-  plugins.push(new CleanWebpackPlugin(utils.distPath(), {
-    root: utils.rootPath(),
-  }));
+  plugins.push(
+    new CleanWebpackPlugin(utils.distPath(), {
+      root: utils.rootPath(),
+    })
+  )
 }
 
 /**
@@ -108,7 +122,14 @@ module.exports = {
   /**
    * The output.
    */
-  output: require('./webpack/output'),
+  output: {
+    ...require('./webpack/output'),
+    ...(env.isProduction
+      ? {
+          publicPath: '/wp-content/plugins/woocommerce-anymarket-release/dist/',
+        }
+      : {}),
+  },
 
   /**
    * Resolve utilities.
@@ -130,7 +151,7 @@ module.exports = {
        */
       {
         enforce: 'pre',
-        test: /\.(js|jsx|css|scss|sass)$/,
+        test: /\.(js|jsx|css|scss|sass|vue)$/,
         use: 'import-glob',
       },
 
@@ -141,6 +162,22 @@ module.exports = {
         type: 'javascript/auto',
         test: utils.rootPath('config.json'),
         use: configLoader,
+      },
+
+      /**
+       * Handle changelog.
+       */
+      {
+        test: /\.md$/,
+        use: changelog,
+      },
+
+      /**
+       * Vue loader
+       * */
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader',
       },
 
       /**
@@ -189,8 +226,10 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: file => `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
+              name: (file) =>
+                `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
               outputPath: 'images',
+              esModule: false,
             },
           },
         ],
@@ -221,7 +260,8 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: file => `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
+              name: (file) =>
+                `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
               outputPath: 'fonts',
             },
           },
@@ -250,4 +290,4 @@ module.exports = {
   bail: false,
   watch: false,
   devtool: false,
-};
+}

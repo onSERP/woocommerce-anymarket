@@ -15,6 +15,7 @@ const get = require('lodash/get')
  */
 const utils = require('./lib/utils')
 const configLoader = require('./config-loader')
+const changelog = require('./changelog')
 const spriteSmith = require('./spritesmith')
 const spriteSvg = require('./spritesvg')
 const postcss = require('./postcss')
@@ -38,16 +39,24 @@ const devHotUrl = url.parse(
 const babelLoader = {
   loader: 'babel-loader',
   options: {
-    cacheDirectory: true,
-    comments: false,
+    cacheDirectory: false,
     presets: [
-      'env',
-      // airbnb not included as stage-2 already covers it
-      'stage-2',
+      [
+        '@babel/preset-env',
+        {
+          targets: '> 1%, last 2 versions',
+        },
+      ],
+    ],
+    plugins: [
+      '@babel/plugin-syntax-dynamic-import',
+      ['@babel/plugin-proposal-class-properties', { loose: true }],
+      '@babel/plugin-proposal-object-rest-spread',
+      '@babel/plugin-proposal-json-strings',
+      '@babel/plugin-syntax-import-meta',
     ],
   },
 }
-
 /**
  * Setup webpack plugins.
  */
@@ -114,7 +123,7 @@ module.exports = {
        */
       {
         enforce: 'pre',
-        test: /\.(js|jsx|css|scss|sass)$/,
+        test: /\.(js|jsx|css|scss|sass|vue)$/,
         use: 'import-glob',
       },
 
@@ -125,6 +134,14 @@ module.exports = {
         type: 'javascript/auto',
         test: utils.rootPath('config.json'),
         use: configLoader,
+      },
+
+      /**
+       * Handle changelog.
+       */
+      {
+        test: /\.md$/,
+        use: changelog,
       },
 
       /**
@@ -178,6 +195,7 @@ module.exports = {
               name: (file) =>
                 `[name].${utils.filehash(file).substr(0, 10)}.[ext]`,
               outputPath: 'images',
+              esModule: false,
             },
           },
         ],
@@ -250,9 +268,11 @@ module.exports = {
 
     // Reload on view file changes.
     before: (app, server) => {
-      chokidar.watch(['./views/**/*.php', './*.php']).on('all', () => {
-        server.sockWrite(server.sockets, 'content-changed')
-      })
+      chokidar
+        .watch(['./views/**/*.php', './app/**/*.php', './*.php'])
+        .on('all', () => {
+          server.sockWrite(server.sockets, 'content-changed')
+        })
     },
   },
 }

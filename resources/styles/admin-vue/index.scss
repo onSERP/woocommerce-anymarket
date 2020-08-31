@@ -1,0 +1,255 @@
+/* Register global styles for vue app */
+
+/* stylelint-disable */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* stylelint-enaable */
+
+.container {
+  @apply bg-gray-100 py-4 rounded-lg shadow-md;
+}
+
+#anymarket__app {
+  @apply font-sans text-black;
+
+  @media (max-width: 1280px) {
+    .container {
+      @apply bg-transparent w-full border-0 shadow-none;
+      max-width: 100% !important;
+    }
+  }
+}
+
+.title {
+  @apply text-2xl font-bold text-black;
+}
+
+.btn {
+  @apply inline-block bg-custom-blue px-3 py-4 text-white border-0 rounded-md;
+
+  &:hover {
+    @apply text-white;
+  }
+}
+
+.btn-base {
+  @apply text-base;
+}
+
+.btn-small {
+  @apply text-xs px-2 py-2 rounded;
+}
+
+.form-group {
+  @apply flex flex-wrap mb-6 text-base items-center;
+
+  label {
+    @apply inline-block w-56 text-right pr-8;
+
+    @media (max-width: 1130px) {
+      @apply w-4/12 text-left  mb-2;
+    }
+
+    @media (max-width: 611px) {
+      @apply w-full;
+    }
+  }
+
+  .input {
+    width: 590px;
+
+    @media (max-width: 611px) {
+      @apply w-full;
+    }
+  }
+
+  button[type='submit'] {
+    margin-left: 460px;
+    @media (max-width: 611px) {
+      @apply ml-auto;
+    }
+  }
+}
+
+input[type='text'] {
+  @apply w-full py-1 bg-white border border-gray-100 rounded-md shadow;
+
+  &:read-only {
+    @apply bg-gray-300 border-gray-300;
+  }
+}
+
+.help-text {
+  @apply text-xs text-gray-700 mt-1;
+
+  a {
+    @apply cursor-pointer text-blue-400;
+  }
+}
+
+.input-copy {
+  @apply relative;
+
+  .btn {
+    @apply absolute py-2 right-0 mr-4 mt-1;
+  }
+}
+
+.menu {
+  @apply text-lg font-bold;
+
+  li {
+    a {
+      @apply block px-4 py-2;
+
+      &:hover,
+      &.router-link-exact-active {
+        @apply text-white bg-custom-blue;
+      }
+    }
+  }
+}
+
+.select-menu {
+  @apply .relative;
+
+  .btn {
+    @apply block;
+  }
+  ul {
+    @apply hidden .absolute;
+  }
+
+  li {
+    @apply bg-white border-b m-0 block;
+
+    a {
+      @apply .cursor-pointer py-4 px-2 block .relative;
+
+      &:hover {
+        @apply bg-gray-100;
+      }
+    }
+  }
+
+  &:hover {
+    ul {
+      @apply block;
+    }
+  }
+}
+
+/* ================= Tooltip styles ================ */
+
+.toplevel_page_anymarket {
+  .tooltip {
+    display: block !important;
+    z-index: 10000;
+
+    .tooltip-inner {
+      background: black;
+      color: white;
+      border-radius: 16px;
+      padding: 5px 10px 4px;
+    }
+
+    .tooltip-arrow {
+      width: 0;
+      height: 0;
+      border-style: solid;
+      position: absolute;
+      margin: 5px;
+      border-color: black;
+      z-index: 1;
+    }
+
+    &[x-placement^='top'] {
+      margin-bottom: 5px;
+
+      .tooltip-arrow {
+        border-width: 5px 5px 0 5px;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom-color: transparent !important;
+        bottom: -5px;
+        left: calc(50% - 5px);
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+    }
+
+    &[x-placement^='bottom'] {
+      margin-top: 5px;
+
+      .tooltip-arrow {
+        border-width: 0 5px 5px 5px;
+        border-left-color: transparent !important;
+        border-right-color: transparent !important;
+        border-top-color: transparent !important;
+        top: -5px;
+        left: calc(50% - 5px);
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+    }
+
+    &[x-placement^='right'] {
+      margin-left: 5px;
+
+      .tooltip-arrow {
+        border-width: 5px 5px 5px 0;
+        border-left-color: transparent !important;
+        border-top-color: transparent !important;
+        border-bottom-color: transparent !important;
+        left: -5px;
+        top: calc(50% - 5px);
+        margin-left: 0;
+        margin-right: 0;
+      }
+    }
+
+    &[x-placement^='left'] {
+      margin-right: 5px;
+
+      .tooltip-arrow {
+        border-width: 5px 0 5px 5px;
+        border-top-color: transparent !important;
+        border-right-color: transparent !important;
+        border-bottom-color: transparent !important;
+        right: -5px;
+        top: calc(50% - 5px);
+        margin-left: 0;
+        margin-right: 0;
+      }
+    }
+
+    &.popover {
+      $color: #f9f9f9;
+
+      .popover-inner {
+        background: $color;
+        color: black;
+        padding: 24px;
+        border-radius: 5px;
+        box-shadow: 0 5px 30px rgba(black, 0.1);
+      }
+
+      .popover-arrow {
+        border-color: $color;
+      }
+    }
+
+    &[aria-hidden='true'] {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.15s, visibility 0.15s;
+    }
+
+    &[aria-hidden='false'] {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.15s;
+    }
+  }
+}

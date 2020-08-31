@@ -9,6 +9,7 @@ use WPEmerge\ServiceProviders\ServiceProviderInterface;
  */
 class PluginServiceProvider implements ServiceProviderInterface
 {
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -24,6 +25,9 @@ class PluginServiceProvider implements ServiceProviderInterface
 		register_deactivation_hook( ANYMARKET_PLUGIN_FILE, [$this, 'deactivate'] );
 
 		add_action( 'plugins_loaded', [$this, 'loadTextdomain'] );
+
+		add_action( 'init', [$this, 'setSettings'] );
+		add_action( 'rest_api_init' , [$this, 'initRestRouter']);
 	}
 
 	/**
@@ -51,5 +55,23 @@ class PluginServiceProvider implements ServiceProviderInterface
 	 */
 	public function loadTextdomain() {
 		load_plugin_textdomain( 'anymarket', false, basename( dirname( ANYMARKET_PLUGIN_FILE ) ) . DIRECTORY_SEPARATOR . 'languages' );
+	}
+
+	/**
+	 * Set plugin options
+	 *
+	 * @return void
+	 */
+	public function setSettings(){
+		$pre = 'anymarket_';
+
+		add_option( $pre . 'token', '');
+		add_option( $pre . 'oi', '');
+		add_option( $pre . 'is_dev_env', false);
+		add_option( $pre . 'callback_url', rest_url('anymarket/v1/notifications'));
+	}
+
+	public function initRestRouter(){
+		require_once dirname( ANYMARKET_PLUGIN_FILE ) . '/app/routes/rest.php';
 	}
 }

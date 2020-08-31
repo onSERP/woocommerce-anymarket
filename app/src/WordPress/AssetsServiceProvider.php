@@ -32,21 +32,81 @@ class AssetsServiceProvider implements ServiceProviderInterface
 	public function enqueueAdminAssets() {
 		// Enqueue scripts.
 		\Anymarket::core()->assets()->enqueueScript(
-			'theme-admin-js-bundle',
+			'anymarket-admin-js-bundle',
 			\Anymarket::core()->assets()->getBundleUrl( 'admin', '.js' ),
 			[ 'jquery' ],
 			true
 		);
+
+		wp_localize_script('anymarket-admin-js-bundle', 'anymarketAjax', array(
+			'url' => admin_url('admin-ajax.php'),
+			'nonce' => wp_create_nonce('anymarket-ajax-nonce')
+		));
+
+		$isDev = get_option( 'anymarket_is_dev_env' );
+		$anymarketToken = get_option( 'anymarket_token' );
+
+		$script = "var anymarket = { sandbox: ${isDev}, token: '${anymarketToken}' }";
+
+		wp_register_script( 'anymarket-sandbox-check', '' );
+		wp_enqueue_script( 'anymarket-sandbox-check' );
+		wp_add_inline_script( 'anymarket-sandbox-check', $script );
 
 		// Enqueue styles.
 		$style = \Anymarket::core()->assets()->getBundleUrl( 'admin', '.css' );
 
 		if ( $style ) {
 			\Anymarket::core()->assets()->enqueueStyle(
-				'theme-admin-css-bundle',
+				'anymarket-admin-css-bundle',
 				$style
 			);
 		}
+
+		$currentScreen = get_current_screen();
+		if( $currentScreen->post_type === 'shop_order' && $currentScreen->base === 'post' ){
+			\Anymarket::core()->assets()->enqueueScript(
+				'anymarket-admin-order-js-bundle',
+				\Anymarket::core()->assets()->getBundleUrl( 'order-vue', '.js' ),
+				[ 'jquery' ],
+				true
+			);
+
+			$styleOrder = \Anymarket::core()->assets()->getBundleUrl( 'order-vue', '.css' );
+
+			if ( $styleOrder ) {
+				\Anymarket::core()->assets()->enqueueStyle(
+					'anymarket-admin-order-css-bundle',
+					$styleOrder
+				);
+			}
+		}
+	}
+
+	/**
+	 * Enqueue admin vue assets.
+	 * Will call this only on menu page callback
+	 *
+	 * @return void
+	 */
+	public static function enqueueAdminVueAssets() {
+
+			// Enqueue scripts.
+			\Anymarket::core()->assets()->enqueueScript(
+				'anymarket-vue-admin-js-bundle',
+				\Anymarket::core()->assets()->getBundleUrl( 'admin-vue', '.js' ),
+				[ 'jquery' ],
+				true
+			);
+
+			// Enqueue styles.
+			$style = \Anymarket::core()->assets()->getBundleUrl( 'admin-vue', '.css' );
+
+			if ( $style ) {
+				\Anymarket::core()->assets()->enqueueStyle(
+					'anymarket-vue-admin-css-bundle',
+					$style
+				);
+			}
 	}
 
 	/**

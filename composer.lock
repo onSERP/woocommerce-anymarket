@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "875be42dba5a89d95364e5e3ccf65781",
+    "content-hash": "e7d276c4343123bc8e47051375868289",
     "packages": [
         {
             "name": "composer/installers",
@@ -215,6 +215,139 @@
             "time": "2019-07-01T23:21:34+00:00"
         },
         {
+            "name": "htmlburger/carbon-fields",
+            "version": "v3.1.20",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/htmlburger/carbon-fields.git",
+                "reference": "0688b493efcf97aab9f540d399813e1392fe30cd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/htmlburger/carbon-fields/zipball/0688b493efcf97aab9f540d399813e1392fe30cd",
+                "reference": "0688b493efcf97aab9f540d399813e1392fe30cd",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3"
+            },
+            "require-dev": {
+                "mockery/mockery": "^0.9.7",
+                "phpunit/phpunit": "~4.8"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Carbon_Fields\\": "core/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "htmlBurger",
+                    "email": "wordpress@htmlburger.com",
+                    "homepage": "https://htmlburger.com/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Miroslav Mitev",
+                    "email": "mmitev.2create@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Atanas Angelov",
+                    "email": "atanas.angelov.dev@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Georgi Stoyanov",
+                    "email": "stoyanov.gs@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Plamen Kostadinov",
+                    "email": "pkostadinov.2create@gmail.com",
+                    "homepage": "http://plasmen.info/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Stanimir Panchev",
+                    "email": "Stan4omir@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Marin Atanasov",
+                    "email": "contact@marinatanasov.com",
+                    "homepage": "http://marinatanasov.com/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Siyan Panayotov",
+                    "homepage": "http://siyanpanayotov.com/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Peter Petrov",
+                    "email": "peter.petrov89@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Stanimir Stoyanov",
+                    "email": "stanimir.k.stoyanov@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Kaloyan Ivanov",
+                    "email": "kaloyanxivanov@gmail.com",
+                    "homepage": "http://vilepixels.com/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Georgi Popov",
+                    "homepage": "http://magadanski.com/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "German Velchev",
+                    "email": "germozy@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Rashko Petrov",
+                    "email": "brutalenemy666@gmail.com",
+                    "homepage": "http://errorfactory.com/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Alexander Panayotov",
+                    "email": "alexander.panayotov@gmail.com",
+                    "homepage": "http://alexanderpanayotov.com/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Viktor Vasilev",
+                    "email": "liberalcho@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Georgi Georgiev",
+                    "email": "george.georgiev96@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Atanas Vasilev",
+                    "email": "atanasvasilev91@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "WordPress developer-friendly custom fields for post types, taxonomy terms, users, comments, widgets, options and more.",
+            "homepage": "http://carbonfields.net/",
+            "time": "2020-05-18T09:54:56+00:00"
+        },
+        {
             "name": "htmlburger/wpemerge",
             "version": "0.16.0",
             "source": {
@@ -329,6 +462,73 @@
             "description": "Core tools for the WP Emerge starter theme and plugin.",
             "homepage": "https://wpemerge.com/",
             "time": "2020-06-04T22:02:40+00:00"
+        },
+        {
+            "name": "php-curl-class/php-curl-class",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-curl-class/php-curl-class.git",
+                "reference": "e5831f35e1f81a0aa94d66f01c65fbc92be6d691"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-curl-class/php-curl-class/zipball/e5831f35e1f81a0aa94d66f01c65fbc92be6d691",
+                "reference": "e5831f35e1f81a0aa94d66f01c65fbc92be6d691",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": ">=5.3"
+            },
+            "require-dev": {
+                "ext-gd": "*",
+                "phpunit/phpunit": "*",
+                "squizlabs/php_codesniffer": "*"
+            },
+            "suggest": {
+                "ext-mbstring": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Curl\\": "src/Curl/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Unlicense"
+            ],
+            "authors": [
+                {
+                    "name": "Zach Borboa"
+                }
+            ],
+            "description": "PHP Curl Class makes it easy to send HTTP requests and integrate with web APIs.",
+            "homepage": "https://github.com/php-curl-class/php-curl-class",
+            "keywords": [
+                "API-Client",
+                "api",
+                "class",
+                "client",
+                "curl",
+                "framework",
+                "http",
+                "http-client",
+                "http-proxy",
+                "json",
+                "php",
+                "php-curl",
+                "php-curl-library",
+                "proxy",
+                "requests",
+                "restful",
+                "web-scraper",
+                "web-scraping ",
+                "web-service",
+                "xml"
+            ],
+            "time": "2020-05-23T03:51:01+00:00"
         },
         {
             "name": "pimple/pimple",
@@ -1376,7 +1576,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "php-curl-class/php-curl-class": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
