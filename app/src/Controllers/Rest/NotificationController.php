@@ -24,6 +24,18 @@ class NotificationController
 			return new \WP_Error( 'unauthorized', 'Wrong oi value', ['status' => 401] );
 		}
 
+		if( get_transient( 'order_' . $request['content']['id'] ) === 'success' ) {
+			$logger->debug( 'Notification 508', ['source' => 'woocommerce-anymarket' ] );
+			return new \WP_Error( 'loop', 'Order already imported', ['status' => 508] );
+		}
+
+		if( get_transient( 'order_' . $request['content']['id'] ) === 'in_progress' ) {
+			$logger->debug( 'Notification 508', ['source' => 'woocommerce-anymarket' ] );
+			return new \WP_Error( 'loop', 'Order still being processed', ['status' => 508] );
+		}
+
+		set_transient( 'order_' . $request['content']['id'] , 'in_progress', 30 );
+
 		$order = new AnymarketOrder;
 		$orderResponse = $order->make( $request['content']['id'] );
 
@@ -33,6 +45,9 @@ class NotificationController
 
 		$response = new \WP_REST_Response( '' );
 		$response->set_status( 201 );
+
+		set_transient( 'order_' . $request['content']['id'] , 'success', 30 );
+
 		return rest_ensure_response( $response );
 
 	}
