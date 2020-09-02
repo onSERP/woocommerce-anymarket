@@ -112,9 +112,13 @@ class ExportProducts extends ExportService implements ExportInterface
 				'weight' => $product->get_weight(),
 				'length' => $product->get_length(),
 				'characteristics' => $this->formatProductAttributes( $product ),
-				'brand' => $this->formatProductBrands( $product ),
 				'definitionPriceScope' => carbon_get_post_meta($product->get_id(), 'anymarket_definition_price_scope')
 			];
+
+			//only send brands if defined on config file
+			if( defined('ANYMARKET_BRAND_CPT') ){
+				$data['brand'] = $this->formatProductBrands( $product );
+			}
 
 			// if product is not on anymarket
 			if( empty( carbon_get_post_meta($product->get_id(), 'anymarket_id') ) ){
