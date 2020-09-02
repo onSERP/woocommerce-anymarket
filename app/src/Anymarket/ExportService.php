@@ -206,7 +206,7 @@ class ExportService
 				$attr_array = [];
 
 				foreach ( $product_variation['attributes'] as $key => $attr ){
-					$newKey = str_replace( '-', ' ', str_replace('attribute_', '', $key ) );
+					$newKey = str_replace( '-', ' ', str_replace('attribute_', '', str_replace('pa_', '', $key) ) );
 
 					$attr_array = [ $newKey => $attr ] + $attr_array;
 				}
