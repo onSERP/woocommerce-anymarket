@@ -26,6 +26,9 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function bootstrap( $container ) {
 		add_action( 'admin_menu', [$this, 'registerAdminPages'] );
 
+		//add custom cron inteval
+		add_filter( 'cron_schedules', [$this, 'cronInterval'] );
+
 		// order statuses
 		add_action( 'init', [$this, 'registerPostStatus'] );
 		add_filter( 'wc_order_statuses', [$this, 'addStatusToWoocommerce']);
@@ -105,6 +108,20 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		// enqueue vue assets only to this page
 		AssetsServiceProvider::enqueueAdminVueAssets();
+	}
+
+	/**
+	 * adds custom interval to wp cron
+	 *
+	 * @return array $schedules
+	 */
+	public function cronInterval( $schedules ){
+		$schedules['five_minutes'] = [
+			'interval' => MINUTE_IN_SECONDS * 5,
+			'display'  => esc_html__( 'Every Five Minutes' ),
+		];
+
+    	return $schedules;
 	}
 
 	/**
@@ -570,8 +587,20 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		$is_on_anymarket = carbon_get_term_meta($this->currentEditingTerm, 'anymarket_id');
 
 		if( !empty($is_on_anymarket) ) {
-			$exportCategories = new ExportCategories();
-			$exportCategories->export( [$this->currentEditingTerm] );
+
+			function exportCat(){
+				$exportCategories = new ExportCategories();
+				$exportCategories->export( [$this->currentEditingTerm] );
+
+				$timestamp = wp_next_scheduled( 'anymarket_cron_export_categories_on_save' );
+				wp_unschedule_event( $timestamp, 'anymarket_cron_export_categories_on_save' );
+			}
+
+			add_action( 'anymarket_cron_export_categories_on_save', 'exportCat' );
+
+			if ( ! wp_next_scheduled( 'anymarket_cron_export_categories_on_save' ) ) {
+				wp_schedule_event( time(), 'five_minutes', 'anymarket_cron_export_categories_on_save' );
+			}
 		}
 
 		add_action('carbon_fields_term_meta_container_saved', [$this, 'saveProductCategoriesTermsMeta'] );
@@ -621,13 +650,25 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		$should_export = carbon_get_post_meta( $post_id, 'anymarket_should_export' );
 
 		if( 'true' === $should_export ) {
-			$exportProducts = new ExportProducts();
-			$response = $exportProducts->export( [$post_id] );
 
-			if( is_wp_error($response) ){
-				set_transient( 'anymarket_product_export_fail', $response->get_error_message(), 3 );
-			} else{
-				set_transient( 'anymarket_product_export_result', $response, 3 );
+			function exportProd(){
+				$exportProducts = new ExportProducts();
+				$response = $exportProducts->export( [$post_id] );
+
+				if( is_wp_error($response) ){
+					set_transient( 'anymarket_product_export_fail', $response->get_error_message(), MINUTE_IN_SECONDS * 6 );
+				} else{
+					set_transient( 'anymarket_product_export_result', $response, MINUTE_IN_SECONDS * 6 );
+				}
+
+				$timestamp = wp_next_scheduled( 'anymarket_cron_export_products_on_save' );
+				wp_unschedule_event( $timestamp, 'anymarket_cron_export_products_on_save' );
+			}
+
+			add_action( 'anymarket_cron_export_products_on_save', 'exportCat' );
+
+			if ( ! wp_next_scheduled( 'anymarket_cron_export_products_on_save' ) ) {
+				wp_schedule_event( time(), 'five_minutes', 'anymarket_cron_export_products_on_save' );
 			}
 
 		} else {
