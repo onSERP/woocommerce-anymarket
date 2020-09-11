@@ -118,7 +118,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function cronInterval( $schedules ){
 		$schedules['five_minutes'] = [
 			'interval' => MINUTE_IN_SECONDS * 5,
-			'display'  => esc_html__( 'Every Five Minutes' ),
+			'display'  => esc_html__( 'Every Five Minutes', 'anymarket' ),
 		];
 
     	return $schedules;
@@ -138,7 +138,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			'exclude_from_search' => false,
 			'show_in_admin_all_list' => true,
 			'show_in_admin_status_list' => true,
-			'label_count' => _n_noop( 'Faturado <span class="count">(%s)</span>', 'Faturado <span class="count">(%s)</span>' )
+			'label_count' => _n_noop( 'Faturado <span class="count">(%s)</span>', 'Faturado <span class="count">(%s)</span>', 'anymarket' )
 		]);
 
 		//SHIPPED
@@ -148,7 +148,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			'exclude_from_search' => false,
 			'show_in_admin_all_list' => true,
 			'show_in_admin_status_list' => true,
-			'label_count' => _n_noop( 'Enviado <span class="count">(%s)</span>', 'Enviado <span class="count">(%s)</span>' )
+			'label_count' => _n_noop( 'Enviado <span class="count">(%s)</span>', 'Enviado <span class="count">(%s)</span>', 'anymarket' )
 		]);
 
 	}
