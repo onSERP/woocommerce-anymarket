@@ -18,6 +18,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function register( $container ) {
 		// Nothing to register.
+		$this->cron = new CronEvents();
 	}
 
 	/**
@@ -312,27 +313,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function handleBulkExportProducts( $redirect, $doaction, $object_ids ){
 
 		if( 'anymarket_bulk_export_products' === $doaction ){
-
-			function exportProd(){
-				$exportProducts = new ExportProducts;
-				$response = $exportProducts->export( $object_ids );
-
-				if( is_wp_error($response) ){
-					set_transient( 'anymarket_export_product_fail', $response->get_error_message(), MINUTE_IN_SECONDS );
-				} else{
-					set_transient( 'anymarket_product_export_result', $response, MINUTE_IN_SECONDS );
-				}
-
-				$timestamp = wp_next_scheduled( 'anymarket_cron_bulk_export_products' );
-				wp_unschedule_event( $timestamp, 'anymarket_cron_bulk_export_products' );
-			}
-
-			add_action( 'anymarket_cron_bulk_export_products', 'exportProd' );
-
-			if ( ! wp_next_scheduled( 'anymarket_cron_bulk_export_products' ) ) {
-				wp_schedule_event( time(), 'five_minutes', 'anymarket_cron_bulk_export_products' );
-			}
-
+			$this->cron->setCronExportProd( MINUTE_IN_SECONDS * 5, [$object_ids] );
 		}
 
 		return $redirect;
@@ -624,76 +605,29 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		if ( 'product' === get_post_type( $post_id ) ) {
 
-			// kinda hacky, tho ಠ_ಠ
-			add_action( 'updated_postmeta', [$this, 'saveProductPostMeta'], 10, 4);
+			$should_export = carbon_get_post_meta( $post_id, 'anymarket_should_export' );
 
-		}
+			if( 'true' === $should_export ) {
 
-	}
+				remove_action( 'save_post',  [$this, 'saveProduct'] );
+				$this->cron->setCronExportProd( MINUTE_IN_SECONDS * 5, [$post_id] );
+				add_action( 'save_post', [$this, 'saveProduct'] );
 
-	/**
-	 * Undocumented function
-	 *
-	 * @param int $meta_id
-	 * @param int $post_id
-	 * @param int $meta_key
-	 * @param string $meta_value
-	 * @return void
-	 */
-	public function saveProductPostMeta($meta_id, $post_id, $meta_key, $meta_value){
-		//avoid loop
-		remove_action( 'save_post',  [$this, 'saveProduct'] );
-		remove_action( 'updated_postmeta', [$this, 'saveProductPostMeta'] );
+			} else {
+					carbon_set_post_meta( $post_id, 'anymarket_id', '' );
 
-		$response;
-		$should_export = carbon_get_post_meta( $post_id, 'anymarket_should_export' );
+					$product = wc_get_product( $post_id );
+					if ($product instanceof \WC_Product_Variable || $product->get_type() === 'variable'){
 
-		if( 'true' === $should_export ) {
+						$children = $product->get_children();
+						foreach ($children as $child) {
+							update_post_meta( $child, 'anymarket_variation_id', '' );
+						}
+					}
 
-			function exportProd(){
-				$exportProducts = new ExportProducts();
-				$response = $exportProducts->export( [$post_id] );
-
-				if( is_wp_error($response) ){
-					set_transient( 'anymarket_product_export_fail', $response->get_error_message(), MINUTE_IN_SECONDS );
-				} else{
-					set_transient( 'anymarket_product_export_result', $response, MINUTE_IN_SECONDS );
-				}
-
-				$timestamp = wp_next_scheduled( 'anymarket_cron_export_products_on_save' );
-				wp_unschedule_event( $timestamp, 'anymarket_cron_export_products_on_save' );
+				return;
 			}
-
-			add_action( 'anymarket_cron_export_products_on_save', 'exportProd' );
-
-			if ( ! wp_next_scheduled( 'anymarket_cron_export_products_on_save' ) ) {
-				wp_schedule_event( time(), 'five_minutes', 'anymarket_cron_export_products_on_save' );
-			}
-
-		} else {
-			carbon_set_post_meta( $post_id, 'anymarket_id', '' );
-
-			$product = wc_get_product( $post_id );
-			if ($product instanceof \WC_Product_Variable || $product->get_type() === 'variable'){
-
-				$children = $product->get_children();
-				foreach ($children as $child) {
-					update_post_meta( $child, 'anymarket_variation_id', '' );
-				}
-			}
-
-			return;
 		}
-
-		if( is_wp_error($response) ){
-			set_transient( 'anymarket_product_export_fail', $response->get_error_message(), 3 );
-		} else{
-			set_transient( 'anymarket_product_export_result', $response, 3 );
-		}
-
-		//avoid loop
-		add_action( 'updated_postmeta', [$this, 'saveProductPostMeta'] );
-		add_action( 'save_post', [$this, 'saveProduct'] );
 	}
 
 	/**
