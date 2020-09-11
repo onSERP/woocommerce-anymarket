@@ -313,13 +313,24 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		if( 'anymarket_bulk_export_products' === $doaction ){
 
-			$exportProducts = new ExportProducts;
-			$response = $exportProducts->export( $object_ids );
+			function exportProd(){
+				$exportProducts = new ExportProducts;
+				$response = $exportProducts->export( $object_ids );
 
-			if( is_wp_error($response) ){
-				set_transient( 'anymarket_export_product_fail', $response->get_error_message(), 3 );
-			} else{
-				set_transient( 'anymarket_product_export_result', $response, 3 );
+				if( is_wp_error($response) ){
+					set_transient( 'anymarket_export_product_fail', $response->get_error_message(), MINUTE_IN_SECONDS );
+				} else{
+					set_transient( 'anymarket_product_export_result', $response, MINUTE_IN_SECONDS );
+				}
+
+				$timestamp = wp_next_scheduled( 'anymarket_cron_bulk_export_products' );
+				wp_unschedule_event( $timestamp, 'anymarket_cron_bulk_export_products' );
+			}
+
+			add_action( 'anymarket_cron_bulk_export_products', 'exportProd' );
+
+			if ( ! wp_next_scheduled( 'anymarket_cron_bulk_export_products' ) ) {
+				wp_schedule_event( time(), 'five_minutes', 'anymarket_cron_bulk_export_products' );
 			}
 
 		}
@@ -587,20 +598,8 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		$is_on_anymarket = carbon_get_term_meta($this->currentEditingTerm, 'anymarket_id');
 
 		if( !empty($is_on_anymarket) ) {
-
-			function exportCat(){
-				$exportCategories = new ExportCategories();
-				$exportCategories->export( [$this->currentEditingTerm] );
-
-				$timestamp = wp_next_scheduled( 'anymarket_cron_export_categories_on_save' );
-				wp_unschedule_event( $timestamp, 'anymarket_cron_export_categories_on_save' );
-			}
-
-			add_action( 'anymarket_cron_export_categories_on_save', 'exportCat' );
-
-			if ( ! wp_next_scheduled( 'anymarket_cron_export_categories_on_save' ) ) {
-				wp_schedule_event( time(), 'five_minutes', 'anymarket_cron_export_categories_on_save' );
-			}
+			$exportCategories = new ExportCategories();
+			$exportCategories->export( [$this->currentEditingTerm] );
 		}
 
 		add_action('carbon_fields_term_meta_container_saved', [$this, 'saveProductCategoriesTermsMeta'] );
@@ -656,16 +655,16 @@ class AdminServiceProvider implements ServiceProviderInterface {
 				$response = $exportProducts->export( [$post_id] );
 
 				if( is_wp_error($response) ){
-					set_transient( 'anymarket_product_export_fail', $response->get_error_message(), MINUTE_IN_SECONDS * 6 );
+					set_transient( 'anymarket_product_export_fail', $response->get_error_message(), MINUTE_IN_SECONDS );
 				} else{
-					set_transient( 'anymarket_product_export_result', $response, MINUTE_IN_SECONDS * 6 );
+					set_transient( 'anymarket_product_export_result', $response, MINUTE_IN_SECONDS );
 				}
 
 				$timestamp = wp_next_scheduled( 'anymarket_cron_export_products_on_save' );
 				wp_unschedule_event( $timestamp, 'anymarket_cron_export_products_on_save' );
 			}
 
-			add_action( 'anymarket_cron_export_products_on_save', 'exportCat' );
+			add_action( 'anymarket_cron_export_products_on_save', 'exportProd' );
 
 			if ( ! wp_next_scheduled( 'anymarket_cron_export_products_on_save' ) ) {
 				wp_schedule_event( time(), 'five_minutes', 'anymarket_cron_export_products_on_save' );
