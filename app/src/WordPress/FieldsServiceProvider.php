@@ -133,7 +133,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 				Field::make( 'hidden', 'anymarket_id'),
 				Field::make( 'hidden', 'is_anymarket_order'),
 
-				Field::make( 'separator', 'faturado', __( 'Status: Faturado' ) ),
+				Field::make( 'separator', 'faturado', __( 'Status: Faturado', 'anymarket' ) ),
 				Field::make( 'text', 'anymarket_nfe_access_key', __('Chave de acesso da NF', 'anymarket')),
 				Field::make( 'text', 'anymarket_nfe_series', __('Número de série', 'anymarket'))
 					->set_attribute('type', 'number')
@@ -156,7 +156,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 								'application/atom+xml'
 					] ),
 
-				Field::make( 'separator', 'enviado', __( 'Status: Enviado' ) ),
+				Field::make( 'separator', 'enviado', __( 'Status: Enviado', 'anymarket' ) ),
 				Field::make( 'text', 'anymarket_tracking_url', __('URL de rastreamento', 'anymarket')),
 				Field::make( 'text', 'anymarket_tracking_number', __('Código de rastreamento', 'anymarket')),
 				Field::make( 'text', 'anymarket_tracking_carrier', __('Transportadora', 'anymarket')),
@@ -202,7 +202,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	 * @return void
 	 */
 	public function productBrandsMeta(){
-		Container::make( 'term_meta', __( 'Anymarket' ) )
+		Container::make( 'term_meta', __( 'Anymarket', 'anymarket' ) )
 			->where( 'term_taxonomy', '=', ANYMARKET_BRAND_CPT )
 			->add_fields( [
 				Field::make( 'hidden', 'anymarket_id'),
