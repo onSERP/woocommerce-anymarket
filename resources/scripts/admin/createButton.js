@@ -6,7 +6,7 @@
  */
 function createButton(page) {
   const protocol = anymarket.sandbox ? 'http://' : 'https://'
-  const subdomain = anymarket.sandbox ? 'sandbox' : 'api'
+  const subdomain = anymarket.sandbox ? 'sandbox' : 'app'
   const link = `${protocol}${subdomain}.anymarket.com.br/#/${page}`
 
   const a = document.createElement('a')
