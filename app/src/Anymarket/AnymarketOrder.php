@@ -254,7 +254,7 @@ class AnymarketOrder extends ExportService {
 
 			$newOrder->set_created_via( $oldOrder->marketPlace );
 			$newOrder->set_payment_method_title( $oldOrder->payments[0]->paymentMethodNormalized );
-			$newOrder->set_currency('BRL');
+			$newOrder->set_currency( get_option( 'woocommerce_currency' ) );
 
 			//add products
 			foreach ($oldOrder->items as $orderItem ){

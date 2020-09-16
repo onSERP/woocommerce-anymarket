@@ -5,7 +5,7 @@ namespace Anymarket\Anymarket;
 /**
  * Export products
  */
-class ExportProducts extends ExportService implements ExportInterface
+class ExportProducts extends ExportService
 {
 	/**
 	 * Recieves list of product ids and export them to anymarket.

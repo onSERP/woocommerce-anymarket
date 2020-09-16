@@ -17,7 +17,6 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 * {@inheritDoc}
 	 */
 	public function register( $container ) {
-		// Nothing to register.
 		$this->cron = new CronEvents();
 	}
 
@@ -697,8 +696,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function updateStatus( $order_id, $old_status, $new_status ){
 
-		$order = new AnymarketOrder;
-		$order->updateStatus( $order_id, $new_status );
+		$this->cron->setCronExportOrder( MINUTE_IN_SECONDS * 5, [$order_id, $new_status] );
 
 	}
 
