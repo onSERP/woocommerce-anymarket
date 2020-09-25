@@ -2,6 +2,8 @@
 import config from '@config'
 import '@styles/admin'
 
+import domReady from '@wordpress/dom-ready'
+
 import buttonOnPage from './createButton'
 
 // button on product categories
@@ -19,7 +21,7 @@ buttonOnPage({
 })
 
 // wait for wp domready event to get field id
-wp.domReady(function () {
+domReady(function () {
   const id = document.querySelector('input[name*="_anymarket_id"]').value
 
   if (id !== '') {
@@ -39,7 +41,7 @@ wp.domReady(function () {
 })
 
 //block everything on anymarket order
-wp.domReady(function () {
+domReady(function () {
   if (
     pagenow === 'shop_order' &&
     adminpage === 'post-php' &&
@@ -70,7 +72,7 @@ wp.domReady(function () {
 })
 
 //delete category button
-wp.domReady(function () {
+domReady(function () {
   const id = document.querySelector('input[name*="_anymarket_id"]').value
   const button = document.querySelector('#button-delete-category')
 
