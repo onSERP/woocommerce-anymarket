@@ -2,10 +2,10 @@
 # This file is distributed under the UNLICENSED.
 msgid ""
 msgstr ""
-"Project-Id-Version: Woocommerce Anymarket 1.0.0-alpha\n"
+"Project-Id-Version: Woocommerce Anymarket 1.0.0-alpha.5\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/anymarket-woocommerce\n"
-"POT-Creation-Date: 2020-09-11 20:00:59+00:00\n"
+"POT-Creation-Date: 2020-10-05 16:54:42+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -18,100 +18,100 @@ msgstr ""
 msgid "Pedido importado do Anymarket"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:93
-#: app/src/WordPress/AdminServiceProvider.php:96
+#: app/src/WordPress/AdminServiceProvider.php:92
+#: app/src/WordPress/AdminServiceProvider.php:95
 msgid "Painel"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:97
+#: app/src/WordPress/AdminServiceProvider.php:96
 msgid "Instruções"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:98
+#: app/src/WordPress/AdminServiceProvider.php:97
 msgid "Sobre"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:122
+#: app/src/WordPress/AdminServiceProvider.php:121
 msgid "Every Five Minutes"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:142
+#: app/src/WordPress/AdminServiceProvider.php:141
 msgid "Faturado <span class=\"count\">(%s)</span>"
 msgid_plural "Faturado <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/src/WordPress/AdminServiceProvider.php:152
+#: app/src/WordPress/AdminServiceProvider.php:151
 msgid "Enviado <span class=\"count\">(%s)</span>"
 msgid_plural "Enviado <span class=\"count\">(%s)</span>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/src/WordPress/AdminServiceProvider.php:201
+#: app/src/WordPress/AdminServiceProvider.php:200
 msgid "Ver no Anymarket"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:452
+#: app/src/WordPress/AdminServiceProvider.php:431
 msgid "Produto <b>%s</b> exportado com sucesso."
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:456
+#: app/src/WordPress/AdminServiceProvider.php:435
 msgid ""
 "O produto <b>%1$s</b> falhou na exportação. Você precisa ativar o "
 "gerenciamento de estoque no produto."
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:458
+#: app/src/WordPress/AdminServiceProvider.php:437
 msgid "O produto <b>%1$s</b> falhou na exportação. Mensagem do erro: %2$s."
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:464
+#: app/src/WordPress/AdminServiceProvider.php:443
 msgid ""
 "Se você excluiu este produto no Anymarket, você deverá desativar e reativar "
 "a integração do produto novamente"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:483
+#: app/src/WordPress/AdminServiceProvider.php:462
 msgid "Categoria <b>%s</b> exportada com sucesso."
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:486
+#: app/src/WordPress/AdminServiceProvider.php:465
 msgid "A categoria <b>%1$s</b> falhou na exportação. Código do erro: %2$s."
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:490
+#: app/src/WordPress/AdminServiceProvider.php:469
 msgid ""
 "Se você excluiu esta categoria no Anymarket, você deverá recriá-la no "
 "Woocommerce para refazer a integração"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:509
+#: app/src/WordPress/AdminServiceProvider.php:488
 msgid "Marca <b>%s</b> exportada com sucesso."
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:512
+#: app/src/WordPress/AdminServiceProvider.php:491
 msgid "A marca <b>%1$s</b> falhou na exportação. Código do erro: %2$s."
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:516
+#: app/src/WordPress/AdminServiceProvider.php:495
 msgid ""
 "Se você excluiu esta marca no Anymarket, você deverá recriá-la no "
 "Woocommerce para refazer a integração"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:533
+#: app/src/WordPress/AdminServiceProvider.php:512
 msgid "Produto <b>%s</b> removido da integração com sucesso."
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:547
+#: app/src/WordPress/AdminServiceProvider.php:526
 msgid "Erro ao remover a categoria <b>%s</b> do anymarket"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:561
+#: app/src/WordPress/AdminServiceProvider.php:540
 msgid "Categoria <b>%s</b> removida do anymarket"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:665
+#: app/src/WordPress/AdminServiceProvider.php:644
 msgid ""
 "<b>Importante:</b> Antes de adicionar variações você deve criá-las no "
 "anymarket."
@@ -264,6 +264,22 @@ msgstr ""
 msgid "ID do SKU no Anymarket"
 msgstr ""
 
+#: app/src/WordPress/PluginServiceProvider.php:87
+msgid "More information about %s"
+msgstr ""
+
+#: app/src/WordPress/PluginServiceProvider.php:89
+msgid "View details"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "Integração entre o Woocommerce e a plataforma de marketplaces ANYMARKET."
+msgstr ""
+
+#: app/src/WordPress/PluginServiceProvider.php:154
+msgid "Faça upload do plugin e ative-o"
+msgstr ""
+
 #: app/version.php:54
 #. Translators: %1$s = plugin or theme name; %2$s = minimum version number;
 #. %3$s = maximum version number; %4$s plugin or theme name; %5$s loaded
@@ -278,11 +294,7 @@ msgid "Woocommerce Anymarket"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "https://onserp.com.br/integracao-anymarket"
-msgstr ""
-
-#. Description of the plugin/theme
-msgid "Integração entre o Woocommerce e a plataforma de marketplaces ANYMARKET."
+msgid "https://onserp.com.br/"
 msgstr ""
 
 #. Author of the plugin/theme
@@ -293,14 +305,14 @@ msgstr ""
 msgid "https://onserp.com.br"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:137
-#: app/src/WordPress/AdminServiceProvider.php:173
+#: app/src/WordPress/AdminServiceProvider.php:136
+#: app/src/WordPress/AdminServiceProvider.php:172
 msgctxt "WooCommerce Order status"
 msgid "Faturado"
 msgstr ""
 
-#: app/src/WordPress/AdminServiceProvider.php:147
-#: app/src/WordPress/AdminServiceProvider.php:174
+#: app/src/WordPress/AdminServiceProvider.php:146
+#: app/src/WordPress/AdminServiceProvider.php:173
 msgctxt "WooCommerce Order status"
 msgid "Enviado"
 msgstr ""
