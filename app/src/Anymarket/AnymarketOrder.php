@@ -55,7 +55,7 @@ class AnymarketOrder extends ExportService {
 		$report = [];
 		$order_anymarket_id = carbon_get_post_meta($order_id, 'anymarket_id');
 
-		if( !empty( $order_anymarket_id ) ) return;
+		if( empty( $order_anymarket_id ) ) return;
 
 		switch ($status){
 			case 'anymarket-billed':
