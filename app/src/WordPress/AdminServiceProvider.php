@@ -608,9 +608,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 			if( 'true' === $should_export ) {
 
-				remove_action( 'save_post',  [$this, 'saveProduct'] );
-				$this->cron->setCronExportProd( MINUTE_IN_SECONDS * 5, [$post_id] );
-				add_action( 'save_post', [$this, 'saveProduct'] );
+			$this->cron->setCronExportProd( MINUTE_IN_SECONDS, [$post_id] );
 
 			} else {
 					carbon_set_post_meta( $post_id, 'anymarket_id', '' );
@@ -696,7 +694,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function updateStatus( $order_id, $old_status, $new_status ){
 
-		$this->cron->setCronExportOrder( MINUTE_IN_SECONDS * 5, [$order_id, $new_status] );
+		$this->cron->setCronExportOrder( MINUTE_IN_SECONDS, [$order_id, $new_status] );
 
 	}
 
