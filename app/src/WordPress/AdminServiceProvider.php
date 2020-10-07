@@ -24,11 +24,6 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 * {@inheritDoc}
 	 */
 	public function bootstrap( $container ) {
-		add_action('admin_notices', function(){
-			echo '<div class="updated notice is-dismissible"><p>';
-			print_r( carbon_get_post_meta( $_GET['post'], 'anymarket_id' ) );
-			echo '</p></div>';
-		});
 		add_action( 'admin_menu', [$this, 'registerAdminPages'] );
 
 		// order statuses
