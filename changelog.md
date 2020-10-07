@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Added WP-Cron substitute in case of sites with modified wp installation.
 -   Added self-hosted plugin updates.
 
+### Changed
+
+-   Changed cron task time from 5min to 1min.
+
+### Fixed
+
+-   Filtering orders that are not supposed to sync with anymarket.
+
 ## 1.0.0-alpha.4 - 2020-09-25
 
 ### Changed
