@@ -147,7 +147,7 @@ class PluginServiceProvider implements ServiceProviderInterface
 			$res->author = '<a href="https://onserp.com.br">onSERP Marketing</a>';
 			$res->author_profile = 'https://profiles.wordpress.org/gustavo641';
 			$res->contributors = [['display_name' => 'Gustavo Rocha', 'profile'=> 'https://profiles.wordpress.org/gustavo641', 'avatar'=> 'https://pt.gravatar.com/userimage/127666815/fe36cfe1a4d212b899a1ba4880e332b3.jpeg']];
-			$res->download_link = 'https://' ;//$remote->download_url;
+			$res->download_link = $remote->download_url;
 			$res->trunk = $remote->download_url;
 			$res->requires_php = '7.3';
 			$res->last_updated = $remote->last_updated;
