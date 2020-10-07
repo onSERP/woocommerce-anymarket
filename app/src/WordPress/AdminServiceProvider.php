@@ -24,10 +24,12 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 * {@inheritDoc}
 	 */
 	public function bootstrap( $container ) {
+		add_action('admin_notices', function(){
+			echo '<div class="updated notice is-dismissible"><p>';
+			print_r( carbon_get_post_meta( $_GET['post'], 'anymarket_id' ) );
+			echo '</p></div>';
+		});
 		add_action( 'admin_menu', [$this, 'registerAdminPages'] );
-
-		//add custom cron inteval
-		add_filter( 'cron_schedules', [$this, 'cronInterval'] );
 
 		// order statuses
 		add_action( 'init', [$this, 'registerPostStatus'] );
@@ -108,20 +110,6 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		// enqueue vue assets only to this page
 		AssetsServiceProvider::enqueueAdminVueAssets();
-	}
-
-	/**
-	 * adds custom interval to wp cron
-	 *
-	 * @return array $schedules
-	 */
-	public function cronInterval( $schedules ){
-		$schedules['five_minutes'] = [
-			'interval' => MINUTE_IN_SECONDS * 5,
-			'display'  => esc_html__( 'Every Five Minutes', 'anymarket' ),
-		];
-
-    	return $schedules;
 	}
 
 	/**
@@ -604,27 +592,41 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		if ( 'product' === get_post_type( $post_id ) ) {
 
-			$should_export = carbon_get_post_meta( $post_id, 'anymarket_should_export' );
+			// kinda hacky, tho ಠ_ಠ
+			add_action( 'updated_postmeta', [$this, 'saveProductPostMeta'], 10, 4);
 
-			if( 'true' === $should_export ) {
+		}
+	}
+
+	public function saveProductPostMeta($meta_id, $post_id, $meta_key, $meta_value){
+		//avoid loop
+		remove_action( 'save_post',  [$this, 'saveProduct'] );
+		remove_action( 'updated_postmeta', [$this, 'saveProductPostMeta'] );
+
+		$should_export = carbon_get_post_meta( $post_id, 'anymarket_should_export' );
+
+		if( 'true' === $should_export ) {
 
 			$this->cron->setCronExportProd( MINUTE_IN_SECONDS, [$post_id] );
 
-			} else {
-					carbon_set_post_meta( $post_id, 'anymarket_id', '' );
+		} else {
+				carbon_set_post_meta( $post_id, 'anymarket_id', '' );
 
-					$product = wc_get_product( $post_id );
-					if ($product instanceof \WC_Product_Variable || $product->get_type() === 'variable'){
+				$product = wc_get_product( $post_id );
+				if ($product instanceof \WC_Product_Variable || $product->get_type() === 'variable'){
 
-						$children = $product->get_children();
-						foreach ($children as $child) {
-							update_post_meta( $child, 'anymarket_variation_id', '' );
-						}
+					$children = $product->get_children();
+					foreach ($children as $child) {
+						update_post_meta( $child, 'anymarket_variation_id', '' );
 					}
+				}
 
-				return;
-			}
+			return;
 		}
+
+		//avoid loop
+		add_action( 'updated_postmeta', [$this, 'saveProductPostMeta'] );
+		add_action( 'save_post', [$this, 'saveProduct'] );
 	}
 
 	/**
