@@ -13,7 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 register_rest_route( 'anymarket/v1', '/notifications', [
   'methods' => WP_REST_Server::CREATABLE,
 	'callback' =>['\\Anymarket\\Controllers\\Rest\\NotificationController', 'create'],
-	'permission_callback' => __return_true()
+	'permission_callback' => function (){
+		return true;
+	}
 ] );
 
 //register options routes
