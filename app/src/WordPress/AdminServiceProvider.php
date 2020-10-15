@@ -3,11 +3,9 @@
 namespace Anymarket\WordPress;
 
 use WPEmerge\ServiceProviders\ServiceProviderInterface;
-use Anymarket\Anymarket\ExportProducts;
 use Anymarket\Anymarket\ExportCategories;
 use Anymarket\Anymarket\ExportBrands;
 use Anymarket\Anymarket\ExportStock;
-use Anymarket\Anymarket\AnymarketOrder;
 
 /**
  * Register admin-related entities, like admin menu pages.
@@ -50,10 +48,6 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			add_filter( 'bulk_actions-edit-' . ANYMARKET_BRAND_CPT, [$this, 'bulkExportProductBrands'] );
 			add_filter( 'handle_bulk_actions-edit-' . ANYMARKET_BRAND_CPT, [$this, 'handleBulkExportProductBrands'], 10, 3 );
 		}
-
-		// admin notices
-		add_action( 'admin_notices', [$this, 'bulkExportNotices'] );
-		add_action( 'admin_notices', [$this, 'productNotices'] );
 
 		// edit/save action on product categories
 		add_action( 'edited_term', [$this, 'saveProductCategories'], 10, 3 );
@@ -295,7 +289,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function handleBulkExportProducts( $redirect, $doaction, $object_ids ){
 
 		if( 'anymarket_bulk_export_products' === $doaction ){
-			$this->cron->setCronExportProd( MINUTE_IN_SECONDS * 5, [$object_ids] );
+			$this->cron->setCronExportProd( 15, [$object_ids] );
 		}
 
 		return $redirect;
@@ -333,7 +327,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 				'include' => $object_ids
 			]);
 
-			set_transient( 'anymarket_remove_integration_product_done', $posts, 3 );
+			set_transient( 'anymarket_remove_integration_product_done', $posts, MINUTE_IN_SECONDS );
 
 		}
 
@@ -357,9 +351,9 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			$response = $exportCategories->export( $object_ids );
 
 			if( is_wp_error($response) ){
-				set_transient( 'anymarket_category_export_fail', $response->get_error_message(), 3 );
+				set_transient( 'anymarket_category_export_fail', $response->get_error_message(), MINUTE_IN_SECONDS );
 			} else{
-				set_transient( 'anymarket_category_export_result', $response, 3 );
+				set_transient( 'anymarket_category_export_result', $response, MINUTE_IN_SECONDS );
 			}
 
 		}
@@ -385,148 +379,14 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			$response = $exportBrands->export( $object_ids );
 
 			if( is_wp_error($response) ){
-				set_transient( 'anymarket_brand_export_fail', $response->get_error_message(), 3 );
+				set_transient( 'anymarket_brand_export_fail', $response->get_error_message(), MINUTE_IN_SECONDS );
 			} else{
-				set_transient( 'anymarket_brand_export_result', $response, 3 );
+				set_transient( 'anymarket_brand_export_result', $response, MINUTE_IN_SECONDS );
 			}
 
 		}
 
 		return $redirect;
-
-	}
-
-	/**
-	 * Add admin notices for anymarket bulk actions
-	 *
-	 * @return void
-	 */
-	public function bulkExportNotices(){
-
-		$report = get_transient( 'anymarket_product_export_result' );
-
-		if( !empty($report) ):
-
-			echo '<div class="updated notice is-dismissible"><p>' ;
-
-			foreach ($report as $item) {
-				if( empty($item['errorCode']) ){
-					printf( __('Produto <b>%s</b> exportado com sucesso.', 'anymarket'), $item['name'] );
-					print("<br/>");
-				} else{
-					if( $item['errorMessage'] == 'Amount must not be null' ){
-						printf( __('O produto <b>%1$s</b> falhou na exportação. Você precisa ativar o gerenciamento de estoque no produto.', 'anymarket'), $item['name'] );
-					} else {
-						printf( __('O produto <b>%1$s</b> falhou na exportação. Mensagem do erro: %2$s.', 'anymarket'), $item['name'], $item['errorMessage'] );
-					}
-
-
-					if ($item['errorCode'] === 404){
-						echo ' ';
-						_e('Se você excluiu este produto no Anymarket, você deverá desativar e reativar a integração do produto novamente', 'anymarket');
-					}
-
-					print("<br/>");
-				}
-			}
-
-			echo '</p></div>';
-			return;
-		endif;
-
-		$report = get_transient( 'anymarket_category_export_result' );
-
-		if( !empty($report) ):
-
-			echo '<div class="updated notice is-dismissible"><p>' ;
-
-			foreach ($report as $item) {
-				if( empty($item['errorCode']) ){
-					printf( __('Categoria <b>%s</b> exportada com sucesso.', 'anymarket'), $item['name'] );
-					print("<br/>");
-				} else{
-					printf( __('A categoria <b>%1$s</b> falhou na exportação. Código do erro: %2$s.', 'anymarket'), $item['name'], $item['errorCode'] );
-
-					if ($item['errorCode'] === 404){
-						echo ' ';
-						_e('Se você excluiu esta categoria no Anymarket, você deverá recriá-la no Woocommerce para refazer a integração', 'anymarket');
-					}
-
-					print("<br/>");
-				}
-			}
-
-			echo '</p></div>';
-			return;
-		endif;
-
-		$report = get_transient( 'anymarket_brand_export_result' );
-
-		if( !empty($report) ):
-
-			echo '<div class="updated notice is-dismissible"><p>' ;
-
-			foreach ($report as $item) {
-				if( empty($item['errorCode']) ){
-					printf( __('Marca <b>%s</b> exportada com sucesso.', 'anymarket'), $item['name'] );
-					print("<br/>");
-				} else{
-					printf( __('A marca <b>%1$s</b> falhou na exportação. Código do erro: %2$s.', 'anymarket'), $item['name'], $item['errorCode'] );
-
-					if ($item['errorCode'] === 404){
-						echo ' ';
-						_e('Se você excluiu esta marca no Anymarket, você deverá recriá-la no Woocommerce para refazer a integração', 'anymarket');
-					}
-
-					print("<br/>");
-				}
-			}
-
-			echo '</p></div>';
-			return;
-		endif;
-
-		$report = get_transient( 'anymarket_remove_integration_product_done' );
-
-		if( !empty($report) ):
-			echo '<div class="updated notice is-dismissible"><p>' ;
-
-			foreach ($report as $item) {
-					printf( __('Produto <b>%s</b> removido da integração com sucesso.', 'anymarket'), $item->post_title );
-					print("<br/>");
-			}
-
-			echo '</p></div>';
-			return;
-		endif;
-
-		$report = get_transient( 'anymarket_category_delete_error' );
-
-		if( !empty($report) ):
-			echo '<div class="updated notice is-dismissible"><p>' ;
-
-			foreach ($report as $item) {
-					printf( __('Erro ao remover a categoria <b>%s</b> do anymarket', 'anymarket'), $item->name );
-					print("<br/>");
-			}
-
-			echo '</p></div>';
-			return;
-		endif;
-
-		$report = get_transient( 'anymarket_category_delete_success' );
-
-		if( !empty($report) ):
-			echo '<div class="updated notice is-dismissible"><p>' ;
-
-			foreach ($report as $item) {
-					printf( __('Categoria <b>%s</b> removida do anymarket', 'anymarket'), $item->name );
-					print("<br/>");
-			}
-
-			echo '</p></div>';
-			return;
-		endif;
 
 	}
 
@@ -602,7 +462,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		if( 'true' === $should_export ) {
 
-			$this->cron->setCronExportProd( MINUTE_IN_SECONDS, [$post_id] );
+			$this->cron->setCronExportProd( 15, [$post_id] );
 
 		} else {
 				carbon_set_post_meta( $post_id, 'anymarket_id', '' );
@@ -622,24 +482,6 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		//avoid loop
 		add_action( 'updated_postmeta', [$this, 'saveProductPostMeta'] );
 		add_action( 'save_post', [$this, 'saveProduct'] );
-	}
-
-	/**
-	 * Undocumented function
-	 *
-	 * @return void
-	 */
-	public function productNotices(){
-		$is_dev = get_option( 'anymarket_is_dev_env' );
-		$env = $is_dev === 'true' ? 'sandbox' : 'app';
-
-		$screen = get_current_screen();
-		if( 'post' === $screen->base && 'product' === $screen->post_type ){
-			echo '<div class="notice is-dismissible notice-warning"><p>';
-			echo __('<b>Importante:</b> Antes de adicionar variações você deve criá-las no anymarket.', 'anymarket');
-			echo " <a href=\"http://${env}.anymarket.com.br/#/variations/list\" target=\"_blank\"><b>Para criar clique aqui <span class=\"dashicons dashicons-external\"></span></b></a>";
-			echo '</p></div>';
-		}
 	}
 
 	/**
@@ -670,9 +512,9 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			$deleted = $deleteCategory->delete( $_GET['tag_ID'] );
 
 			if( is_wp_error($deleted) ){
-				set_transient( 'anymarket_category_delete_error', $report, 3);
+				set_transient( 'anymarket_category_delete_error', $report, MINUTE_IN_SECONDS);
 			} else {
-				set_transient( 'anymarket_category_delete_success', $report, 3);
+				set_transient( 'anymarket_category_delete_success', $report, MINUTE_IN_SECONDS);
 			}
 
 			wp_safe_redirect( remove_query_arg( 'anymarket_action' ) );
@@ -691,7 +533,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function updateStatus( $order_id, $old_status, $new_status ){
 
-		$this->cron->setCronExportOrder( MINUTE_IN_SECONDS, [$order_id, $new_status] );
+		$this->cron->setCronExportOrder( 15, [$order_id, $new_status] );
 
 	}
 
