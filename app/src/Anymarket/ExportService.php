@@ -179,7 +179,7 @@ class ExportService
 			$formatted_options = implode(', ', $options);
 
 			$attributes_array[$i]['index'] = $attribute->get_position();
-			$attributes_array[$i]['name'] = $attribute->get_name();
+			$attributes_array[$i]['name'] = str_replace( 'pa_', '', $attribute->get_name() );
 			$attributes_array[$i]['value'] = $formatted_options;
 
 			$i++;
