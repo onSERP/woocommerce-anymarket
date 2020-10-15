@@ -228,31 +228,44 @@ class AnymarketOrder extends ExportService {
 		carbon_set_post_meta($newOrder->get_id(), 'anymarket_id', $oldOrder->id);
 
 		if( false === $updated ){
-			$shippingFname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[0];
-			$shippingLname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[1];
 
-			$newOrder->set_shipping_first_name( $shippingFname );
-			$newOrder->set_shipping_last_name( $shippingLname );
+			if ( isset( $oldOrder->billingAddress ) ){
+				$shippingFname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[0];
+				$shippingLname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[1];
+			}
+
+			$newOrder->set_shipping_first_name( isset($shippingFname) ? $shippingFname : '' );
+			$newOrder->set_shipping_last_name( isset($shippingLname) ? $shippingLname : '' );
 
 			//formatar endereço - shipping
-			$newOrder->set_shipping_address_1( $oldOrder->shipping->street );
-			$newOrder->set_shipping_city( $oldOrder->shipping->city );
-			$newOrder->set_shipping_state( $oldOrder->shipping->stateNameNormalized );
-			$newOrder->set_shipping_postcode( $oldOrder->shipping->zipCode );
-			$newOrder->set_shipping_country( $oldOrder->shipping->countryNameNormalized );
 
-			$billingFname = anymarket_split_name( $oldOrder->buyer->name )[0];
-			$billingLname = anymarket_split_name( $oldOrder->buyer->name )[1];
+			if ( isset( $oldOrder->shipping ) ){
+				$newOrder->set_shipping_address_1( $oldOrder->shipping->street );
+				$newOrder->set_shipping_city( $oldOrder->shipping->city );
+				$newOrder->set_shipping_state( $oldOrder->shipping->stateNameNormalized );
+				$newOrder->set_shipping_postcode( $oldOrder->shipping->zipCode );
+				$newOrder->set_shipping_country( $oldOrder->shipping->countryNameNormalized );
+			}
 
-			$newOrder->set_billing_first_name( $billingFname );
-			$newOrder->set_billing_last_name( $billingLname );
-			$newOrder->set_billing_address_1( $oldOrder->billingAddress->street );
-			$newOrder->set_billing_city( $oldOrder->billingAddress->city );
-			$newOrder->set_billing_state( $oldOrder->billingAddress->stateNameNormalized );
-			$newOrder->set_billing_postcode( $oldOrder->billingAddress->zipCode );
-			$newOrder->set_billing_country( $oldOrder->billingAddress->country );
-			$newOrder->set_billing_email( $oldOrder->buyer->email );
-			$newOrder->set_billing_phone( $oldOrder->buyer->phone );
+			if ( isset( $oldOrder->buyer ) ){
+				$billingFname = anymarket_split_name( $oldOrder->buyer->name )[0];
+				$billingLname = anymarket_split_name( $oldOrder->buyer->name )[1];
+			}
+
+			if ( isset( $oldOrder->billingAddress ) ){
+				$newOrder->set_billing_first_name( isset($billingFname) ? $billingFname : '' );
+				$newOrder->set_billing_last_name( isset($billingLname) ? $billingLname : '' );
+				$newOrder->set_billing_address_1( $oldOrder->billingAddress->street );
+				$newOrder->set_billing_city( $oldOrder->billingAddress->city );
+				$newOrder->set_billing_state( $oldOrder->billingAddress->stateNameNormalized );
+				$newOrder->set_billing_postcode( $oldOrder->billingAddress->zipCode );
+				$newOrder->set_billing_country( $oldOrder->billingAddress->country );
+			}
+
+			if ( isset( $oldOrder->buyer ) ){
+				$newOrder->set_billing_email( $oldOrder->buyer->email );
+				$newOrder->set_billing_phone( $oldOrder->buyer->phone );
+			}
 
 			$newOrder->set_created_via( $oldOrder->marketPlace );
 			$newOrder->set_payment_method_title( $oldOrder->payments[0]->paymentMethodNormalized );
