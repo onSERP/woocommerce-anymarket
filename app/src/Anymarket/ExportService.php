@@ -213,7 +213,8 @@ class ExportService
 
 				$skus[] = [
 					'title' => $product->get_name(),
-					'price' => $product_variation['display_price'],
+					'price' => $product_variation['display_regular_price'],
+					'sellPrice' => $product_variation['display_price'],
 					'amount' => $product_variation['max_qty'],
 					'partnerId' => $product_variation['sku'],
 					'ean' => get_post_meta( $product_variation['variation_id'], 'anymarket_variable_barcode', true ),
