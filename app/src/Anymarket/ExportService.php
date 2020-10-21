@@ -107,6 +107,16 @@ class ExportService
 
 		}
 
+		//images inside variations
+		if ( $product instanceof \WC_Product_Variable || $product->get_type() === 'variable' ){
+			$variations = $product->get_available_variations();
+
+			foreach ( $variations as $variation ) {
+				if( !empty( $variation['image']['url'] ) )
+					$images_array[] = [ 'url' => $variation['image']['url'] ];
+			}
+		}
+
 		return $images_array;
 	}
 
