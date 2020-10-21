@@ -110,22 +110,22 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function registerPostStatus(){
 		//BILLED
 		register_post_status( 'wc-anymarket-billed', [
-			'label' => _x('Faturado', 'WooCommerce Order status','anymarket'),
+			'label' => _x('Faturado (Anymarket) ', 'WooCommerce Order status','anymarket'),
 			'public' => true,
 			'exclude_from_search' => false,
 			'show_in_admin_all_list' => true,
 			'show_in_admin_status_list' => true,
-			'label_count' => _n_noop( 'Faturado <span class="count">(%s)</span>', 'Faturado <span class="count">(%s)</span>', 'anymarket' )
+			'label_count' => _n_noop( 'Faturado (Anymarket) <span class="count">(%s)</span>', 'Faturado (Anymarket) <span class="count">(%s)</span>', 'anymarket' )
 		]);
 
 		//SHIPPED
 		register_post_status( 'wc-anymarket-shipped', [
-			'label' => _x('Enviado', 'WooCommerce Order status','anymarket'),
+			'label' => _x('Enviado (Anymarket)', 'WooCommerce Order status','anymarket'),
 			'public' => true,
 			'exclude_from_search' => false,
 			'show_in_admin_all_list' => true,
 			'show_in_admin_status_list' => true,
-			'label_count' => _n_noop( 'Enviado <span class="count">(%s)</span>', 'Enviado <span class="count">(%s)</span>', 'anymarket' )
+			'label_count' => _n_noop( 'Enviado (Anymarket) <span class="count">(%s)</span>', 'Enviado (Anymarket)<span class="count">(%s)</span>', 'anymarket' )
 		]);
 
 	}
@@ -146,8 +146,8 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 			//insert them after wc-on-hold
 			if ( 'wc-on-hold' === $key ) {
-				$new_order_statuses['wc-anymarket-billed'] = _x( 'Faturado', 'WooCommerce Order status', 'anymarket' );
-				$new_order_statuses['wc-anymarket-shipped'] = _x( 'Enviado', 'WooCommerce Order status', 'anymarket' );
+				$new_order_statuses['wc-anymarket-billed'] = _x( 'Faturado (Anymarket)', 'WooCommerce Order status', 'anymarket' );
+				$new_order_statuses['wc-anymarket-shipped'] = _x( 'Enviado (Anymarket)', 'WooCommerce Order status', 'anymarket' );
 			}
 		}
 
