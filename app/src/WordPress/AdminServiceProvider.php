@@ -498,7 +498,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	}
 
 	/**
-	 * Undocumented function
+	 * Delete a category only on anymarket
 	 *
 	 * @return void
 	 */
