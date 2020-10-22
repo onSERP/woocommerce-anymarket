@@ -185,11 +185,38 @@ class ExportService
 
 		foreach ($product_attributes as $attribute) {
 
-			$options = $attribute->get_options();
+			//attribute name
+			$attribute_name;
+
+			if( preg_match('/pa_/', $attribute->get_name()) ){
+				$tax = get_taxonomy( $attribute->get_name() );
+				$attribute_name = $tax->labels->singular_name;
+			} else {
+				$attribute_name = $attribute->get_name();
+			}
+
+			//options
+			$options;
+			if( preg_match('/pa_/', $attribute->get_name()) ){
+				$opts_array = [];
+				foreach ($attribute->get_options() as $attribute_options){
+					$attribute_term = get_term_by( 'term_id', $attribute_options, $attribute->get_name() );
+
+					$opts_array[] = $attribute_term->name;
+				}
+
+				$options = $opts_array;
+
+			} else{
+
+				$options = $attribute->get_options();
+
+			}
+
 			$formatted_options = implode(', ', $options);
 
 			$attributes_array[$i]['index'] = $attribute->get_position();
-			$attributes_array[$i]['name'] = str_replace( 'pa_', '', $attribute->get_name() );
+			$attributes_array[$i]['name'] = $attribute_name;
 			$attributes_array[$i]['value'] = $formatted_options;
 
 			$i++;
