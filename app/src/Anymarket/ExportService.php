@@ -99,10 +99,12 @@ class ExportService
 
 		//format image gallery
 		$image_gallery = $product->get_gallery_image_ids();
+		$image_index = 0;
 		foreach ($image_gallery as $image_id) {
+			$image_index++;
 			$image_url = wp_get_attachment_url( $image_id );
 			if ( !empty($image_url) ){
-				$images_array[] = ['url' => $image_url];
+				$images_array[] = ['index' => $image_index, 'url' => $image_url];
 			}
 
 		}
