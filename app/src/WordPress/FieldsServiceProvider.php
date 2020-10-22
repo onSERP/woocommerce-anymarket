@@ -167,10 +167,6 @@ class FieldsServiceProvider implements ServiceProviderInterface
 				Field::make( 'date', 'anymarket_tracking_delivered', __('Data em que foi entregue ao cliente', 'anymarket')),
 
 			] );
-
-		Container::make( 'post_meta', 'order_data_vue', 'Dados do Pedido no Anymarket' )
-			->where( 'post_type', '=', 'shop_order' )
-			->set_priority('core');
 	}
 
 	/**
