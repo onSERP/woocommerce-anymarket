@@ -41,6 +41,13 @@ class FieldsServiceProvider implements ServiceProviderInterface
 		add_action( 'woocommerce_variation_options_pricing', [$this, 'addCustomFieldToVariations'], 10, 3 );
 		add_action( 'woocommerce_save_product_variation', [$this, 'saveCustomFieldVariations'], 10, 2 );
 
+
+		//product attributes
+		add_action('woocommerce_after_add_attribute_fields', [$this, 'addCustomFieldsToProductAttributes']);
+		add_action('woocommerce_after_edit_attribute_fields', [$this, 'addCustomFieldsToProductAttributesEdit']);
+
+		add_action('init', [$this, 'saveCustomFieldsToProductAttributes']);
+
 	}
 
 	/**
@@ -205,7 +212,6 @@ class FieldsServiceProvider implements ServiceProviderInterface
 		] );
 	}
 
-
 	/**
 	 * Undocumented function
 	 *
@@ -277,4 +283,103 @@ class FieldsServiceProvider implements ServiceProviderInterface
 		$anymarket_variation_id = $_POST['anymarket_variation_id'][$i];
 		if ( isset( $anymarket_variation_id ) ) update_post_meta( $variation_id, 'anymarket_variation_id', esc_attr( $anymarket_variation_id ) );
 	}
+
+	public function addCustomFieldsToProductAttributes(){ ?>
+
+		<div class="form-field">
+			<label for="attribute_has_visual_variation"><input name="attribute_has_visual_variation"
+					id="attribute_has_visual_variation" type="checkbox" value="0">
+				<?php esc_html_e( 'Tem variação visual?', 'anymarket' ) ?>
+			</label>
+
+			<p class="description"><?php esc_html_e( 'Campo utilizado no anymarket', 'anymarket' ) ?></p>
+		</div>
+
+		<?php
+	}
+
+
+	public function addCustomFieldsToProductAttributesEdit(){
+		global $wpdb;
+
+		$edit = isset( $_GET['edit'] ) ? absint( $_GET['edit'] ) : 0;
+
+		$attribute_to_edit = $wpdb->get_row(
+			$wpdb->prepare(
+				"
+				SELECT attribute_name
+				FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d
+				",
+				$edit
+			)
+		);
+
+		$attribute_name = $attribute_to_edit->attribute_name;
+		$attribute_has_visual_variation = !empty( get_option( 'attribute_' . $attribute_name . '_has_visual_variation' ) ) ? '1' : '0';
+
+		?>
+
+		<tr class="form-field form-required">
+			<th scope="row" valign="top">
+				<label for="attribute_has_visual_variation">
+				<?php esc_html_e( 'Tem variação visual?', 'anymarket' ) ?>
+				</label>
+			</th>
+			<td>
+				<input name="attribute_has_visual_variation" id="attribute_has_visual_variation" type="checkbox" value="1" <?php checked( $attribute_has_visual_variation, 1 ) ?>>
+				<p class="description">
+					<?php esc_html_e( 'Campo utilizado no anymarket', 'anymarket' ) ?>
+				</p>
+			</td>
+		</tr>
+
+		<?php
+	}
+
+	public function saveCustomFieldsToProductAttributes(){
+
+		//do nothing if not in product attributes page
+		if( $_GET['post_type'] !== 'product' ) return;
+		if( $_GET['page'] !== 'product_attributes' ) return;
+
+		// @see woocommerce/includes/admin/class-wc-admin-attributes.php
+
+		if ( ! empty( $_POST['add_new_attribute'] ) ) { // WPCS: CSRF ok.
+			$action = 'add';
+		} elseif ( ! empty( $_POST['save_attribute'] ) && ! empty( $_GET['edit'] ) ) { // WPCS: CSRF ok.
+			$action = 'edit';
+		} elseif ( ! empty( $_GET['delete'] ) ) {
+			$action = 'delete';
+		}
+
+		switch ( $action ) {
+			case 'add':
+
+				$attribute_has_visual_variation = isset( $_POST['attribute_has_visual_variation'] ) ? 1 : 0;
+				$attribute_name = isset( $_POST['attribute_name'] ) ? wc_sanitize_taxonomy_name( wp_unslash( $_POST['attribute_name'] ) ) : '';
+
+				add_option( 'attribute_' . $attribute_name . '_has_visual_variation'  , $attribute_has_visual_variation );
+
+				break;
+
+			case 'edit':
+
+				$attribute_has_visual_variation = isset( $_POST['attribute_has_visual_variation'] ) ? 1 : 0;
+				$attribute_name = isset( $_POST['attribute_name'] ) ? wc_sanitize_taxonomy_name( wp_unslash( $_POST['attribute_name'] ) ) : '';
+
+				update_option( 'attribute_' . $attribute_name . '_has_visual_variation'  , $attribute_has_visual_variation );
+
+				break;
+
+			case 'delete':
+
+				$attribute_name = isset( $_POST['attribute_name'] ) ? wc_sanitize_taxonomy_name( wp_unslash( $_POST['attribute_name'] ) ) : '';
+
+				delete_option( 'attribute_' . $attribute_name . '_has_visual_variation' );
+
+				break;
+		}
+
+	}
+
 }
