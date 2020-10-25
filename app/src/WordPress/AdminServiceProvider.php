@@ -289,7 +289,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function handleBulkExportProducts( $redirect, $doaction, $object_ids ){
 
 		if( 'anymarket_bulk_export_products' === $doaction ){
-			$this->cron->setCronExportProd( 15, [$object_ids] );
+			$this->cron->setCronExportProd( 5, [$object_ids] );
 		}
 
 		return $redirect;
@@ -462,7 +462,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		if( 'true' === $should_export ) {
 
-			$this->cron->setCronExportProd( 15, [$post_id] );
+			$this->cron->setCronExportProd( 5, [$post_id] );
 
 		} else {
 				carbon_set_post_meta( $post_id, 'anymarket_id', '' );
@@ -533,7 +533,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function updateStatus( $order_id, $old_status, $new_status ){
 
-		$this->cron->setCronExportOrder( 15, [$order_id, $new_status] );
+		$this->cron->setCronExportOrder( 5, [$order_id, $new_status] );
 
 	}
 
