@@ -4,7 +4,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* stylelint-enaable */
+/* stylelint-enable */
+
+*:not(#anymarket_app) {
+  img {
+    border-style: unset;
+  }
+}
 
 .container {
   @apply bg-gray-100 py-4 rounded-lg shadow-md;
@@ -15,8 +21,8 @@
 
   @media (max-width: 1280px) {
     .container {
-      @apply bg-transparent w-full border-0 shadow-none;
       max-width: 100% !important;
+      @apply bg-transparent w-full border-0 shadow-none;
     }
   }
 }
@@ -26,11 +32,10 @@
 }
 
 .btn {
-  @apply inline-block bg-custom-blue px-3 py-4 text-white border-0 rounded-md;
-
   &:hover {
     @apply text-white;
   }
+  @apply inline-block bg-custom-blue px-3 py-4 text-white border-0 rounded-md;
 }
 
 .btn-base {
@@ -42,8 +47,6 @@
 }
 
 .form-group {
-  @apply flex flex-wrap mb-6 text-base items-center;
-
   label {
     @apply inline-block w-56 text-right pr-8;
 
@@ -70,50 +73,49 @@
       @apply ml-auto;
     }
   }
+
+  @apply flex flex-wrap mb-6 text-base items-center;
 }
 
 input[type='text'] {
-  @apply w-full py-1 bg-white border border-gray-100 rounded-md shadow;
-
   &:read-only {
     @apply bg-gray-300 border-gray-300;
   }
+
+  @apply w-full py-1 bg-white border border-gray-100 rounded-md shadow;
 }
 
 .help-text {
-  @apply text-xs text-gray-700 mt-1;
-
   a {
     @apply cursor-pointer text-blue-400;
   }
+  @apply text-xs text-gray-700 mt-1;
 }
 
 .input-copy {
-  @apply relative;
-
   .btn {
     @apply absolute py-2 right-0 mr-4 mt-1;
   }
+
+  @apply relative;
 }
 
 .menu {
-  @apply text-lg font-bold;
-
   li {
     a {
-      @apply block px-4 py-2;
-
       &:hover,
       &.router-link-exact-active {
         @apply text-white bg-custom-blue;
       }
+
+      @apply block px-4 py-2;
     }
   }
+
+  @apply text-lg font-bold;
 }
 
 .select-menu {
-  @apply .relative;
-
   .btn {
     @apply block;
   }
@@ -121,23 +123,25 @@ input[type='text'] {
     @apply hidden .absolute;
   }
 
+  /* stylelint-disable */
   li {
-    @apply bg-white border-b m-0 block;
-
     a {
-      @apply .cursor-pointer py-4 px-2 block .relative;
-
       &:hover {
         @apply bg-gray-100;
       }
+      @apply .cursor-pointer py-4 px-2 block .relative;
     }
-  }
 
+    @apply bg-white border-b m-0 block;
+  }
+  /* stylelint-enable */
   &:hover {
     ul {
       @apply block;
     }
   }
+
+  @apply .relative;
 }
 
 /* ================= Tooltip styles ================ */
