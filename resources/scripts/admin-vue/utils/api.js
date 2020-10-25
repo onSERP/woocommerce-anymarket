@@ -15,6 +15,10 @@ export const anymarket = {
   put(endpoint, body) {
     return axiosAnymarket.put(endpoint, body)
   },
+
+  post(endpoint, body) {
+    return axiosAnymarket.post(endpoint, body)
+  },
 }
 
 const axiosWoo = axios.create({

@@ -162,7 +162,7 @@ class ExportProducts extends ExportService
 
 		$this->multiCurl->start();
 
-		if( get_option('anymarket_is_dev_env') == 'true' ){
+		if( get_option('anymarket_show_logs') == 'true' ){
 			$this->logger->debug( print_r($report, true), ['source' => 'woocommerce-anymarket'] );
 		}
 

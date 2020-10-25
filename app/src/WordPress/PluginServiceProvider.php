@@ -76,6 +76,7 @@ class PluginServiceProvider implements ServiceProviderInterface
 		add_option( $pre . 'token', '');
 		add_option( $pre . 'oi', '');
 		add_option( $pre . 'is_dev_env', false);
+		add_option( $pre . 'show_logs', false);
 		add_option( $pre . 'callback_url', rest_url('anymarket/v1/notifications'));
 	}
 

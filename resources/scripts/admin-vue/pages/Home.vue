@@ -83,6 +83,26 @@
           </div>
         </div>
         <div class="form-group">
+          <label for="showLogs">Logs</label>
+          <div class="input relative">
+            <toggle-button
+              id="showLogs"
+              v-model="options.showLogs"
+              sync
+              :color="{
+                checked: '#3366FF',
+                unchecked: '#555770',
+                disabled: '#CCCCCC',
+              }"
+            />
+            <span class="absolute left-0 ml-16"> Habilitar logs </span>
+            <div class="help-text">
+              Registra os eventos do plugin.
+              <a href="/wp-admin/admin.php?page=wc-status&tab=logs">Ver Logs</a>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
           <label for="callbackURL">URL para Callback</label>
           <div class="input input-copy">
             <input
@@ -146,6 +166,7 @@ export default {
         anymarketOI: '',
         isDevEnv: false,
         callbackURL: '',
+        showLogs: false,
       },
     }
   },
@@ -157,6 +178,7 @@ export default {
 
       //string to boolean
       this.options.isDevEnv = response.data.is_dev_env === 'true'
+      this.options.showLogs = response.data.show_logs === 'true'
     })
   },
   methods: {
