@@ -80,8 +80,8 @@ class FieldsServiceProvider implements ServiceProviderInterface
 				 ] ),
 
 				//hidden fields - will only use internally
-				Field::make( 'hidden', 'anymarket_id'),
-				Field::make( 'hidden', 'anymarket_variation_id'),
+				Field::make( 'hidden', 'anymarket_id', __('ID do produto no ANYMARKET', 'anymarket')),
+				Field::make( 'hidden', 'anymarket_variation_id', __('ID do SKU no ANYMARKET', 'anymarket')),
 
 				Field::make( 'text', 'anymarket_warranty_time', __('Garantia (meses)', 'anymarket') )
 					->set_attribute('type', 'number')
@@ -298,7 +298,11 @@ class FieldsServiceProvider implements ServiceProviderInterface
 		<?php
 	}
 
-
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
 	public function addCustomFieldsToProductAttributesEdit(){
 		global $wpdb;
 
@@ -336,6 +340,11 @@ class FieldsServiceProvider implements ServiceProviderInterface
 		<?php
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @return void
+	 */
 	public function saveCustomFieldsToProductAttributes(){
 
 		//do nothing if not in product attributes page
