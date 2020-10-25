@@ -72,25 +72,27 @@ domReady(function () {
 })
 
 //delete category button
-domReady(function () {
-  const id = document.querySelector('input[name*="_anymarket_id"]').value
-  const button = document.querySelector('#button-delete-category')
+if (pagenow === 'edit-product_cat') {
+  domReady(function () {
+    const id = document.querySelector('input[name*="_anymarket_id"]').value
+    const button = document.querySelector('#button-delete-category')
 
-  if (id === '') {
-    button.setAttribute('disabled', 'disabled')
-  }
-
-  button.addEventListener('click', (e) => {
-    e.preventDefault()
-
-    if (id === '') return
-
-    const confirmation = confirm(
-      'Você tem certeza? Esta ação não pode ser desfeita.'
-    )
-
-    if (confirmation) {
-      window.location = e.target.attributes.href.value
+    if (id === '') {
+      button.setAttribute('disabled', 'disabled')
     }
+
+    button.addEventListener('click', (e) => {
+      e.preventDefault()
+
+      if (id === '') return
+
+      const confirmation = confirm(
+        'Você tem certeza? Esta ação não pode ser desfeita.'
+      )
+
+      if (confirmation) {
+        window.location = e.target.attributes.href.value
+      }
+    })
   })
-})
+}
