@@ -22,20 +22,20 @@ buttonOnPage({
 
 // wait for wp domready event to get field id
 domReady(function () {
-  const id = document.querySelector('input[name*="_anymarket_id"]').value
+  const idField = document.querySelector('input[name*="_anymarket_id"]')
 
-  if (id !== '') {
+  if (idField) {
     // button on product edit page
     buttonOnPage({
       admin: 'post-php',
       page: 'product',
-      dest: 'products/edit/' + id,
+      dest: 'products/edit/' + idField.value,
     })
 
     buttonOnPage({
       admin: 'post-php',
       page: 'shop_order',
-      dest: 'orders/edit/' + id,
+      dest: 'orders/edit/' + idField.value,
     })
   }
 })

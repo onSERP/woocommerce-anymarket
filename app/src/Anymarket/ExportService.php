@@ -118,11 +118,16 @@ class ExportService
 				$image_id = $product_variation->get_image_id();
 				$image_src = wp_get_attachment_image_url( $image_id, 'full' );
 
-				foreach ( $product_variation->get_attributes() as $key => $variation ){
+				foreach ( $product_variation->get_attributes() as $attribute => $attribute_value ){
 					if( preg_match('/pa_/', $key ) ){
-						$attribute_name = str_replace('pa_', '', $key);
 
-						$attribute_has_visual_variation = !empty( get_option( 'attribute_' . $attribute_name . '_has_visual_variation' ) ) ? 1 : 0;
+						$tax = get_taxonomy( $attribute );
+						$attribute_name = $tax->labels->singular_name;
+
+						$attribute_term = get_term_by( 'slug', $attribute_value, $attribute );
+						$attribute_value = $attribute_term->name;
+
+						$attribute_has_visual_variation = !empty( get_option( 'attribute_' . str_replace( 'pa_', '', $attribute ) . '_has_visual_variation' ) ) ? 1 : 0;
 
 						if( $attribute_has_visual_variation === 1 ){
 
