@@ -25,7 +25,7 @@ class NoticesServiceProvider implements ServiceProviderInterface
 
 		add_action( 'admin_notices', [$this, 'categoryExportNotice'] );
 
-		if ( defined( ANYMARKET_BRAND_CPT ) ){
+		if ( defined( 'ANYMARKET_BRAND_CPT' ) ){
 			add_action( 'admin_notices', [$this, 'brandExportNotice'] );
 		}
 
