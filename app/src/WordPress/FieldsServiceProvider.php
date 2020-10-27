@@ -347,9 +347,11 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	 */
 	public function saveCustomFieldsToProductAttributes(){
 
+		if( !is_admin() && wp_doing_ajax() ) return;
+
 		//do nothing if not in product attributes page
-		if( isset($_GET['post_type']) && $_GET['post_type'] !== 'product' ) return;
-		if( isset($_GET['page']) && $_GET['page'] !== 'product_attributes' ) return;
+		if( !empty($_GET['post_type']) && $_GET['post_type'] !== 'product' ) return;
+		if( !empty($_GET['page']) && $_GET['page'] !== 'product_attributes' ) return;
 
 		// @see woocommerce/includes/admin/class-wc-admin-attributes.php
 
