@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.0-beta.1 - 2020-10-27
+
+### Changed
+
+-   Updated order statuses labels
+-   Optimized the way that product variation data is queried
+-   Separated "show logs" option from "use sandbox" option
+-       Set cron time to five seconds
+
+### Added
+
+-   Send variation images on product export
+-   Send image orders
+-   Created field on product attributes to store visual variation option
+-   Added content on "Instructions" page
+-   Create variation types on product export
+
+### Fixed
+
+-   Minor style fixes
+-   Cleaning measure values before sending to anymarket
+-   Execute category deletion script only on edit category page
+
+### Removed
+
+-   Removed all custom JS code in "View Order" page
+
 ## 1.0.0-beta 🎉 - 2020-10-16
 
 ### Changed
