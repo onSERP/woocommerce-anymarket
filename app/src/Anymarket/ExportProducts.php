@@ -43,7 +43,11 @@ class ExportProducts extends ExportService
 
 		// export variation types
 		foreach ($products as $product ){
-			$this->exportVariationTypes( $product );
+			$exportVariation = new ExportVariations();
+			$exportVariation->variationTypes( $product );
+			sleep(1);
+
+			$exportVariation->variationValues();
 			sleep(1);
 		}
 
