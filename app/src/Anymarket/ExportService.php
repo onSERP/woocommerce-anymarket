@@ -119,7 +119,7 @@ class ExportService
 				$image_src = wp_get_attachment_image_url( $image_id, 'full' );
 
 				foreach ( $product_variation->get_attributes() as $attribute => $attribute_value ){
-					if( preg_match('/pa_/', $key ) ){
+					if( preg_match('/pa_/', $attribute ) ){
 
 						$tax = get_taxonomy( $attribute );
 						$attribute_name = $tax->labels->singular_name;
@@ -132,7 +132,7 @@ class ExportService
 						if( $attribute_has_visual_variation === 1 ){
 
 							if( !empty($variation) ){
-								$images_array[] = [ 'url' => $image_src, 'variation' => $variation ];
+								$images_array[] = [ 'url' => $image_src, 'variation' => $attribute_value ];
 							} else {
 								$images_array[] = [ 'url' => $image_src ];
 							}
