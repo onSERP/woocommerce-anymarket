@@ -43,8 +43,8 @@ class AssetsServiceProvider implements ServiceProviderInterface
 			'nonce' => wp_create_nonce('anymarket-ajax-nonce')
 		));
 
-		$isDev = get_option( 'anymarket_is_dev_env' );
-		$anymarketToken = get_option( 'anymarket_token' );
+		$isDev = get_option( 'anymarket_is_dev_env', false );
+		$anymarketToken = get_option( 'anymarket_token', false );
 
 		$script = "var anymarket = { sandbox: ${isDev}, token: '${anymarketToken}' }";
 
