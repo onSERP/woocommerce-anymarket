@@ -6,6 +6,7 @@ use WPEmerge\ServiceProviders\ServiceProviderInterface;
 use Anymarket\Anymarket\ExportCategories;
 use Anymarket\Anymarket\ExportBrands;
 use Anymarket\Anymarket\ExportStock;
+use Anymarket\Anymarket\ExportVariations;
 
 /**
  * Register admin-related entities, like admin menu pages.
@@ -56,7 +57,11 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		add_action( 'save_post', [$this, 'saveProduct'], 10, 3 );
 
 		// delete category on anymarket
-		add_action( 'init', [$this, 'deleteCategoryOnAnymarket'] );
+		add_action( 'admin_init', [$this, 'deleteCategoryOnAnymarket'] );
+
+		//bulk export variations
+		add_action( 'admin_init', [$this, 'bulkExportVariations'] );
+		add_action('admin_footer', [$this, 'exportVariationsButton']);
 
 		// new order
 		add_action( 'woocommerce_thankyou', [$this, 'discountStock'] );
@@ -504,6 +509,8 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function deleteCategoryOnAnymarket(){
 
+		if ( wp_doing_ajax() ) return;
+
 		if ( isset( $_GET['anymarket_action'])
 		&& $_GET['anymarket_action'] === 'delete_category'
 		&& current_user_can('manage_options') ){
@@ -512,15 +519,70 @@ class AdminServiceProvider implements ServiceProviderInterface {
 			$deleted = $deleteCategory->delete( $_GET['tag_ID'] );
 
 			if( is_wp_error($deleted) ){
-				set_transient( 'anymarket_category_delete_error', $report, MINUTE_IN_SECONDS);
+				set_transient( 'anymarket_category_delete_error', $deleted->get_error_message(), MINUTE_IN_SECONDS);
 			} else {
-				set_transient( 'anymarket_category_delete_success', $report, MINUTE_IN_SECONDS);
+				set_transient( 'anymarket_category_delete_success', $deleted, MINUTE_IN_SECONDS);
 			}
 
 			wp_safe_redirect( remove_query_arg( 'anymarket_action' ) );
 		}
 
 		return;
+	}
+
+	/**
+	 * Export all variations to anymarket
+	 *
+	 * @return void
+	 */
+	public function bulkExportVariations(){
+
+		if ( wp_doing_ajax() ) return;
+
+		if ( isset( $_GET['anymarket_action'])
+		&& $_GET['anymarket_action'] === 'export_variations'
+		&& current_user_can('manage_options') ){
+
+			$exportVariation = new ExportVariations();
+
+			$types = $exportVariation->variationTypes();
+
+			sleep(1);
+
+			$values = $exportVariation->variationValues();
+
+			if( is_wp_error($types) ){
+				set_transient( 'anymarket_variation_type_export_error', $types->get_error_message(), 10);
+			} else {
+				set_transient( 'anymarket_variation_type_export_success', $types, 10);
+			}
+
+			if( is_wp_error($values) ){
+				set_transient( 'anymarket_variation_value_export_error', $values->get_error_message(), 10);
+			} else {
+				set_transient( 'anymarket_variation_value_export_success', $values, 10);
+			}
+
+			wp_safe_redirect( remove_query_arg( 'anymarket_action' ) );
+		}
+	}
+
+	public function exportVariationsButton(){
+		?>
+			<a id="button-export-variation" class="page-title-action" style="display: inline-block;padding-bottom: 4px;" href="<?php echo esc_url( add_query_arg( [	'anymarket_action' => 'export_variations' ] ) )  ?>">
+				<?php _e('Exportar em massa', 'anymarket') ?>
+			</a>'
+
+			<script>
+				document.addEventListener('DOMContentLoaded',  function() {
+					var _wrapElement = document.querySelector('.wrap.woocommerce h1');
+					var _buttonExport = document.getElementById('button-export-variation');
+
+					if (_wrapElement) _wrapElement.after(_buttonExport);
+				});
+
+			</script>
+		<?php
 	}
 
 	/**

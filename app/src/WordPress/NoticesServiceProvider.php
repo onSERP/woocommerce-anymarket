@@ -33,6 +33,8 @@ class NoticesServiceProvider implements ServiceProviderInterface
 
 		add_action( 'admin_notices', [$this, 'categoryDeleteNotice'] );
 
+		add_action( 'admin_notices', [$this, 'variationExportNotice'] );
+
 		add_action( 'admin_notices', [$this, 'productNotices'] );
 	}
 
@@ -175,7 +177,7 @@ class NoticesServiceProvider implements ServiceProviderInterface
 			echo '<div class="updated notice is-dismissible"><p>' ;
 
 			foreach ($report as $item) {
-					printf( __('Erro ao remover a categoria <b>%s</b> do anymarket', 'anymarket'), $item->name );
+					printf( __('Erro ao remover a categoria <b>%s</b> do anymarket', 'anymarket'), $item['name'] );
 					print("<br/>");
 			}
 
@@ -189,7 +191,72 @@ class NoticesServiceProvider implements ServiceProviderInterface
 			echo '<div class="updated notice is-dismissible"><p>' ;
 
 			foreach ($report as $item) {
-					printf( __('Categoria <b>%s</b> removida do anymarket', 'anymarket'), $item->name );
+					printf( __('Categoria <b>%s</b> removida do anymarket', 'anymarket'), $item['name'] );
+					print("<br/>");
+			}
+
+			echo '</p></div>';
+			return;
+		endif;
+
+	}
+
+	/**
+	 * Add admin notices for anymarket category deletion
+	 *
+	 * @return void
+	 */
+	public function variationExportNotice(){
+
+		$report = get_transient( 'anymarket_variation_type_export_error' );
+
+		if( !empty($report) ):
+			echo '<div class="updated notice is-dismissible"><p>' ;
+
+			foreach ($report as $item) {
+					printf( __('A variação <b>%1$s</b> falhou na exportação. Mensagem do erro: %2$s.', 'anymarket'), $item['name'], $item['errorMessage'] );
+					print("<br/>");
+			}
+
+			echo '</p></div>';
+			return;
+		endif;
+
+		$report = get_transient( 'anymarket_variation_type_export_success' );
+
+		if( !empty($report) ):
+			echo '<div class="updated notice is-dismissible"><p>' ;
+
+			foreach ($report as $item) {
+					printf( __('Variação <b>%s</b> exportada com sucesso.', 'anymarket'), $item['name'] );
+					print("<br/>");
+			}
+
+			echo '</p></div>';
+			return;
+		endif;
+
+		$report = get_transient( 'anymarket_variation_value_export_error' );
+
+		if( !empty($report) ):
+			echo '<div class="updated notice is-dismissible"><p>' ;
+
+			foreach ($report as $item) {
+					printf( __('O valor de variação <b>%1$s</b> falhou na exportação. Mensagem do erro: %2$s.', 'anymarket'), $item['name'], $item['errorMessage'] );
+					print("<br/>");
+			}
+
+			echo '</p></div>';
+			return;
+		endif;
+
+		$report = get_transient( 'anymarket_variation_value_export_success' );
+
+		if( !empty($report) ):
+			echo '<div class="updated notice is-dismissible"><p>' ;
+
+			foreach ($report as $item) {
+					printf( __('Valor de variação <b>%s</b> exportado com sucesso.', 'anymarket'), $item['name'] );
 					print("<br/>");
 			}
 

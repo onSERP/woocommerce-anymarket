@@ -73,6 +73,7 @@ class ExportVariations extends ExportService
 
 		$this->multiCurl->success(function ($instance) use (&$report) {
 			$report[] = [
+				'name' => $instance->name,
 				'type' => $instance->type,
 				'data' => json_encode($instance->data, JSON_UNESCAPED_UNICODE),
 				'url' => $instance->url,
@@ -84,6 +85,7 @@ class ExportVariations extends ExportService
 
 		$this->multiCurl->error(function ($instance) use (&$report) {
 			$report[] = [
+				'name' => $instance->name,
 				'type' => $instance->type,
 				'data' => json_encode($instance->data, JSON_UNESCAPED_UNICODE),
 				'url' => $instance->url,
@@ -107,6 +109,7 @@ class ExportVariations extends ExportService
 					$data = ['description' => $term->name];
 
 					$instance = $this->multiCurl->addPost($url, json_encode($data, JSON_UNESCAPED_UNICODE));
+					$instance->name = $term->name;
 					$instance->type = 'Create variation item';
 					$instance->data = $data;
 				}
@@ -124,79 +127,63 @@ class ExportVariations extends ExportService
 	/**
 	 * create variation types on anymarket
 	 *
-	 * @param \WC_Product $product
 	 * @return array $report
 	 */
-	public function variationTypes( \WC_Product $product ){
+	public function variationTypes(){
 
 		$report = [];
 
-		$variations = $product->get_children();
 
-		foreach ( $variations as $variation_id ) {
-
-			$product_variation = wc_get_product( $variation_id );
-
-			$attr_array = [];
-
-			foreach ( $product_variation->get_attributes() as $attribute => $attribute_value ){
-
-				$attribute_name;
-
-				if( preg_match('/pa_/', $attribute ) ){
-					$tax = get_taxonomy( $attribute );
-					$attribute_name = $tax->labels->singular_name;
-
-					$attribute_terms = get_terms([
-						'taxonomy' => $attribute,
-						'hide_empty' => false
-					]);
-
-					$attribute_values = [];
-					foreach ( $attribute_terms as $term ){
-						$attribute_values[] = [ 'description' => $term->name ];
-					}
-
-					$attribute_has_visual_variation = !empty( get_option( 'attribute_' . str_replace('pa_', '', $attribute) . '_has_visual_variation' ) ) ? true : false;
-				}
-
-				$attr_array[] = [
-					'name' => $attribute_name,
-					'visualVariation' => $attribute_has_visual_variation,
-					'values' => $attribute_values
-				];
-
-			}
-
-		}
-
-		$data = $attr_array;
-
-		$this->multiCurl->success(function ($instance) use ($product, $data, &$report) {
+		$this->multiCurl->success(function ($instance) use (&$report) {
 			$report[] = [
-				'name' => $product->get_name(),
-				'product_id' => $product->get_id(),
+				'name' => $instance->name,
 				'type' => 'Create variation types',
-				'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
+				'data' => json_encode($instance->data, JSON_UNESCAPED_UNICODE),
 				'response' => json_encode($instance->response, JSON_UNESCAPED_UNICODE),
 				'responseCode' => $instance->httpStatusCode,
 
 			];
 		});
 
-		$this->multiCurl->error(function ($instance) use ($product, $data, &$report) {
+		$this->multiCurl->error(function ($instance) use (&$report) {
 			$report[] = [
-				'name' => $product->get_name(),
-				'product_id' => $product->get_id(),
+				'name' => $instance->name,
 				'type' => 'Create variation types',
-				'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
+				'data' => json_encode($instance->data, JSON_UNESCAPED_UNICODE),
 				'errorCode' => $instance->errorCode,
 				'errorMessage' => $instance->response->message,
 			];
 		});
 
-		foreach ( $data as $data_item ){
-			$instance = $this->multiCurl->addPost($this->baseUrl . 'variations' , json_encode($data_item, JSON_UNESCAPED_UNICODE));
+		foreach( wc_get_attribute_taxonomies() as $attributeTax ){
+
+			$terms = get_terms([
+				'taxonomy' => 'pa_' . $attributeTax->attribute_name,
+				'hide_empty' => false
+			]);
+
+			$values = [];
+
+			foreach ($terms as $term_key => $term){
+				$values[] = ['description' => $term->name];
+			}
+
+			$attribute_has_visual_variation = !empty( get_option( 'attribute_' . $attributeTax->attribute_name . '_has_visual_variation' ) ) ? true : false;
+
+			$data = [
+				'name' => $attributeTax->attribute_label,
+				'visualVariation' => $attribute_has_visual_variation,
+				'values' => $values,
+			];
+
+			if ( ! anymarket_in_multidimensional_array( $attributeTax->attribute_name, $this->getVariations() ) ){
+				$instance = $this->multiCurl->addPost($this->baseUrl . 'variations' , json_encode($data, JSON_UNESCAPED_UNICODE));
+				$instance->name = $data['name'];
+				$instance->data = $data;
+			}
+
+
+
 		}
 
 		$this->multiCurl->start();

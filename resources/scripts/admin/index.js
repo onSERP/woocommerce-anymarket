@@ -20,6 +20,12 @@ buttonOnPage({
   dest: 'products/list',
 })
 
+buttonOnPage({
+  admin: 'product_page_product_attributes',
+  page: 'product_page_product_attributes',
+  dest: 'variations/list',
+})
+
 // wait for wp domready event to get field id
 domReady(function () {
   const idField = document.querySelector('input[name*="_anymarket_id"]')

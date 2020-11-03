@@ -28,7 +28,7 @@ function createButton(page) {
 /**
  * Append button on page
  *
- * @param {string} obj object of params
+ * @param {object} obj object of params
  * @param {string} obj.page pagenow
  * @param {string} obj.admin admin page
  * @param {string} obj.dest destination
@@ -38,7 +38,10 @@ function createButton(page) {
 export default function buttonOnPage(obj) {
   if (pagenow === obj.page && adminpage === obj.admin) {
     const headingInline = document.querySelector('.wp-heading-inline')
+    const wooWrap = document.querySelector('.woocommerce-page .wrap h1')
 
     if (headingInline) headingInline.after(createButton(obj.dest))
+
+    if (wooWrap) wooWrap.after(createButton(obj.dest))
   }
 }

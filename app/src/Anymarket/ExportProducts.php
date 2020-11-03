@@ -41,16 +41,6 @@ class ExportProducts extends ExportService
 			$exportBrand->export( $this->getAllBrands( $products ), false );
 		}
 
-		// export variation types
-		foreach ($products as $product ){
-			$exportVariation = new ExportVariations();
-			$exportVariation->variationTypes( $product );
-			sleep(1);
-
-			$exportVariation->variationValues();
-			sleep(1);
-		}
-
 
 		//delay script execution for 1 sec
 		sleep(1);
