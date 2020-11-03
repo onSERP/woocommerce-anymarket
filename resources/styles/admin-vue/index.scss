@@ -6,9 +6,10 @@
 @tailwind utilities;
 /* stylelint-enable */
 
-*:not(#anymarket_app) {
+#adminmenumain {
   img {
     border-style: unset;
+    margin: auto;
   }
 }
 
