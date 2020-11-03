@@ -73,11 +73,11 @@ class PluginServiceProvider implements ServiceProviderInterface
 	public function setSettings(){
 		$pre = 'anymarket_';
 
-		add_option( $pre . 'token', '');
-		add_option( $pre . 'oi', '');
-		add_option( $pre . 'is_dev_env', false);
-		add_option( $pre . 'show_logs', false);
-		add_option( $pre . 'callback_url', rest_url('anymarket/v1/notifications'));
+		if( !get_option( $pre . 'token', false ) ) add_option( $pre . 'token', '');
+		if( !get_option( $pre . 'oi', false ) ) add_option( $pre . 'oi', '');
+		if( !get_option( $pre . 'is_dev_env', false ) ) add_option( $pre . 'is_dev_env', false);
+		if( !get_option( $pre . 'show_logs', false ) ) add_option( $pre . 'show_logs', false);
+		if( !get_option( $pre . 'callback_url', false ) ) add_option( $pre . 'callback_url', rest_url('anymarket/v1/notifications'));
 	}
 
 	public function initRestRouter(){
