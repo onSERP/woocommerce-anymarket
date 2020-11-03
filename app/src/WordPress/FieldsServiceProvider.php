@@ -46,7 +46,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 		add_action('woocommerce_after_add_attribute_fields', [$this, 'addCustomFieldsToProductAttributes']);
 		add_action('woocommerce_after_edit_attribute_fields', [$this, 'addCustomFieldsToProductAttributesEdit']);
 
-		add_action('init', [$this, 'saveCustomFieldsToProductAttributes']);
+		add_action('admin_init', [$this, 'saveCustomFieldsToProductAttributes']);
 
 	}
 
@@ -348,6 +348,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	public function saveCustomFieldsToProductAttributes(){
 
 		if( !is_admin() && wp_doing_ajax() ) return;
+		if( !current_user_can( 'manage_options' ) ) return;
 
 		//do nothing if not in product attributes page
 		if( !empty($_GET['post_type']) && $_GET['post_type'] !== 'product' ) return;
