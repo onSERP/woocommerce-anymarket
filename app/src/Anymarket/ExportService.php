@@ -57,7 +57,8 @@ class ExportService
 	protected function formatProductCategories( \WC_Product $product ){
 
 		$category_ids = $product->get_category_ids();
-		$id = carbon_get_term_meta($category_ids[0], 'anymarket_id');
+		$category_id = is_array($category_ids) ? $category_ids[0] : $category_ids;
+		$id = carbon_get_term_meta($category_id, 'anymarket_id');
 		$anymarket_category_id = ['id' => $id];
 
 		return $anymarket_category_id;

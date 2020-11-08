@@ -22,8 +22,9 @@
               <li>
                 <a
                   href="/wp-admin/edit.php?post_type=product&page=product_attributes"
-                  >2º PASSO - Exportar Atributos</a
                 >
+                  2º PASSO - Exportar Atributos
+                </a>
               </li>
               <li>
                 <a href="/wp-admin/edit.php?post_type=product">

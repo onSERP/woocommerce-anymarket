@@ -221,7 +221,7 @@ class AnymarketOrder extends ExportService {
 	 * @return void
 	 */
 	protected function assignToOrder(object $oldOrder, \WC_Order $newOrder, $updated = true ){
-
+		global $wpdb;
 		// first - carbon meta fields
 		carbon_set_post_meta($newOrder->get_id(), 'anymarket_order_marketplace', $oldOrder->marketPlace);
 		carbon_set_post_meta($newOrder->get_id(), 'is_anymarket_order', 'true');
@@ -273,26 +273,30 @@ class AnymarketOrder extends ExportService {
 
 			//add products
 			foreach ($oldOrder->items as $orderItem ){
-				$products = get_posts( [
-					'post_type' => ['product', 'product_variation'],
-					'meta_query' => [
-						'relation' => 'OR',
-						[
-							'key' => '_anymarket_variation_id',
-							'compare' => '=',
-							'value' => $orderItem->sku->id
-						],
-						[
-							'key' => 'anymarket_variation_id',
-							'compare' => '=',
-							'value' => $orderItem->sku->id
-						],
-					],
-					'status' => 'publish'
-				]);
 
-				if( !empty($products) )
-					$newOrder->add_product( wc_get_product($products[0]->ID), $orderItem->amount, [
+				$product_id = $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT post_id FROM $wpdb->postmeta
+						WHERE (meta_key='_anymarket_variation_id' AND meta_value='%s')
+						LIMIT 1", absint( $orderItem->sku->id )
+					)
+				);
+
+				$variable_product_id = $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT post_id FROM $wpdb->postmeta
+						WHERE (meta_key='anymarket_variation_id' AND meta_value='%s')
+						LIMIT 1", absint( $orderItem->sku->id )
+					)
+				);
+
+
+
+				if( $product_id || $variable_product_id )
+
+					$_id = $product_id ? $product_id : $variable_product_id;
+
+					$newOrder->add_product( wc_get_product($_id), $orderItem->amount, [
 						'subtotal' => $orderItem->total,
 						'total' => $orderItem->total
 					] );
