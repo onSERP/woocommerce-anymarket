@@ -182,7 +182,6 @@ export default {
       this.options.anymarketOI = response.data.anymarket_oi
       this.options.callbackURL = response.data.callback_url
 
-      //string to boolean
       this.options.isDevEnv = response.data.is_dev_env === 'true'
       this.options.showLogs = response.data.show_logs === 'true'
     })

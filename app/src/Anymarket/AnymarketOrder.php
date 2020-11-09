@@ -41,7 +41,7 @@ class AnymarketOrder extends ExportService {
 	}
 
 	/**
-	 * Undocumented function
+	 * Triggered on updated order status
 	 *
 	 * @param [type] $order_id
 	 * @param [type] $status
@@ -89,6 +89,8 @@ class AnymarketOrder extends ExportService {
 				$data['tracking']['deliveredDate'] = anymarket_format_date( carbon_get_post_meta($order_id, 'anymarket_tracking_delivered'));
 			break;
 		}
+
+		$data = apply_filters( 'anymarket_update_order_status_data', $data );
 
 		if( empty($data) ) return false;
 

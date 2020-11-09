@@ -40,7 +40,10 @@ export default function buttonOnPage(obj) {
     const headingInline = document.querySelector('.wp-heading-inline')
     const wooWrap = document.querySelector('.woocommerce-page .wrap h1')
 
-    if (headingInline) headingInline.after(createButton(obj.dest))
+    if (headingInline){
+      headingInline.after(createButton(obj.dest))
+      return
+    }
 
     if (wooWrap) wooWrap.after(createButton(obj.dest))
   }

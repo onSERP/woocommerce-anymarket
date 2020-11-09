@@ -63,24 +63,6 @@ class AssetsServiceProvider implements ServiceProviderInterface
 			);
 		}
 
-		$currentScreen = get_current_screen();
-		if( $currentScreen->post_type === 'shop_order' && $currentScreen->base === 'post' ){
-			\Anymarket::core()->assets()->enqueueScript(
-				'anymarket-admin-order-js-bundle',
-				\Anymarket::core()->assets()->getBundleUrl( 'order-vue', '.js' ),
-				[ 'jquery' ],
-				true
-			);
-
-			$styleOrder = \Anymarket::core()->assets()->getBundleUrl( 'order-vue', '.css' );
-
-			if ( $styleOrder ) {
-				\Anymarket::core()->assets()->enqueueStyle(
-					'anymarket-admin-order-css-bundle',
-					$styleOrder
-				);
-			}
-		}
 	}
 
 	/**

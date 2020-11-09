@@ -44,23 +44,6 @@ class StatusController
 			'hide_empty' => false,
 		]) );
 
-		$exportedCategories = count( get_terms([
-			'taxonomy' => 'product_cat',
-			'meta_query' => [
-				'relation' => 'AND',
-				[
-					'key' => '_anymarket_id',
-					'compare' => '!=',
-					'value' => ''
-				],
-				[
-					'key' => '_anymarket_id',
-					'compare' => 'EXISTS',
-				],
-			],
-			'hide_empty' => false,
-		]) );
-
 		$exportedCategories = count( $wpdb->get_results(
 			$wpdb->prepare(
 				"

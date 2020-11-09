@@ -32,6 +32,10 @@
   @apply text-2xl font-bold text-black;
 }
 
+.title-2 {
+  @apply text-xl font-semibold text-gray-600;
+}
+
 .btn {
   &:hover {
     @apply text-white;
