@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.0-beta.3 - 2020-11-08
+
+### Fixed
+
+-   Removed brands panel when not necessary form plugin config page
+-   Duplicated buttons
+
+### Changed
+
+-   Using `$wpdb` instead of `get_posts` since it's more failproof
+
 ## 1.0.0-beta.2 - 2020-10-29
 
 ### Fixed
@@ -23,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Updated order statuses labels
 -   Optimized the way that product variation data is queried
 -   Separated "show logs" option from "use sandbox" option
--         Set cron time to five seconds
+-   Set cron time to five seconds
 
 ### Added
 
@@ -79,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 -   Turned order export into wp-cron cronjob.
--   Added support for wp_timezone_string() on WP <=5.3
+-   Added support for `wp_timezone_string()` on WP <=5.3
 
 ## 1.0.0-alpha.2 - 2020-09-11
 
