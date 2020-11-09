@@ -311,14 +311,16 @@ class AnymarketOrder extends ExportService {
 
 					$_id = $product_id ? $product_id : $variable_product_id;
 
-					$newOrder->add_product( wc_get_product($_id), $orderItem->amount, [
+					$orderItemID = $newOrder->add_product( wc_get_product($_id), $orderItem->amount, [
 						'subtotal' => $orderItem->total,
 						'total' => $orderItem->total
 					] );
+
+					add_option('shipping_order_' . $newOrder->get_id() . '_item_' . $orderItemID, $orderItem->shippings[0]->shippingType . ' - ' . $orderItem->shippings[0]->shippingCarrierNormalized );
 			}
 
 
-			$newOrder->set_shipping_tax( $oldOrder->freight );
+			$newOrder->set_shipping_total( $oldOrder->freight );
 			$newOrder->set_discount_total( $oldOrder->discount );
 
 			$newOrder->calculate_totals();
