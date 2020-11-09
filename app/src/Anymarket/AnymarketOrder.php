@@ -316,7 +316,7 @@ class AnymarketOrder extends ExportService {
 						'total' => $orderItem->total
 					] );
 
-					add_option('shipping_order_' . $newOrder->get_id() . '_item_' . $orderItemID, $orderItem->shippings[0]->shippingType . ' - ' . $orderItem->shippings[0]->shippingCarrierNormalized );
+					add_option('shipping_order_' . $newOrder->get_id() . '_item_' . $orderItemID, $orderItem->shippings[0]->shippingtype . ' - ' . $orderItem->shippings[0]->shippingCarrierNormalized );
 			}
 
 
