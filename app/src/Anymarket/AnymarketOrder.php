@@ -323,7 +323,8 @@ class AnymarketOrder extends ExportService {
 			$newOrder->set_shipping_total( $oldOrder->freight );
 			$newOrder->set_discount_total( $oldOrder->discount );
 
-			$newOrder->calculate_totals();
+			$newOrder->set_total( $oldOrder->total );
+			$newOrder->save();
 		}
 
 			$orderStatuses = [
@@ -338,7 +339,6 @@ class AnymarketOrder extends ExportService {
 		$newOrder->update_status( $orderStatuses[$oldOrder->status],
 					__('Pedido importado do Anymarket', 'anymarket'));
 
-		$newOrder->save();
 
 		//meta fields that are not officialy part of WP_Order
 		$documentType =  $oldOrder->buyer->documentType === 'CPF' ? 'cpf' : 'cnpj';
