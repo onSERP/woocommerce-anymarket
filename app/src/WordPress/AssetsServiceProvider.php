@@ -43,10 +43,11 @@ class AssetsServiceProvider implements ServiceProviderInterface
 			'nonce' => wp_create_nonce('anymarket-ajax-nonce')
 		));
 
-		$isDev = get_option( 'anymarket_is_dev_env', false );
-		$anymarketToken = get_option( 'anymarket_token', false );
+		$isDev = get_option( 'anymarket_is_dev_env', 'false' );
+		$anymarketToken = get_option( 'anymarket_token', 'false' );
+		$hasBrand = defined('ANYMARKET_BRAND_CPT') === true ? 'true' : 'false';
 
-		$script = "var anymarket = { sandbox: ${isDev}, token: '${anymarketToken}' }";
+		$script = "var anymarket = { sandbox: ${isDev}, token: '${anymarketToken}', hasBrand: ${hasBrand} }";
 
 		wp_register_script( 'anymarket-sandbox-check', '' );
 		wp_enqueue_script( 'anymarket-sandbox-check' );

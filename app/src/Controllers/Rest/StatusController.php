@@ -17,32 +17,27 @@ class StatusController
 	 * @return void
 	 */
 	public static function index( \WP_REST_Request $request ){
+		global $wpdb;
 
 		$totalProducts = count( wc_get_products([
 			'limit' => -1,
 			'status' => 'publish'
 		]) );
 
-		$exportedProducts = count( get_posts([
-			'post_type' => 'product',
-			'meta_query' => [
-				'relation' => 'AND',
-				[
-					'key' => '_anymarket_id',
-					'compare' => '!=',
-					'value' => ''
-				],
-				[
-					'key' => '_anymarket_id',
-					'compare' => 'EXISTS',
-				],
-				[
-					'key' => '_anymarket_should_export',
-					'value' => 'true',
-				],
-			],
-			'status' => 'publish'
-		]) );
+		$exportedProducts = count( $wpdb->get_results(
+			$wpdb->prepare(
+				"
+					SELECT pm.post_id, pm.meta_value, p.post_type
+					FROM $wpdb->postmeta pm
+					LEFT JOIN $wpdb->posts p
+						ON p.ID = pm.post_id
+					WHERE pm.meta_key = '%s'
+						AND p.post_status = '%s'
+						AND p.post_type = '%s'
+						AND pm.meta_value <> ''
+				"
+	  			, '_anymarket_id', 'publish', 'product' )
+		));
 
 		$totalCategories = count( get_terms([
 			'taxonomy' => 'product_cat',
@@ -66,28 +61,39 @@ class StatusController
 			'hide_empty' => false,
 		]) );
 
+		$exportedCategories = count( $wpdb->get_results(
+			$wpdb->prepare(
+				"
+					SELECT tm.term_id
+					FROM $wpdb->termmeta tm
+					LEFT JOIN $wpdb->term_taxonomy tax
+						ON tm.term_id = tax.term_id
+					WHERE tax.taxonomy = '%s'
+						AND tm.meta_key = '%s'
+						AND tm.meta_value <> ''
+				"
+	  			, 'product_cat', '_anymarket_id', )
+		));
+
 		if( defined('ANYMARKET_BRAND_CPT') ){
 			$totalBrands = count( get_terms([
 				'taxonomy' => ANYMARKET_BRAND_CPT,
 				'hide_empty' => false,
 			]) );
 
-			$exportedBrands = count( get_terms([
-				'taxonomy' => ANYMARKET_BRAND_CPT,
-				'meta_query' => [
-					'relation' => 'AND',
-					[
-						'key' => '_anymarket_id',
-						'compare' => '!=',
-						'value' => ''
-					],
-					[
-						'key' => '_anymarket_id',
-						'compare' => 'EXISTS',
-					],
-				],
-				'hide_empty' => false,
-			]) );
+			$exportedBrands = count( $wpdb->get_results(
+				$wpdb->prepare(
+					"
+						SELECT tm.term_id
+						FROM $wpdb->termmeta tm
+						LEFT JOIN $wpdb->term_taxonomy tax
+							ON tm.term_id = tax.term_id
+						WHERE tax.taxonomy = '%s'
+							AND tm.meta_key = '%s'
+							AND tm.meta_value <> ''
+					"
+					  , ANYMARKET_BRAND_CPT, '_anymarket_id', )
+			));
 		}
 
 		$exportService = new ExportService;

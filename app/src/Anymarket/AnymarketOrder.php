@@ -14,26 +14,25 @@ class AnymarketOrder extends ExportService {
 	 * @return void
 	 */
 	public function make( int $id ){
+		global $wpdb;
 
-		$existingOrder = get_posts([
-			'post_type' => 'shop_order',
-			'meta_query' => [
-				'relation' => 'AND',
-				[
-					'key' => '_anymarket_id',
-					'compare' => '=',
-					'value' => $id
-				],
-				[
-					'key' => '_is_anymarket_order',
-					'value' => 'true'
-				]
-			],
-			'post_status'    => 'any'
-		]);
+		$existingOrder = $wpdb->get_var(
+			$wpdb->prepare(
+				"
+					SELECT pm.post_id
+					FROM $wpdb->postmeta pm
+					LEFT JOIN $wpdb->posts p
+						ON p.ID = pm.post_id
+					WHERE pm.meta_key='%s'
+						AND p.post_type = '%s'
+						AND pm.meta_value='%d'
+					LIMIT 1
+				", '_anymarket_id', 'shop_order', absint( $id )
+			)
+		);
 
 		if ( !empty($existingOrder) ){
-			$response = $this->updateOrder( $existingOrder[0], $id );
+			$response = $this->updateOrder( get_post( absint($existingOrder) ), $id );
 		} else {
 			$response = $this->createOrder( $id );
 		}
@@ -276,18 +275,32 @@ class AnymarketOrder extends ExportService {
 
 				$product_id = $wpdb->get_var(
 					$wpdb->prepare(
-						"SELECT post_id FROM $wpdb->postmeta
-						WHERE (meta_key='_anymarket_variation_id' AND meta_value='%s')
-						LIMIT 1", absint( $orderItem->sku->id )
-					)
+						"
+						SELECT pm.post_id
+						FROM $wpdb->postmeta pm
+						LEFT JOIN $wpdb->posts p
+							ON p.ID = pm.post_id
+						WHERE pm.meta_key = '%s'
+							AND p.post_status = '%s'
+							AND p.post_type = '%s'
+							AND pm.meta_value = '%d'
+		  			"
+		  			, '_anymarket_variation_id', 'publish', 'product', absint( $orderItem->sku->id ) )
 				);
 
 				$variable_product_id = $wpdb->get_var(
 					$wpdb->prepare(
-						"SELECT post_id FROM $wpdb->postmeta
-						WHERE (meta_key='anymarket_variation_id' AND meta_value='%s')
-						LIMIT 1", absint( $orderItem->sku->id )
-					)
+						"
+						SELECT pm.post_id
+						FROM $wpdb->postmeta pm
+						LEFT JOIN $wpdb->posts p
+							ON p.ID = pm.post_id
+						WHERE pm.meta_key = '%s'
+							AND p.post_status = '%s'
+							AND p.post_type = '%s'
+							AND pm.meta_value = '%d'
+		  			"
+		  			, 'anymarket_variation_id', 'publish', 'product_variation', absint( $orderItem->sku->id ) )
 				);
 
 
