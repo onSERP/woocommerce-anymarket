@@ -41,7 +41,7 @@ domReady(function () {
     buttonOnPage({
       admin: 'post-php',
       page: 'shop_order',
-      dest: 'orders/edit/' + id.value,
+      dest: 'orders/edit/' + idField.value,
     })
   }
 })
