@@ -316,9 +316,17 @@ class AnymarketOrder extends ExportService {
 						'total' => $orderItem->total
 					] );
 
-					add_option('shipping_order_' . $newOrder->get_id() . '_item_' . $orderItemID, $orderItem->shippings[0]->shippingtype . ' - ' . $orderItem->shippings[0]->shippingCarrierNormalized );
 			}
 
+			$shipping = new \WC_Order_Item_Shipping();
+
+			$shipping->set_method_title(
+				$orderItem->shippings[0]->shippingCarrierNormalized . ' - ' . $orderItem->shippings[0]->shippingtype
+			);
+			$shipping->set_method_id( 'anyshipping' );
+			$shipping->set_total( $oldOrder->freight );
+
+			$newOrder->add_item($shipping);
 
 			$newOrder->set_shipping_total( $oldOrder->freight );
 			$newOrder->set_discount_total( $oldOrder->discount );

@@ -66,9 +66,8 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		// new order
 		add_action( 'woocommerce_thankyou', [$this, 'discountStock'] );
 
-		//custom columns on order item table
-		add_action( 'woocommerce_admin_order_item_headers', [$this, 'headerOrderItem'] );
-		add_action( 'woocommerce_admin_order_item_values', [$this, 'valuesOrderItem'], 10, 3 );
+		//initiate shipping class
+		add_filter( 'woocommerce_shipping_methods', [$this, 'addAnymarketShippingMethod'] );
 
 		// on order change status
 		add_action( 'woocommerce_order_status_changed', [$this, 'updateStatus'], 10, 3);
@@ -616,34 +615,14 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		return $mimes;
 	}
 
-	public function headerOrderItem ($order){
-
-		if( !empty( get_post_meta($order->get_id(), '_anymarket_id', true) ) ) {
-
-		?>
-
-			<th class="line_anymarket_shipping sortable" data-sort="string-ins">
-				<?php _e('Entrega', 'anymarket'); ?>
-			</th>
-
-		<?php
-
-		}
-	}
-
-	public function valuesOrderItem ( $product, $item, $item_id ) {
-
-		if( !empty( get_post_meta($item->get_order_id(), '_anymarket_id', true) ) ) {
-
-	   	?>
-
-			<td class="line_anymarket_shipping">
-				<?php echo get_option( 'shipping_order_' . $item->get_order_id() . '_item_' . $item_id, false ); ?>
-
-			</td>
-
-	   	<?php
-
-		}
+	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $methods
+	 * @return void
+	 */
+	function addAnymarketShippingMethod( $methods ) {
+		$methods[] = AnymarketShippingMethod::class;
+		return $methods;
 	}
 }
