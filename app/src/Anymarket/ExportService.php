@@ -57,7 +57,8 @@ class ExportService
 	protected function formatProductCategories( \WC_Product $product ){
 
 		$category_ids = $product->get_category_ids();
-		$id = carbon_get_term_meta($category_ids[0], 'anymarket_id');
+		$category_id = is_array($category_ids) ? $category_ids[0] : $category_ids;
+		$id = carbon_get_term_meta($category_id, 'anymarket_id');
 		$anymarket_category_id = ['id' => $id];
 
 		return $anymarket_category_id;
@@ -99,12 +100,48 @@ class ExportService
 
 		//format image gallery
 		$image_gallery = $product->get_gallery_image_ids();
+		$image_index = 0;
 		foreach ($image_gallery as $image_id) {
+			$image_index++;
 			$image_url = wp_get_attachment_url( $image_id );
 			if ( !empty($image_url) ){
-				$images_array[] = ['url' => $image_url];
+				$images_array[] = ['index' => $image_index, 'url' => $image_url];
 			}
 
+		}
+
+		//images inside variations
+		if ( $product instanceof \WC_Product_Variable || $product->get_type() === 'variable' ){
+			$variations = $product->get_children();
+
+			foreach ( $variations as $variation ) {
+				$product_variation = wc_get_product( $variation );
+				$image_id = $product_variation->get_image_id();
+				$image_src = wp_get_attachment_image_url( $image_id, 'full' );
+
+				foreach ( $product_variation->get_attributes() as $attribute => $attribute_value ){
+					if( preg_match('/pa_/', $attribute ) ){
+
+						$tax = get_taxonomy( $attribute );
+						$attribute_name = $tax->labels->singular_name;
+
+						$attribute_term = get_term_by( 'slug', $attribute_value, $attribute );
+						$attribute_value = $attribute_term->name;
+
+						$attribute_has_visual_variation = !empty( get_option( 'attribute_' . str_replace( 'pa_', '', $attribute ) . '_has_visual_variation' ) ) ? 1 : 0;
+
+						if( $attribute_has_visual_variation === 1 ){
+
+							if( !empty($variation) ){
+								$images_array[] = [ 'url' => $image_src, 'variation' => $attribute_value ];
+							} else {
+								$images_array[] = [ 'url' => $image_src ];
+							}
+						}
+					}
+
+				}
+			}
 		}
 
 		return $images_array;
@@ -175,11 +212,38 @@ class ExportService
 
 		foreach ($product_attributes as $attribute) {
 
-			$options = $attribute->get_options();
+			//attribute name
+			$attribute_name;
+
+			if( preg_match('/pa_/', $attribute->get_name()) ){
+				$tax = get_taxonomy( $attribute->get_name() );
+				$attribute_name = $tax->labels->singular_name;
+			} else {
+				$attribute_name = $attribute->get_name();
+			}
+
+			//options
+			$options;
+			if( preg_match('/pa_/', $attribute->get_name()) ){
+				$opts_array = [];
+				foreach ($attribute->get_options() as $attribute_options){
+					$attribute_term = get_term_by( 'term_id', $attribute_options, $attribute->get_name() );
+
+					$opts_array[] = $attribute_term->name;
+				}
+
+				$options = $opts_array;
+
+			} else{
+
+				$options = $attribute->get_options();
+
+			}
+
 			$formatted_options = implode(', ', $options);
 
 			$attributes_array[$i]['index'] = $attribute->get_position();
-			$attributes_array[$i]['name'] = $attribute->get_name();
+			$attributes_array[$i]['name'] = $attribute_name;
 			$attributes_array[$i]['value'] = $formatted_options;
 
 			$i++;
@@ -199,27 +263,43 @@ class ExportService
 
 		if( $product instanceof \WC_Product_Variable || $product->get_type() === 'variable'){
 
-			$product_variations = $product->get_available_variations();
+			$variations = $product->get_children();
+			$skus = [];
 
-			foreach ($product_variations as $product_variation) {
+			foreach ( $variations as $variation_id ) {
+
+				$product_variation = wc_get_product( $variation_id );
 
 				$attr_array = [];
 
-				foreach ( $product_variation['attributes'] as $key => $attr ){
-					$newKey = str_replace( '-', ' ', str_replace('attribute_', '', $key ) );
+				foreach ( $product_variation->get_attributes() as $attribute => $attribute_value ){
 
-					$attr_array = [ $newKey => $attr ] + $attr_array;
+					$attribute_name;
+
+					if( preg_match('/pa_/', $attribute ) ){
+						$tax = get_taxonomy( $attribute );
+						$attribute_name = $tax->labels->singular_name;
+
+						$attribute_term = get_term_by( 'slug', $attribute_value, $attribute );
+						$attribute_value = $attribute_term->name;
+
+					} else {
+						$attribute_name = str_replace( '-', ' ', str_replace('attribute_', '', str_replace('pa_', '', $attribute) ) );
+					}
+
+					$attr_array = [ $attribute_name => $attribute_value ] + $attr_array;
 				}
 
 				$skus[] = [
-					'title' => $product->get_name(),
-					'price' => $product_variation['display_price'],
-					'amount' => $product_variation['max_qty'],
-					'partnerId' => $product_variation['sku'],
-					'ean' => get_post_meta( $product_variation['variation_id'], 'anymarket_variable_barcode', true ),
+					'title' => $product_variation->get_name(),
+					'price' => $product_variation->get_regular_price(),
+					'sellPrice' => $product_variation->get_price(),
+					'amount' => $product_variation->get_stock_quantity(),
+					'partnerId' => $product_variation->get_sku(),
+					'ean' => get_post_meta( $variation_id, 'anymarket_variable_barcode', true ),
 					'variations' => $attr_array,
 					// internal id to check later
-					'internalId' => $product_variation['variation_id']
+					'internalId' => $variation_id
 				];
 			}
 
@@ -308,7 +388,7 @@ class ExportService
 			$stockLocal['amount'] = $response->content[0]->amount;
 		}
 
-		if( get_option('anymarket_is_dev_env') == 'true' ){
+		if( get_option('anymarket_show_logs') == 'true' ){
 			$this->logger->debug( print_r($report, true), ['source' => 'woocommerce-anymarket']);
 			$this->logger->debug( print_r($stockLocal, true), ['source' => 'woocommerce-anymarket']);
 		}
@@ -316,4 +396,5 @@ class ExportService
 		return $stockLocal;
 
 	}
+
 }

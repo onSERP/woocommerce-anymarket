@@ -43,10 +43,11 @@ class AssetsServiceProvider implements ServiceProviderInterface
 			'nonce' => wp_create_nonce('anymarket-ajax-nonce')
 		));
 
-		$isDev = get_option( 'anymarket_is_dev_env' );
-		$anymarketToken = get_option( 'anymarket_token' );
+		$isDev = get_option( 'anymarket_is_dev_env', 'false' );
+		$anymarketToken = get_option( 'anymarket_token', 'false' );
+		$hasBrand = defined('ANYMARKET_BRAND_CPT') === true ? 'true' : 'false';
 
-		$script = "var anymarket = { sandbox: ${isDev}, token: '${anymarketToken}' }";
+		$script = "var anymarket = { sandbox: ${isDev}, token: '${anymarketToken}', hasBrand: ${hasBrand} }";
 
 		wp_register_script( 'anymarket-sandbox-check', '' );
 		wp_enqueue_script( 'anymarket-sandbox-check' );
@@ -62,24 +63,6 @@ class AssetsServiceProvider implements ServiceProviderInterface
 			);
 		}
 
-		$currentScreen = get_current_screen();
-		if( $currentScreen->post_type === 'shop_order' && $currentScreen->base === 'post' ){
-			\Anymarket::core()->assets()->enqueueScript(
-				'anymarket-admin-order-js-bundle',
-				\Anymarket::core()->assets()->getBundleUrl( 'order-vue', '.js' ),
-				[ 'jquery' ],
-				true
-			);
-
-			$styleOrder = \Anymarket::core()->assets()->getBundleUrl( 'order-vue', '.css' );
-
-			if ( $styleOrder ) {
-				\Anymarket::core()->assets()->enqueueStyle(
-					'anymarket-admin-order-css-bundle',
-					$styleOrder
-				);
-			}
-		}
 	}
 
 	/**

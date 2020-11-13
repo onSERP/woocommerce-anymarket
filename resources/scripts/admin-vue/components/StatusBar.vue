@@ -18,6 +18,7 @@
         :dataText="`${exportedCategories}/${totalCategories}`"
       />
       <StatusBox
+        v-if="hasBrand"
         :loaded="loaded"
         title="Marcas exportadas"
         :dataText="`${exportedBrands}/${totalBrands}`"
@@ -45,6 +46,11 @@ export default {
       exportedBrands: 0,
       loaded: false,
     }
+  },
+  computed: {
+    hasBrand() {
+      return !(this.totalBrands === 0)
+    },
   },
   mounted() {
     this.getStatus()

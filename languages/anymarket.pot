@@ -1,10 +1,11 @@
-# Copyright (C) 2020 Atanas Angelov
-# This file is distributed under the GPL-2.0-only.
+# Copyright (C) 2020 onSERP Marketing
+# This file is distributed under the UNLICENSED.
 msgid ""
 msgstr ""
-"Project-Id-Version: Woocommerce Anymarket 0.15.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wpemerge\n"
-"POT-Creation-Date: 2020-05-20 20:42:11+00:00\n"
+"Project-Id-Version: Woocommerce Anymarket 1.0.0-alpha.5\n"
+"Report-Msgid-Bugs-To: "
+"https://wordpress.org/support/plugin/anymarket-woocommerce\n"
+"POT-Creation-Date: 2020-10-05 16:54:42+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -12,6 +13,272 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: node-wp-i18n 1.2.3\n"
+
+#: app/src/Anymarket/AnymarketOrder.php:303
+msgid "Pedido importado do Anymarket"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:92
+#: app/src/WordPress/AdminServiceProvider.php:95
+msgid "Painel"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:96
+msgid "Instruções"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:97
+msgid "Sobre"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:121
+msgid "Every Five Minutes"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:141
+msgid "Faturado <span class=\"count\">(%s)</span>"
+msgid_plural "Faturado <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/src/WordPress/AdminServiceProvider.php:151
+msgid "Enviado <span class=\"count\">(%s)</span>"
+msgid_plural "Enviado <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/src/WordPress/AdminServiceProvider.php:200
+msgid "Ver no Anymarket"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:431
+msgid "Produto <b>%s</b> exportado com sucesso."
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:435
+msgid ""
+"O produto <b>%1$s</b> falhou na exportação. Você precisa ativar o "
+"gerenciamento de estoque no produto."
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:437
+msgid "O produto <b>%1$s</b> falhou na exportação. Mensagem do erro: %2$s."
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:443
+msgid ""
+"Se você excluiu este produto no Anymarket, você deverá desativar e reativar "
+"a integração do produto novamente"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:462
+msgid "Categoria <b>%s</b> exportada com sucesso."
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:465
+msgid "A categoria <b>%1$s</b> falhou na exportação. Código do erro: %2$s."
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:469
+msgid ""
+"Se você excluiu esta categoria no Anymarket, você deverá recriá-la no "
+"Woocommerce para refazer a integração"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:488
+msgid "Marca <b>%s</b> exportada com sucesso."
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:491
+msgid "A marca <b>%1$s</b> falhou na exportação. Código do erro: %2$s."
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:495
+msgid ""
+"Se você excluiu esta marca no Anymarket, você deverá recriá-la no "
+"Woocommerce para refazer a integração"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:512
+msgid "Produto <b>%s</b> removido da integração com sucesso."
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:526
+msgid "Erro ao remover a categoria <b>%s</b> do anymarket"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:540
+msgid "Categoria <b>%s</b> removida do anymarket"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:644
+msgid ""
+"<b>Importante:</b> Antes de adicionar variações você deve criá-las no "
+"anymarket."
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:69
+msgid "Integrar com o Anymarket?"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:71
+msgid "Não"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:72
+msgid "Sim"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:79
+msgid "Garantia (meses)"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:83
+#: app/src/WordPress/FieldsServiceProvider.php:224
+#: app/src/WordPress/FieldsServiceProvider.php:254
+msgid "Campo obrigatório para o Anymarket"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:89
+msgid "Modelo"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:90
+msgid "Campo obrigatório para o Anymarket."
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:96
+msgid "Markup"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:100
+msgid "Campo obrigatório para o Anymarket. Se não preenchido, será enviado \"1\""
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:106
+msgid "Cálculo de preço"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:108
+msgid "Automático, pela mudança do custo"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:109
+msgid "Manual, eu controlo o preço pelo SKU"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:110
+msgid "Manual, eu controlo o preço pelo anúncio"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:136
+msgid "Status: Faturado"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:137
+msgid "Chave de acesso da NF"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:138
+msgid "Número de série"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:142
+msgid "Número da nota"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:146
+msgid "Data de emissão da NF"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:147
+msgid "Código Fiscal de Operações e Prestações"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:148
+msgid "Link da nota"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:149
+msgid "Link do PDF ou XML da nota"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:150
+msgid "Observações da nota"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:151
+msgid "XML (Arquivo)"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:159
+msgid "Status: Enviado"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:160
+msgid "URL de rastreamento"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:161
+msgid "Código de rastreamento"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:162
+msgid "Transportadora"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:163
+msgid "CNPJ da transportadora"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:164
+msgid "Estimativa de entrega"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:165
+msgid "Data em que foi entregue à transportadora"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:167
+msgid "Data em que foi entregue ao cliente"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:182
+msgid "Campos do Anymarket"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:189
+msgid "Obrigatório para o Anymarket. Se não específicado será enviado como \"1\""
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:205
+msgid "Anymarket"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:223
+#: app/src/WordPress/FieldsServiceProvider.php:253
+msgid "Código de barras"
+msgstr ""
+
+#: app/src/WordPress/FieldsServiceProvider.php:264
+msgid "ID do SKU no Anymarket"
+msgstr ""
+
+#: app/src/WordPress/PluginServiceProvider.php:87
+msgid "More information about %s"
+msgstr ""
+
+#: app/src/WordPress/PluginServiceProvider.php:89
+msgid "View details"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "Integração entre o Woocommerce e a plataforma de marketplaces ANYMARKET."
+msgstr ""
+
+#: app/src/WordPress/PluginServiceProvider.php:154
+msgid "Faça upload do plugin e ative-o"
+msgstr ""
 
 #: app/version.php:54
 #. Translators: %1$s = plugin or theme name; %2$s = minimum version number;
@@ -22,22 +289,30 @@ msgid ""
 "loaded version %5$s."
 msgstr ""
 
-#: views/example.php:12
-msgid "Hello World!"
-msgstr ""
-
 #. Plugin Name of the plugin/theme
 msgid "Woocommerce Anymarket"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "https://wpemerge.com/"
+msgid "https://onserp.com.br/"
 msgstr ""
 
 #. Author of the plugin/theme
-msgid "Atanas Angelov"
+msgid "onSERP Marketing"
 msgstr ""
 
 #. Author URI of the plugin/theme
-msgid "https://atanas.dev/"
+msgid "https://onserp.com.br"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:136
+#: app/src/WordPress/AdminServiceProvider.php:172
+msgctxt "WooCommerce Order status"
+msgid "Faturado"
+msgstr ""
+
+#: app/src/WordPress/AdminServiceProvider.php:146
+#: app/src/WordPress/AdminServiceProvider.php:173
+msgctxt "WooCommerce Order status"
+msgid "Enviado"
 msgstr ""

@@ -1,10 +1,10 @@
 <?php
 /**
  * Plugin Name: Woocommerce Anymarket
- * Plugin URI: https://onserp.com.br/integracao-anymarket
+ * Plugin URI: https://onserp.com.br/
  * Description: Integração entre o Woocommerce e a plataforma de marketplaces ANYMARKET.
- * Version: 1.0.0-alpha
- * Requires at least: 5.2
+ * Version: 1.0.0-beta.3
+ * Requires at least: 5.3
  * Requires PHP: 7.3.2
  * Author: onSERP Marketing
  * Author URI: https://onserp.com.br
@@ -12,7 +12,7 @@
  * Text Domain: anymarket
  * Domain Path: /languages
  *
- * WC requires at least: 4.3
+ * WC requires at least: 4.0
  * WC tested up to: 4.7
  *
  * YOU SHOULD NORMALLY NOT NEED TO ADD ANYTHING HERE - any custom functionality unrelated
@@ -40,6 +40,7 @@ if ( ! $load ) {
 
 define( 'ANYMARKET_PLUGIN_FILE', __FILE__ );
 define( 'ANYMARKET_PLUGIN_NAME', 'anymarket');
+define( 'ANYMARKET_PLUGIN_VERSION', '1.0.0-beta.3' );
 
 //custom configs file
 if ( file_exists( __DIR__ . DIRECTORY_SEPARATOR . 'anymarket-config.php' ) ){

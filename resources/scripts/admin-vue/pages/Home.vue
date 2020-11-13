@@ -19,10 +19,16 @@
                   1º PASSO - Exportar Categorias
                 </a>
               </li>
-              <!-- <li><a href="">2º PASSO - Exportar Marcas</a></li> -->
+              <li>
+                <a
+                  href="/wp-admin/edit.php?post_type=product&page=product_attributes"
+                >
+                  2º PASSO - Exportar Atributos
+                </a>
+              </li>
               <li>
                 <a href="/wp-admin/edit.php?post_type=product">
-                  2º PASSO - Exportar Produtos
+                  3º PASSO - Exportar Produtos
                 </a>
               </li>
             </ul>
@@ -79,6 +85,26 @@
             <div class="help-text">
               Marque a opção se o integrador informar que seu ambiente é de
               Testes (Sandbox)
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="showLogs">Logs</label>
+          <div class="input relative">
+            <toggle-button
+              id="showLogs"
+              v-model="options.showLogs"
+              sync
+              :color="{
+                checked: '#3366FF',
+                unchecked: '#555770',
+                disabled: '#CCCCCC',
+              }"
+            />
+            <span class="absolute left-0 ml-16"> Habilitar logs </span>
+            <div class="help-text">
+              Registra os eventos do plugin.
+              <a href="/wp-admin/admin.php?page=wc-status&tab=logs">Ver Logs</a>
             </div>
           </div>
         </div>
@@ -146,6 +172,7 @@ export default {
         anymarketOI: '',
         isDevEnv: false,
         callbackURL: '',
+        showLogs: false,
       },
     }
   },
@@ -155,8 +182,8 @@ export default {
       this.options.anymarketOI = response.data.anymarket_oi
       this.options.callbackURL = response.data.callback_url
 
-      //string to boolean
       this.options.isDevEnv = response.data.is_dev_env === 'true'
+      this.options.showLogs = response.data.show_logs === 'true'
     })
   },
   methods: {
