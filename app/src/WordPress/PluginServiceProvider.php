@@ -29,13 +29,12 @@ class PluginServiceProvider implements ServiceProviderInterface
 		add_action( 'init', [$this, 'setSettings'] );
 		add_action( 'rest_api_init' , [$this, 'initRestRouter']);
 
+		add_action( 'plugin_action_links_' . $this->plugin_slug, [$this, 'actionLinks'] );
+
 		add_filter('plugins_api', [$this, 'pluginInfo'], 20, 3);
 
-		add_action( 'plugin_action_links_' . plugin_basename( ANYMARKET_PLUGIN_FILE ), [$this, 'actionLinks'] );
+		add_action( 'admin_init', [$this, 'showUpdateMessage'] );
 
-		add_filter('site_transient_update_plugins', [$this, 'pushUpdate'] );
-
-		add_action( 'upgrader_process_complete', [$this, 'afterUpdate'], 10, 2 );
 	}
 
 	/**
@@ -85,17 +84,159 @@ class PluginServiceProvider implements ServiceProviderInterface
 	}
 
 	public function actionLinks( $links ){
-		$plugin_name = trim( get_file_data( ANYMARKET_PLUGIN_FILE, [ 'Plugin Name' ] )[0] );
 		$links = array_merge( array(
-			sprintf( '<a href="%s" class="thickbox" aria-label="%s" data-title="%s">%s</a>',
-				esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . plugin_basename( ANYMARKET_PLUGIN_FILE )  .
-					'&TB_iframe=true&width=600&height=550' ) ),
-				esc_attr( sprintf( __( 'More information about %s', 'anymarket' ), $plugin_name ) ),
-				esc_attr( $plugin_name ),
-				__( 'View details', 'anymarket' ))
+			sprintf( '<a href="%s">%s</a>',	esc_url( admin_url( 'admin.php?page=anymarket' ) ), __( 'Settings' ))
 		), $links );
 
 		return $links;
+	}
+
+	public function showUpdateMessage(){
+
+		$plugin_info = $this->checkForUpdates();
+
+		$requires_wp  = isset( $plugin_info->requires ) ? $plugin_info->requires : null;
+		$requires_php = isset( $plugin_info->requires_php ) ? $plugin_info->requires_php : null;
+
+		$compatible_wp  = is_wp_version_compatible( $requires_wp );
+		$compatible_php = is_php_version_compatible( $requires_php );
+
+		if( $plugin_info && version_compare( ANYMARKET_PLUGIN_VERSION, $plugin_info->version, '<' ) && $compatible_wp && $compatible_wp ) {
+
+			add_action( 'after_plugin_row_' . $this->plugin_slug, [$this, 'updateMessage'], 10, 2 );
+
+		}
+	}
+
+	public function updateMessage($file, $plugin_data ){
+		$plugin_info = $this->checkForUpdates();
+
+		$plugins_allowedtags = array(
+			'a'       => array(
+				'href'  => array(),
+				'title' => array(),
+			),
+			'abbr'    => array( 'title' => array() ),
+			'acronym' => array( 'title' => array() ),
+			'code'    => array(),
+			'em'      => array(),
+			'strong'  => array(),
+		);
+
+		$plugin_name = wp_kses( $plugin_data['Name'], $plugins_allowedtags );
+		$details_url = self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $file . '&section=changelog&TB_iframe=true&width=600&height=800' );
+
+		$wp_list_table = _get_list_table(
+			'WP_Plugins_List_Table',
+			[
+				'screen' => get_current_screen(),
+			]
+		);
+
+		$requires_php   = isset( $plugin_info->requires_php ) ? $plugin_info->requires_php : null;
+		$compatible_php = is_php_version_compatible( $requires_php );
+		$notice_type    = $compatible_php ? 'notice-warning' : 'notice-error';
+
+		printf(
+			'<tr class="plugin-update-tr%s" id="%s" data-slug="%s" data-plugin="%s">' .
+			'<td colspan="%s" class="plugin-update colspanchange">' .
+			'<div class="update-message notice inline %s notice-alt"><p>',
+			' active',
+			esc_attr( $this->plugin_slug . '-update' ),
+			esc_attr( $this->plugin_slug ),
+			esc_attr( $file ),
+			esc_attr( $wp_list_table->get_column_count() ),
+			$notice_type
+		);
+
+		if ( ! current_user_can( 'update_plugins' ) ) {
+			printf(
+				/* translators: 1: Plugin name, 2: Details URL, 3: Additional link attributes, 4: Version number. */
+				__( 'There is a new version of %1$s available. <a href="%2$s" %3$s>View version %4$s details</a>.' ),
+				$plugin_name,
+				esc_url( $details_url ),
+				sprintf(
+					'class="thickbox open-plugin-details-modal" aria-label="%s"',
+					/* translators: 1: Plugin name, 2: Version number. */
+					esc_attr( sprintf( __( 'View %1$s version %2$s details' ), $plugin_name, $plugin_info->version ) )
+				),
+				esc_attr( $plugin_info->version )
+			);
+		} elseif ( empty( $plugin_info->download_url ) ) {
+			printf(
+				/* translators: 1: Plugin name, 2: Details URL, 3: Additional link attributes, 4: Version number. */
+				__( 'There is a new version of %1$s available. <a href="%2$s" %3$s>View version %4$s details</a>. <em>Automatic update is unavailable for this plugin.</em>' ),
+				$plugin_name,
+				esc_url( $details_url ),
+				sprintf(
+					'class="thickbox open-plugin-details-modal" aria-label="%s"',
+					/* translators: 1: Plugin name, 2: Version number. */
+					esc_attr( sprintf( __( 'View %1$s version %2$s details' ), $plugin_name, $plugin_info->version ) )
+				),
+				esc_attr( $plugin_info->version )
+			);
+		} else {
+			if ( $compatible_php ) {
+				printf(
+					/* translators: 1: Plugin name, 2: Details URL, 3: Additional link attributes, 4: Version number, 5: Update URL, 6: Additional link attributes. */
+					__( 'There is a new version of %1$s available. <a href="%2$s" %3$s>View version %4$s details</a> or <a href="%5$s" %6$s>update now</a>.' ),
+					$plugin_name,
+					esc_url( $details_url ),
+					sprintf(
+						'class="thickbox open-plugin-details-modal" aria-label="%s"',
+						/* translators: 1: Plugin name, 2: Version number. */
+						esc_attr( sprintf( __( 'View %1$s version %2$s details' ), $plugin_name, $plugin_info->version ) )
+					),
+					esc_attr( $plugin_info->version ),
+					wp_nonce_url( self_admin_url( 'update.php?action=upgrade-plugin&plugin=' ) . $file, 'upgrade-plugin_' . $file ),
+					sprintf(
+						'class="update-link" aria-label="%s"',
+						/* translators: %s: Plugin name. */
+						esc_attr( sprintf( _x( 'Update %s now', 'plugin' ), $plugin_name ) )
+					)
+				);
+			} else {
+				printf(
+					/* translators: 1: Plugin name, 2: Details URL, 3: Additional link attributes, 4: Version number 5: URL to Update PHP page. */
+					__( 'There is a new version of %1$s available, but it doesn&#8217;t work with your version of PHP. <a href="%2$s" %3$s>View version %4$s details</a> or <a href="%5$s">learn more about updating PHP</a>.' ),
+					$plugin_name,
+					esc_url( $details_url ),
+					sprintf(
+						'class="thickbox open-plugin-details-modal" aria-label="%s"',
+						/* translators: 1: Plugin name, 2: Version number. */
+						esc_attr( sprintf( __( 'View %1$s version %2$s details' ), $plugin_name, $plugin_info->version ) )
+					),
+					esc_attr( $plugin_info->version ),
+					esc_url( wp_get_update_php_url() )
+				);
+				wp_update_php_annotation( '<br><em>', '</em>' );
+			}
+		}
+
+		do_action( "in_plugin_update_message-{$file}", $plugin_data, $plugin_info ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+
+		echo '</p></div></td></tr>';
+	}
+
+	protected function checkForUpdates(){
+		// trying to get from cache first
+		if( false == $remote = get_transient( 'anymarket_update' ) ) {
+
+			$remote = wp_remote_get( 'https://onserp.com.br/plugins/anymarket/info.json', [
+				'timeout' => 10,
+				'headers' => [
+					'Accept' => 'application/json'
+				]
+			]);
+
+			if ( ! is_wp_error( $remote ) && isset( $remote['response']['code'] ) && $remote['response']['code'] == 200 && ! empty( $remote['body'] ) ) {
+				set_transient( 'anymarket_update', json_decode( $remote['body'] ), 43200 ); // 12 hours cache
+				return json_decode( $remote['body'] );
+			}
+		}
+
+		return get_transient( 'anymarket_update' );
+
 	}
 
 	/**
@@ -118,51 +259,32 @@ class PluginServiceProvider implements ServiceProviderInterface
 			return false;
 		}
 
-		// trying to get from cache first
-		if( false == $remote = get_transient( 'anymarket_update_' . $this->plugin_slug ) ) {
+		$plugin_info = $this->checkForUpdates();
 
-			// info.json is the file with the actual plugin information on your server
-			$remote = wp_remote_get( 'https://onserp.com.br/plugins/anymarket/info.json', array(
-				'timeout' => 10,
-				'headers' => array(
-					'Accept' => 'application/json'
-				) )
-			);
+		$res = new \stdClass();
 
-			if ( ! is_wp_error( $remote ) && isset( $remote['response']['code'] ) && $remote['response']['code'] == 200 && ! empty( $remote['body'] ) ) {
-				set_transient( 'anymarket_update_' . $this->plugin_slug, $remote, 43200 ); // 12 hours cache
-			}
-
-		}
-
-		if( ! is_wp_error( $remote ) && isset( $remote['response']['code'] ) && $remote['response']['code'] == 200 && ! empty( $remote['body'] ) ) {
-
-			$remote = json_decode( $remote['body'] );
-			$res = new \stdClass();
-
-			$res->name = $remote->name;
-			$res->slug = $this->plugin_slug;
-			$res->version = $remote->version;
-			$res->tested = $remote->tested;
-			$res->requires = $remote->requires;
-			$res->author = '<a href="https://onserp.com.br">onSERP Marketing</a>';
-			$res->author_profile = 'https://profiles.wordpress.org/gustavo641';
-			$res->contributors = [['display_name' => 'Gustavo Rocha', 'profile'=> 'https://profiles.wordpress.org/gustavo641', 'avatar'=> 'https://pt.gravatar.com/userimage/127666815/fe36cfe1a4d212b899a1ba4880e332b3.jpeg']];
-			$res->download_link = $remote->download_url;
-			$res->trunk = $remote->download_url;
-			$res->requires_php = '7.3';
-			$res->last_updated = $remote->last_updated;
-			$res->sections = [
-				'description' => __('Integração entre o Woocommerce e a plataforma de marketplaces ANYMARKET.', 'anymarket'),
-				'installation' => __('Faça upload do plugin e ative-o', 'anymarket'),
-				'changelog' => $remote->sections->changelog
-				// you can add your custom sections (tabs) here
-			];
+		$res->name = $plugin_info->name;
+		$res->slug = $this->plugin_slug;
+		$res->version = $plugin_info->version;
+		$res->tested = $plugin_info->tested;
+		$res->requires = $plugin_info->requires;
+		$res->author = '<a href="https://onserp.com.br">onSERP Marketing</a>';
+		$res->author_profile = 'https://profiles.wordpress.org/gustavo641';
+		$res->contributors = [['display_name' => 'Gustavo Rocha', 'profile'=> 'https://profiles.wordpress.org/gustavo641', 'avatar'=> 'https://pt.gravatar.com/userimage/127666815/fe36cfe1a4d212b899a1ba4880e332b3.jpeg']];
+		$res->download_link = $plugin_info->download_url;
+		$res->trunk = $plugin_info->download_url;
+		$res->requires_php = '7.3';
+		$res->last_updated = $plugin_info->last_updated;
+		$res->sections = [
+			'description' => __('Integração entre o Woocommerce e a plataforma de marketplaces ANYMARKET. <b>Isto é um teste. Por favor não instale.</b>', 'anymarket'),
+			'installation' => __('Faça upload do plugin e ative-o. <b>Isto é um teste. Por favor não instale.</b>', 'anymarket'),
+			'changelog' => $plugin_info->sections->changelog
+		];
 
 			// in case you want the screenshots tab, use the following HTML format for its content:
 			// <ol><li><a href="IMG_URL" target="_blank"><img src="IMG_URL" alt="CAPTION" /></a><p>CAPTION</p></li></ol>
-			if( !empty( $remote->sections->screenshots ) ) {
-				$res->sections['screenshots'] = $remote->sections->screenshots;
+			if( !empty( $plugin_info->sections->screenshots ) ) {
+				$res->sections['screenshots'] = $plugin_info->sections->screenshots;
 			}
 
 			$res->banners = [
@@ -171,59 +293,5 @@ class PluginServiceProvider implements ServiceProviderInterface
 			];
 			return $res;
 
-		}
-
-		return false;
-
-	}
-
-	public function pushUpdate( $transient ){
-
-		if ( empty($transient->checked ) ) {
-				return $transient;
-			}
-
-		// trying to get from cache first, to disable cache comment 10,20,21,22,24
-		if( false == $remote = get_transient( 'anymarket_update_' . $this->plugin_slug ) ) {
-
-			// info.json is the file with the actual plugin information on your server
-			$remote = wp_remote_get( 'https://onserp.com.br/plugins/anymarket/info.json', [
-				'timeout' => 10,
-				'headers' => [
-					'Accept' => 'application/json'
-				] ]
-			);
-
-			if ( !is_wp_error( $remote ) && isset( $remote['response']['code'] ) && $remote['response']['code'] == 200 && !empty( $remote['body'] ) ) {
-				set_transient( 'anymarket_update_' . $this->plugin_slug, $remote, 43200 ); // 12 hours cache
-			}
-
-		}
-
-		if( $remote ) {
-
-			$remote = json_decode( $remote['body'] );
-
-			// your installed plugin version should be on the line below! You can obtain it dynamically of course
-			if( $remote && version_compare( '1.0.0-alpha.5', $remote->version, '<' ) && version_compare($remote->requires, get_bloginfo('version'), '<' ) ) {
-				$res = new \stdClass();
-				$res->slug = $this->plugin_slug;
-				$res->plugin = $this->plugin_slug; // it could be just YOUR_PLUGIN_SLUG.php if your plugin doesn't have its own directory
-				$res->new_version = $remote->version;
-				$res->tested = $remote->tested;
-				$res->package = $remote->download_url;
-					   $transient->response[$res->plugin] = $res;
-					   //$transient->checked[$res->plugin] = $remote->version;
-				   }
-
-		}
-			return $transient;
-	}
-
-	public function afterUpdate( $upgrader_object, $options ){
-		if ( $options['action'] == 'update' && $options['type'] === 'plugin' )  {
-			// just clean the cache when new plugin version is installed
-			delete_transient( 'anymarket_update_' . $this->plugin_slug );
-		}
 	}
 }

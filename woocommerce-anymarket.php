@@ -40,6 +40,7 @@ if ( ! $load ) {
 
 define( 'ANYMARKET_PLUGIN_FILE', __FILE__ );
 define( 'ANYMARKET_PLUGIN_NAME', 'anymarket');
+define( 'ANYMARKET_PLUGIN_VERSION', '1.0.0-beta.3' );
 
 //custom configs file
 if ( file_exists( __DIR__ . DIRECTORY_SEPARATOR . 'anymarket-config.php' ) ){
