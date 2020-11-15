@@ -30,10 +30,12 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		add_filter( 'wc_order_statuses', [$this, 'addStatusToWoocommerce']);
 
 		// custom columns on orders
-		add_filter( 'manage_shop_order_posts_columns', [$this, 'addColumnsToOrder'], 20);
-		add_filter( 'manage_edit-shop_order_sortable_columns', [$this, 'makeOrderColumnsSortable']);
-		add_action( 'manage_shop_order_posts_custom_column', [$this, 'populateOrderColumns'], 10, 2);
-		add_action( 'pre_get_posts', [$this, 'orderColumnsOrderby'] );
+		if( get_option( 'anymarket_use_order' ) == 'true' ) {
+			add_filter( 'manage_shop_order_posts_columns', [$this, 'addColumnsToOrder'], 20);
+			add_filter( 'manage_edit-shop_order_sortable_columns', [$this, 'makeOrderColumnsSortable']);
+			add_action( 'manage_shop_order_posts_custom_column', [$this, 'populateOrderColumns'], 10, 2);
+			add_action( 'pre_get_posts', [$this, 'orderColumnsOrderby'] );
+		}
 
 		// bulk action on product
 		add_filter( 'bulk_actions-edit-product', [$this, 'bulkExportProducts'] );
@@ -63,15 +65,16 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		add_action( 'admin_init', [$this, 'bulkExportVariations'] );
 		add_action('admin_footer', [$this, 'exportVariationsButton']);
 
-		// new order
+		// discount stock on new order
 		add_action( 'woocommerce_thankyou', [$this, 'discountStock'] );
 
 		//initiate shipping class
 		add_filter( 'woocommerce_shipping_methods', [$this, 'addAnymarketShippingMethod'] );
 
 		// on order change status
-		add_action( 'woocommerce_order_status_changed', [$this, 'updateStatus'], 10, 3);
-
+		if( get_option( 'anymarket_use_order' ) == 'true' ) {
+			add_action( 'woocommerce_order_status_changed', [$this, 'updateStatus'], 10, 3);
+		}
 		// allow xml uploads
 		add_filter( 'upload_mimes', [$this, 'uploadXML'] );
 	}

@@ -359,4 +359,66 @@ class AnymarketOrder extends ExportService {
 
 		return $newOrder;
 	}
+
+	public function discount( int $id ){
+		$anyOrder = $this->getOrderData( $id )['response'];
+
+		if ( empty( $anyOrder ) ) {
+			return new \WP_Error ('could_not_connect', 'Could not connect to anymarket servers', ['status' => 503]);
+			$this->logger->debug( print_r($this->getOrderData( $id )['report'], true), ['source' => 'woocommerce-anymarket']);
+		}
+
+		foreach ($anyOrder->items as $orderItem ){
+
+			$product_id = $wpdb->get_var(
+				$wpdb->prepare(
+					"
+					SELECT pm.post_id
+					FROM $wpdb->postmeta pm
+					LEFT JOIN $wpdb->posts p
+						ON p.ID = pm.post_id
+					WHERE pm.meta_key = '%s'
+						AND p.post_status = '%s'
+						AND p.post_type = '%s'
+						AND pm.meta_value = '%d'
+				  "
+				  , '_anymarket_variation_id', 'publish', 'product', absint( $orderItem->sku->id ) )
+			);
+
+			$variable_product_id = $wpdb->get_var(
+				$wpdb->prepare(
+					"
+					SELECT pm.post_id
+					FROM $wpdb->postmeta pm
+					LEFT JOIN $wpdb->posts p
+						ON p.ID = pm.post_id
+					WHERE pm.meta_key = '%s'
+						AND p.post_status = '%s'
+						AND p.post_type = '%s'
+						AND pm.meta_value = '%d'
+				  "
+				  , 'anymarket_variation_id', 'publish', 'product_variation', absint( $orderItem->sku->id ) )
+			);
+
+			if( $product_id || $variable_product_id ) {
+
+					$_id = $product_id ? $product_id : $variable_product_id;
+
+					$product_obj = wc_get_product($_id);
+					$amount = $orderItem->amount;
+
+					if( ! $product_obj->get_manage_stock() ) return false;
+
+					$stock_managed_id = $product_obj->get_stock_managed_by_id();
+
+					$product_to_discount_stock = wc_get_product($stock_managed_id);
+
+					$stock = $product_to_discount_stock->get_stock_quantity();
+
+					$stock !== null &&
+					$product_to_discount_stock->set_stock_quantity($stock - $amount);
+
+			}
+		}
+	}
 }

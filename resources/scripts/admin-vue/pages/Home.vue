@@ -109,6 +109,26 @@
           </div>
         </div>
         <div class="form-group">
+          <label for="useOrder">Pedido</label>
+          <div class="input relative">
+            <toggle-button
+              id="useOrder"
+              v-model="options.useOrder"
+              sync
+              :color="{
+                checked: '#3366FF',
+                unchecked: '#555770',
+                disabled: '#CCCCCC',
+              }"
+            />
+            <span class="absolute left-0 ml-16"> Integrar pedidos </span>
+            <div class="help-text">
+              Caso desabilitado, sua loja não receberá pedidos e apenas o
+              estoque será descontado.
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
           <label for="callbackURL">URL para Callback</label>
           <div class="input input-copy">
             <input
@@ -173,18 +193,25 @@ export default {
         isDevEnv: false,
         callbackURL: '',
         showLogs: false,
+        useOrder: false,
       },
     }
   },
   mounted() {
-    anymarket.get('options').then((response) => {
-      this.options.anymarketToken = response.data.anymarket_token
-      this.options.anymarketOI = response.data.anymarket_oi
-      this.options.callbackURL = response.data.callback_url
+    anymarket
+      .get('options')
+      .then((response) => {
+        this.options.anymarketToken = response.data.anymarket_token
+        this.options.anymarketOI = response.data.anymarket_oi
+        this.options.callbackURL = response.data.callback_url
 
-      this.options.isDevEnv = response.data.is_dev_env === 'true'
-      this.options.showLogs = response.data.show_logs === 'true'
-    })
+        this.options.isDevEnv = response.data.is_dev_env === 'true'
+        this.options.showLogs = response.data.show_logs === 'true'
+        this.options.useOrder = response.data.use_order === 'true'
+      })
+      .catch((err) => {
+        console.log(err)
+      })
   },
   methods: {
     copiedTooltip(e) {
