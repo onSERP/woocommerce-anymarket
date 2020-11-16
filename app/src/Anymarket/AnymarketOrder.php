@@ -361,6 +361,7 @@ class AnymarketOrder extends ExportService {
 	}
 
 	public function discount( int $id ){
+		global $wpdb;
 		$anyOrder = $this->getOrderData( $id )['response'];
 
 		if ( empty( $anyOrder ) ) {
@@ -407,8 +408,6 @@ class AnymarketOrder extends ExportService {
 					$product_obj = wc_get_product($_id);
 					$amount = $orderItem->amount;
 
-					if( ! $product_obj->get_manage_stock() ) return false;
-
 					$stock_managed_id = $product_obj->get_stock_managed_by_id();
 
 					$product_to_discount_stock = wc_get_product($stock_managed_id);
@@ -417,6 +416,10 @@ class AnymarketOrder extends ExportService {
 
 					$stock !== null &&
 					$product_to_discount_stock->set_stock_quantity($stock - $amount);
+
+					if( get_option('anymarket_show_logs') == 'true' ){
+						$this->logger->debug( print_r('Produto id:' . $product_to_discount_stock . 'descontado' . $amount . ' item do estoque', true), ['source' => 'woocommerce-anymarket'] );
+					}
 
 			}
 		}
