@@ -416,10 +416,23 @@ class AnymarketOrder extends ExportService {
 
 					$stock !== null &&
 					$product_to_discount_stock->set_stock_quantity($stock - $amount);
+					$product_to_discount_stock->save();
 
 					if( get_option('anymarket_show_logs') == 'true' ){
-						$this->logger->debug( print_r('Produto id:' . $product_to_discount_stock . 'descontado' . $amount . ' item do estoque', true), ['source' => 'woocommerce-anymarket'] );
+						$this->logger->debug( 'Produto id: ' . $product_to_discount_stock->get_id() . ' tinha '.  $stock .' items em estoque e foram descontados ' . $amount . ' itens. Estoque restante é de ' . ($stock - $amount) . ' itens', ['source' => 'woocommerce-anymarket'] );
 					}
+
+					$update = new ExportProducts;
+
+					if( $product_to_discount_stock instanceof \WC_Product_Variable || $product_to_discount_stock->get_type() === 'variable' ){
+
+						$update->export( [$product_to_discount_stock->get_parent_id()] );
+
+					} else{
+						$update->export( [$product_to_discount_stock->get_id()] );
+					}
+
+
 
 			}
 		}
