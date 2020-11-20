@@ -36,12 +36,22 @@ class NotificationController
 
 		set_transient( 'order_' . $request['content']['id'] , 'in_progress', 30 );
 
-		$order = new AnymarketOrder;
-		$orderResponse = $order->make( $request['content']['id'] );
+		if( get_option( 'anymarket_use_order' ) == 'true' ) {
+			$order = new AnymarketOrder;
+			$orderResponse = $order->make( $request['content']['id'] );
 
-		$logger->debug( json_encode($orderResponse, JSON_UNESCAPED_UNICODE) , ['source' => 'woocommerce-anymarket'] );
+			$logger->debug( json_encode($orderResponse, JSON_UNESCAPED_UNICODE) , ['source' => 'woocommerce-anymarket'] );
 
-		if ( is_wp_error($orderResponse) ) return $orderResponse;
+			if ( is_wp_error($orderResponse) ) return $orderResponse;
+
+		} else {
+			$stock = new AnymarketOrder;
+			$stockResponse = $stock->discount( $request['content']['id'] );
+
+			$logger->debug( json_encode($stockResponse, JSON_UNESCAPED_UNICODE) , ['source' => 'woocommerce-anymarket'] );
+
+			if ( is_wp_error($stockResponse) ) return $stockResponse;
+		}
 
 		$response = new \WP_REST_Response( '' );
 		$response->set_status( 201 );

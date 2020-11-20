@@ -14,26 +14,25 @@ class AnymarketOrder extends ExportService {
 	 * @return void
 	 */
 	public function make( int $id ){
+		global $wpdb;
 
-		$existingOrder = get_posts([
-			'post_type' => 'shop_order',
-			'meta_query' => [
-				'relation' => 'AND',
-				[
-					'key' => '_anymarket_id',
-					'compare' => '=',
-					'value' => $id
-				],
-				[
-					'key' => '_is_anymarket_order',
-					'value' => 'true'
-				]
-			],
-			'post_status'    => 'any'
-		]);
+		$existingOrder = $wpdb->get_var(
+			$wpdb->prepare(
+				"
+					SELECT pm.post_id
+					FROM $wpdb->postmeta pm
+					LEFT JOIN $wpdb->posts p
+						ON p.ID = pm.post_id
+					WHERE pm.meta_key='%s'
+						AND p.post_type = '%s'
+						AND pm.meta_value='%d'
+					LIMIT 1
+				", '_anymarket_id', 'shop_order', absint( $id )
+			)
+		);
 
 		if ( !empty($existingOrder) ){
-			$response = $this->updateOrder( $existingOrder[0], $id );
+			$response = $this->updateOrder( get_post( absint($existingOrder) ), $id );
 		} else {
 			$response = $this->createOrder( $id );
 		}
@@ -42,7 +41,7 @@ class AnymarketOrder extends ExportService {
 	}
 
 	/**
-	 * Undocumented function
+	 * Triggered on updated order status
 	 *
 	 * @param [type] $order_id
 	 * @param [type] $status
@@ -54,6 +53,8 @@ class AnymarketOrder extends ExportService {
 		$nfe;
 		$report = [];
 		$order_anymarket_id = carbon_get_post_meta($order_id, 'anymarket_id');
+
+		if( empty( $order_anymarket_id ) ) return;
 
 		switch ($status){
 			case 'anymarket-billed':
@@ -88,6 +89,8 @@ class AnymarketOrder extends ExportService {
 				$data['tracking']['deliveredDate'] = anymarket_format_date( carbon_get_post_meta($order_id, 'anymarket_tracking_delivered'));
 			break;
 		}
+
+		$data = apply_filters( 'anymarket_update_order_status_data', $data );
 
 		if( empty($data) ) return false;
 
@@ -134,7 +137,7 @@ class AnymarketOrder extends ExportService {
 
 		$this->multiCurl->start();
 
-		if( get_option('anymarket_is_dev_env') == 'true' ){
+		if( get_option('anymarket_show_logs') == 'true' ){
 			$this->logger->debug( print_r($report, true), ['source' => 'woocommerce-anymarket']);
 		}
 	}
@@ -219,75 +222,117 @@ class AnymarketOrder extends ExportService {
 	 * @return void
 	 */
 	protected function assignToOrder(object $oldOrder, \WC_Order $newOrder, $updated = true ){
-
+		global $wpdb;
 		// first - carbon meta fields
 		carbon_set_post_meta($newOrder->get_id(), 'anymarket_order_marketplace', $oldOrder->marketPlace);
 		carbon_set_post_meta($newOrder->get_id(), 'is_anymarket_order', 'true');
 		carbon_set_post_meta($newOrder->get_id(), 'anymarket_id', $oldOrder->id);
 
 		if( false === $updated ){
-			$shippingFname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[0];
-			$shippingLname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[1];
 
-			$newOrder->set_shipping_first_name( $shippingFname );
-			$newOrder->set_shipping_last_name( $shippingLname );
+			if ( isset( $oldOrder->billingAddress ) ){
+				$shippingFname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[0];
+				$shippingLname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[1];
+			}
+
+			$newOrder->set_shipping_first_name( isset($shippingFname) ? $shippingFname : '' );
+			$newOrder->set_shipping_last_name( isset($shippingLname) ? $shippingLname : '' );
 
 			//formatar endereço - shipping
-			$newOrder->set_shipping_address_1( $oldOrder->shipping->street );
-			$newOrder->set_shipping_city( $oldOrder->shipping->city );
-			$newOrder->set_shipping_state( $oldOrder->shipping->stateNameNormalized );
-			$newOrder->set_shipping_postcode( $oldOrder->shipping->zipCode );
-			$newOrder->set_shipping_country( $oldOrder->shipping->countryNameNormalized );
 
-			$billingFname = anymarket_split_name( $oldOrder->buyer->name )[0];
-			$billingLname = anymarket_split_name( $oldOrder->buyer->name )[1];
+			if ( isset( $oldOrder->shipping ) ){
+				$newOrder->set_shipping_address_1( $oldOrder->shipping->street );
+				$newOrder->set_shipping_city( $oldOrder->shipping->city );
+				$newOrder->set_shipping_state( $oldOrder->shipping->stateNameNormalized );
+				$newOrder->set_shipping_postcode( $oldOrder->shipping->zipCode );
+				$newOrder->set_shipping_country( $oldOrder->shipping->countryNameNormalized );
+			}
 
-			$newOrder->set_billing_first_name( $billingFname );
-			$newOrder->set_billing_last_name( $billingLname );
-			$newOrder->set_billing_address_1( $oldOrder->billingAddress->street );
-			$newOrder->set_billing_city( $oldOrder->billingAddress->city );
-			$newOrder->set_billing_state( $oldOrder->billingAddress->stateNameNormalized );
-			$newOrder->set_billing_postcode( $oldOrder->billingAddress->zipCode );
-			$newOrder->set_billing_country( $oldOrder->billingAddress->country );
-			$newOrder->set_billing_email( $oldOrder->buyer->email );
-			$newOrder->set_billing_phone( $oldOrder->buyer->phone );
+			if ( isset( $oldOrder->buyer ) ){
+				$billingFname = anymarket_split_name( $oldOrder->buyer->name )[0];
+				$billingLname = anymarket_split_name( $oldOrder->buyer->name )[1];
+			}
+
+			if ( isset( $oldOrder->billingAddress ) ){
+				$newOrder->set_billing_first_name( isset($billingFname) ? $billingFname : '' );
+				$newOrder->set_billing_last_name( isset($billingLname) ? $billingLname : '' );
+				$newOrder->set_billing_address_1( $oldOrder->billingAddress->street );
+				$newOrder->set_billing_city( $oldOrder->billingAddress->city );
+				$newOrder->set_billing_state( $oldOrder->billingAddress->stateNameNormalized );
+				$newOrder->set_billing_postcode( $oldOrder->billingAddress->zipCode );
+				$newOrder->set_billing_country( $oldOrder->billingAddress->country );
+			}
+
+			if ( isset( $oldOrder->buyer ) ){
+				$newOrder->set_billing_email( $oldOrder->buyer->email );
+				$newOrder->set_billing_phone( $oldOrder->buyer->phone );
+			}
 
 			$newOrder->set_created_via( $oldOrder->marketPlace );
 			$newOrder->set_payment_method_title( $oldOrder->payments[0]->paymentMethodNormalized );
-			$newOrder->set_currency('BRL');
+			$newOrder->set_currency( get_option( 'woocommerce_currency' ) );
 
 			//add products
 			foreach ($oldOrder->items as $orderItem ){
-				$products = get_posts( [
-					'post_type' => ['product', 'product_variation'],
-					'meta_query' => [
-						'relation' => 'OR',
-						[
-							'key' => '_anymarket_variation_id',
-							'compare' => '=',
-							'value' => $orderItem->sku->id
-						],
-						[
-							'key' => 'anymarket_variation_id',
-							'compare' => '=',
-							'value' => $orderItem->sku->id
-						],
-					],
-					'status' => 'publish'
-				]);
 
-				if( !empty($products) )
-					$newOrder->add_product( wc_get_product($products[0]->ID), $orderItem->amount, [
+				$product_id = $wpdb->get_var(
+					$wpdb->prepare(
+						"
+						SELECT pm.post_id
+						FROM $wpdb->postmeta pm
+						LEFT JOIN $wpdb->posts p
+							ON p.ID = pm.post_id
+						WHERE pm.meta_key = '%s'
+							AND p.post_status = '%s'
+							AND p.post_type = '%s'
+							AND pm.meta_value = '%d'
+		  			"
+		  			, '_anymarket_variation_id', 'publish', 'product', absint( $orderItem->sku->id ) )
+				);
+
+				$variable_product_id = $wpdb->get_var(
+					$wpdb->prepare(
+						"
+						SELECT pm.post_id
+						FROM $wpdb->postmeta pm
+						LEFT JOIN $wpdb->posts p
+							ON p.ID = pm.post_id
+						WHERE pm.meta_key = '%s'
+							AND p.post_status = '%s'
+							AND p.post_type = '%s'
+							AND pm.meta_value = '%d'
+		  			"
+		  			, 'anymarket_variation_id', 'publish', 'product_variation', absint( $orderItem->sku->id ) )
+				);
+
+
+
+				if( $product_id || $variable_product_id )
+
+					$_id = $product_id ? $product_id : $variable_product_id;
+
+					$orderItemID = $newOrder->add_product( wc_get_product($_id), $orderItem->amount, [
 						'subtotal' => $orderItem->total,
 						'total' => $orderItem->total
 					] );
+
 			}
 
+			$shipping = new \WC_Order_Item_Shipping();
 
-			$newOrder->set_shipping_tax( $oldOrder->freight );
+			$shipping->set_method_title(
+				$orderItem->shippings[0]->shippingCarrierNormalized . ' - ' . $orderItem->shippings[0]->shippingtype
+			);
+			$shipping->set_method_id( 'anyshipping' );
+			$shipping->set_total( $oldOrder->freight );
+
+			$newOrder->add_item($shipping);
+
+			$newOrder->set_shipping_total( $oldOrder->freight );
 			$newOrder->set_discount_total( $oldOrder->discount );
 
-			$newOrder->calculate_totals();
+			$newOrder->set_total( $oldOrder->total );
+			$newOrder->save();
 		}
 
 			$orderStatuses = [
@@ -302,7 +347,6 @@ class AnymarketOrder extends ExportService {
 		$newOrder->update_status( $orderStatuses[$oldOrder->status],
 					__('Pedido importado do Anymarket', 'anymarket'));
 
-		$newOrder->save();
 
 		//meta fields that are not officialy part of WP_Order
 		$documentType =  $oldOrder->buyer->documentType === 'CPF' ? 'cpf' : 'cnpj';
@@ -314,5 +358,83 @@ class AnymarketOrder extends ExportService {
 		update_post_meta($newOrder->get_id(), '_billing_cellphone', $oldOrder->buyer->phone);
 
 		return $newOrder;
+	}
+
+	public function discount( int $id ){
+		global $wpdb;
+		$anyOrder = $this->getOrderData( $id )['response'];
+
+		if ( empty( $anyOrder ) ) {
+			return new \WP_Error ('could_not_connect', 'Could not connect to anymarket servers', ['status' => 503]);
+			$this->logger->debug( print_r($this->getOrderData( $id )['report'], true), ['source' => 'woocommerce-anymarket']);
+		}
+
+		foreach ($anyOrder->items as $orderItem ){
+
+			$product_id = $wpdb->get_var(
+				$wpdb->prepare(
+					"
+					SELECT pm.post_id
+					FROM $wpdb->postmeta pm
+					LEFT JOIN $wpdb->posts p
+						ON p.ID = pm.post_id
+					WHERE pm.meta_key = '%s'
+						AND p.post_status = '%s'
+						AND p.post_type = '%s'
+						AND pm.meta_value = '%d'
+				  "
+				  , '_anymarket_variation_id', 'publish', 'product', absint( $orderItem->sku->id ) )
+			);
+
+			$variable_product_id = $wpdb->get_var(
+				$wpdb->prepare(
+					"
+					SELECT pm.post_id
+					FROM $wpdb->postmeta pm
+					LEFT JOIN $wpdb->posts p
+						ON p.ID = pm.post_id
+					WHERE pm.meta_key = '%s'
+						AND p.post_status = '%s'
+						AND p.post_type = '%s'
+						AND pm.meta_value = '%d'
+				  "
+				  , 'anymarket_variation_id', 'publish', 'product_variation', absint( $orderItem->sku->id ) )
+			);
+
+			if( $product_id || $variable_product_id ) {
+
+					$_id = $product_id ? $product_id : $variable_product_id;
+
+					$product_obj = wc_get_product($_id);
+					$amount = $orderItem->amount;
+
+					$stock_managed_id = $product_obj->get_stock_managed_by_id();
+
+					$product_to_discount_stock = wc_get_product($stock_managed_id);
+
+					$stock = $product_to_discount_stock->get_stock_quantity();
+
+					$stock !== null &&
+					$product_to_discount_stock->set_stock_quantity($stock - $amount);
+					$product_to_discount_stock->save();
+
+					if( get_option('anymarket_show_logs') == 'true' ){
+						$this->logger->debug( 'Produto id: ' . $product_to_discount_stock->get_id() . ' tinha '.  $stock .' items em estoque e foram descontados ' . $amount . ' itens. Estoque restante é de ' . ($stock - $amount) . ' itens', ['source' => 'woocommerce-anymarket'] );
+					}
+
+					$update = new ExportProducts;
+
+					if( $product_to_discount_stock instanceof \WC_Product_Variable || $product_to_discount_stock->get_type() === 'variable' ){
+
+						$update->export( [$product_to_discount_stock->get_parent_id()] );
+
+					} else{
+						$update->export( [$product_to_discount_stock->get_id()] );
+					}
+
+
+
+			}
+		}
 	}
 }

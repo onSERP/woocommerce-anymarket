@@ -19,10 +19,16 @@
                   1º PASSO - Exportar Categorias
                 </a>
               </li>
-              <!-- <li><a href="">2º PASSO - Exportar Marcas</a></li> -->
+              <li>
+                <a
+                  href="/wp-admin/edit.php?post_type=product&page=product_attributes"
+                >
+                  2º PASSO - Exportar Atributos
+                </a>
+              </li>
               <li>
                 <a href="/wp-admin/edit.php?post_type=product">
-                  2º PASSO - Exportar Produtos
+                  3º PASSO - Exportar Produtos
                 </a>
               </li>
             </ul>
@@ -79,6 +85,70 @@
             <div class="help-text">
               Marque a opção se o integrador informar que seu ambiente é de
               Testes (Sandbox)
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="showLogs">Logs</label>
+          <div class="input relative">
+            <toggle-button
+              id="showLogs"
+              v-model="options.showLogs"
+              sync
+              :color="{
+                checked: '#3366FF',
+                unchecked: '#555770',
+                disabled: '#CCCCCC',
+              }"
+            />
+            <span class="absolute left-0 ml-16"> Habilitar logs </span>
+            <div class="help-text">
+              Registra os eventos do plugin.
+              <a href="/wp-admin/admin.php?page=wc-status&tab=logs">Ver Logs</a>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="useOrder">Pedido</label>
+          <div class="input relative">
+            <toggle-button
+              id="useOrder"
+              v-model="options.useOrder"
+              sync
+              :color="{
+                checked: '#3366FF',
+                unchecked: '#555770',
+                disabled: '#CCCCCC',
+              }"
+            />
+            <span class="absolute left-0 ml-16"> Integrar pedidos </span>
+            <div class="help-text">
+              Caso desabilitado, sua loja não receberá pedidos e apenas o
+              estoque será descontado.
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="useOrder">Modo de Edição</label>
+          <div class="input relative">
+            <toggle-button
+              id="useOrder"
+              v-model="options.editMode"
+              sync
+              :color="{
+                checked: '#3366FF',
+                unchecked: '#555770',
+                disabled: '#CCCCCC',
+              }"
+            />
+            <span class="absolute left-0 ml-16"></span>
+            <div class="help-text">
+              Ative esta opção caso deseje associar livremente um produto no
+              Woocommerce a um produto no Anymarket.
+              <b>
+                ATENÇÃO: Desative após usar. Manter essa opção ativada por muito
+                tempo pode gerar comportamentos inesperados na sua loja.
+              </b>
             </div>
           </div>
         </div>
@@ -146,18 +216,28 @@ export default {
         anymarketOI: '',
         isDevEnv: false,
         callbackURL: '',
+        showLogs: false,
+        useOrder: false,
+        editMode: false,
       },
     }
   },
   mounted() {
-    anymarket.get('options').then((response) => {
-      this.options.anymarketToken = response.data.anymarket_token
-      this.options.anymarketOI = response.data.anymarket_oi
-      this.options.callbackURL = response.data.callback_url
+    anymarket
+      .get('options')
+      .then((response) => {
+        this.options.anymarketToken = response.data.anymarket_token
+        this.options.anymarketOI = response.data.anymarket_oi
+        this.options.callbackURL = response.data.callback_url
 
-      //string to boolean
-      this.options.isDevEnv = response.data.is_dev_env === 'true'
-    })
+        this.options.isDevEnv = response.data.is_dev_env === 'true'
+        this.options.showLogs = response.data.show_logs === 'true'
+        this.options.useOrder = response.data.use_order === 'true'
+        this.options.editMode = response.data.edit_mode === 'true'
+      })
+      .catch((err) => {
+        console.log(err)
+      })
   },
   methods: {
     copiedTooltip(e) {

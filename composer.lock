@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "39ebf15070ad9796d62a5429e6622e5f",
+    "content-hash": "2af61be9b7a8afe6814adaa1f3899399",
     "packages": [
         {
             "name": "composer/installers",
@@ -455,27 +455,70 @@
         },
         {
             "name": "php-curl-class/php-curl-class",
-            "version": "2.0.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-curl-class/php-curl-class.git",
-                "reference": "24a93bdc51058ad50d219842b63f7f2e0cb350ac"
+                "reference": "e5831f35e1f81a0aa94d66f01c65fbc92be6d691"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-curl-class/php-curl-class/zipball/24a93bdc51058ad50d219842b63f7f2e0cb350ac",
-                "reference": "24a93bdc51058ad50d219842b63f7f2e0cb350ac",
+                "url": "https://api.github.com/repos/php-curl-class/php-curl-class/zipball/e5831f35e1f81a0aa94d66f01c65fbc92be6d691",
+                "reference": "e5831f35e1f81a0aa94d66f01c65fbc92be6d691",
                 "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": ">=5.3"
+            },
+            "require-dev": {
+                "ext-gd": "*",
+                "phpunit/phpunit": "*",
+                "squizlabs/php_codesniffer": "*"
+            },
+            "suggest": {
+                "ext-mbstring": "*"
             },
             "type": "library",
             "autoload": {
-                "classmap": [
-                    "src/"
-                ]
+                "psr-4": {
+                    "Curl\\": "src/Curl/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
-            "description": "PHP Curl Class is an object-oriented wrapper of the PHP cURL extension.",
-            "time": "2014-04-12T09:46:33+00:00"
+            "license": [
+                "Unlicense"
+            ],
+            "authors": [
+                {
+                    "name": "Zach Borboa"
+                }
+            ],
+            "description": "PHP Curl Class makes it easy to send HTTP requests and integrate with web APIs.",
+            "homepage": "https://github.com/php-curl-class/php-curl-class",
+            "keywords": [
+                "API-Client",
+                "api",
+                "class",
+                "client",
+                "curl",
+                "framework",
+                "http",
+                "http-client",
+                "http-proxy",
+                "json",
+                "php",
+                "php-curl",
+                "php-curl-library",
+                "proxy",
+                "requests",
+                "restful",
+                "web-scraper",
+                "web-scraping ",
+                "web-service",
+                "xml"
+            ],
+            "time": "2020-05-23T03:51:01+00:00"
         },
         {
             "name": "pimple/pimple",

@@ -16,6 +16,7 @@ return [
 		\WPEmergeAppCore\Assets\AssetsServiceProvider::class,
 		\WPEmergeAppCore\Config\ConfigServiceProvider::class,
 		\Anymarket\WordPress\AdminServiceProvider::class,
+		\Anymarket\WordPress\NoticesServiceProvider::class,
 		\Anymarket\WordPress\FieldsServiceProvider::class,
 		\Anymarket\WordPress\AssetsServiceProvider::class,
 		\Anymarket\WordPress\ContentTypesServiceProvider::class,

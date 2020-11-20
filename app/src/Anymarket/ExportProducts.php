@@ -5,7 +5,7 @@ namespace Anymarket\Anymarket;
 /**
  * Export products
  */
-class ExportProducts extends ExportService implements ExportInterface
+class ExportProducts extends ExportService
 {
 	/**
 	 * Recieves list of product ids and export them to anymarket.
@@ -40,6 +40,7 @@ class ExportProducts extends ExportService implements ExportInterface
 			$exportBrand = new ExportBrands();
 			$exportBrand->export( $this->getAllBrands( $products ), false );
 		}
+
 
 		//delay script execution for 1 sec
 		sleep(1);
@@ -107,14 +108,18 @@ class ExportProducts extends ExportService implements ExportInterface
 				'warrantyTime' => carbon_get_post_meta( $product->get_id(), 'anymarket_warranty_time' ),
 				'model' => carbon_get_post_meta( $product->get_id(), 'anymarket_model' ),
 				'priceFactor' => $priceFactor,
-				'height' => $product->get_height(),
-				'width' => $product->get_width(),
-				'weight' => $product->get_weight(),
-				'length' => $product->get_length(),
+				'height' => str_replace( ',', '.', $product->get_height() ),
+				'width' =>  str_replace( ',', '.', $product->get_width() ),
+				'weight' =>  str_replace( ',', '.', $product->get_weight() ),
+				'length' =>  str_replace( ',', '.', $product->get_length() ),
 				'characteristics' => $this->formatProductAttributes( $product ),
-				'brand' => $this->formatProductBrands( $product ),
 				'definitionPriceScope' => carbon_get_post_meta($product->get_id(), 'anymarket_definition_price_scope')
 			];
+
+			//only send brands if defined on config file
+			if( defined('ANYMARKET_BRAND_CPT') ){
+				$data['brand'] = $this->formatProductBrands( $product );
+			}
 
 			// if product is not on anymarket
 			if( empty( carbon_get_post_meta($product->get_id(), 'anymarket_id') ) ){
@@ -158,7 +163,7 @@ class ExportProducts extends ExportService implements ExportInterface
 
 		$this->multiCurl->start();
 
-		if( get_option('anymarket_is_dev_env') == 'true' ){
+		if( get_option('anymarket_show_logs') == 'true' ){
 			$this->logger->debug( print_r($report, true), ['source' => 'woocommerce-anymarket'] );
 		}
 

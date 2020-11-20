@@ -22,6 +22,9 @@ class OptionController
 			'anymarket_oi' => get_option( 'anymarket_oi' ),
 			'is_dev_env' => get_option( 'anymarket_is_dev_env' ),
 			'callback_url' => get_option( 'anymarket_callback_url' ),
+			'show_logs' => get_option( 'anymarket_show_logs' ),
+			'use_order' => get_option( 'anymarket_use_order' ),
+			'edit_mode' => get_option( 'anymarket_edit_mode')
 		];
 
 		$response = new \WP_REST_Response( $data );
@@ -49,10 +52,31 @@ class OptionController
 			$is_dev_env = 'false';
 		}
 
+		if ($request['showLogs'] === true ) {
+			$show_logs = 'true';
+		} else {
+			$show_logs = 'false';
+		}
+
+		if ($request['useOrder'] === true ) {
+			$use_order = 'true';
+		} else {
+			$use_order = 'false';
+		}
+
+		if ($request['editMode'] === true ) {
+			$edit_mode = 'true';
+		} else {
+			$edit_mode = 'false';
+		}
+
 		update_option( 'anymarket_onserp_license', $onserp_license );
 		update_option( 'anymarket_token', $anymarket_token );
 		update_option( 'anymarket_oi', $anymarket_oi );
 		update_option( 'anymarket_is_dev_env', $is_dev_env );
+		update_option( 'anymarket_show_logs', $show_logs );
+		update_option( 'anymarket_use_order', $use_order );
+		update_option( 'anymarket_edit_mode', $edit_mode );
 
 		$response = new \WP_REST_Response( [$request['isDevEnv']] );
 		$response->set_status( 200 );
