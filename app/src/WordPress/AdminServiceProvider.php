@@ -77,6 +77,11 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		}
 		// allow xml uploads
 		add_filter( 'upload_mimes', [$this, 'uploadXML'] );
+
+		// filter anymarket id field
+		if( get_option( 'anymarket_edit_mode' ) == 'true' ) {
+			add_filter( 'update_post_metadata', [$this, 'updateAnymarketId'], 10, 5 );
+		}
 	}
 
 	/**
@@ -624,8 +629,29 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 * @param [type] $methods
 	 * @return void
 	 */
-	function addAnymarketShippingMethod( $methods ) {
+	public function addAnymarketShippingMethod( $methods ) {
 		$methods[] = AnymarketShippingMethod::class;
 		return $methods;
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param [type] $meta_id
+	 * @param [type] $object_id
+	 * @param [type] $meta_key
+	 * @param [type] $meta_value
+	 * @return void
+	 */
+	public function updateAnymarketId( $check, $object_id, $meta_key, $meta_value, $prev_value ){
+
+		if ( $meta_key === '_anymarket_id' &&  !empty($meta_value) ){
+
+			$get_ids = new ExportVariations;
+			$get_ids->assignVariationIDs($object_id, $meta_value );
+
+		}
+
+		return $check;
 	}
 }

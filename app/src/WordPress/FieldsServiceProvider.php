@@ -67,6 +67,8 @@ class FieldsServiceProvider implements ServiceProviderInterface
 	 * @return void
 	 */
 	public function productsMeta(){
+		$id_field_type = get_option('anymarket_edit_mode') == 'true' ? 'text' : 'hidden';
+
 		Container::make( 'post_meta', 'Anymarket' )
 			->where( 'post_type', '=', 'product' )
 			->set_context( 'side' )
@@ -80,7 +82,8 @@ class FieldsServiceProvider implements ServiceProviderInterface
 				 ] ),
 
 				//hidden fields - will only use internally
-				Field::make( 'hidden', 'anymarket_id', __('ID do produto no ANYMARKET', 'anymarket')),
+				Field::make( $id_field_type, 'anymarket_id', __('ID do produto no Anymarket', 'anymarket'))
+					->set_help_text(__('Alterar esse campo pode fazer com que seu sistema se comporte de forma inesperada. Não altere se não souber o que está fazendo.', 'anymarket')),
 				Field::make( 'hidden', 'anymarket_variation_id', __('ID do SKU no ANYMARKET', 'anymarket')),
 
 				Field::make( 'text', 'anymarket_warranty_time', __('Garantia (meses)', 'anymarket') )

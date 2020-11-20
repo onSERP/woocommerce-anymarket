@@ -129,6 +129,30 @@
           </div>
         </div>
         <div class="form-group">
+          <label for="useOrder">Modo de Edição</label>
+          <div class="input relative">
+            <toggle-button
+              id="useOrder"
+              v-model="options.editMode"
+              sync
+              :color="{
+                checked: '#3366FF',
+                unchecked: '#555770',
+                disabled: '#CCCCCC',
+              }"
+            />
+            <span class="absolute left-0 ml-16"></span>
+            <div class="help-text">
+              Ative esta opção caso deseje associar livremente um produto no
+              Woocommerce a um produto no Anymarket.
+              <b>
+                ATENÇÃO: Desative após usar. Manter essa opção ativada por muito
+                tempo pode gerar comportamentos inesperados na sua loja.
+              </b>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
           <label for="callbackURL">URL para Callback</label>
           <div class="input input-copy">
             <input
@@ -194,6 +218,7 @@ export default {
         callbackURL: '',
         showLogs: false,
         useOrder: false,
+        editMode: false,
       },
     }
   },
@@ -208,6 +233,7 @@ export default {
         this.options.isDevEnv = response.data.is_dev_env === 'true'
         this.options.showLogs = response.data.show_logs === 'true'
         this.options.useOrder = response.data.use_order === 'true'
+        this.options.editMode = response.data.edit_mode === 'true'
       })
       .catch((err) => {
         console.log(err)
