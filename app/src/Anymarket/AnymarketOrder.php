@@ -2,6 +2,8 @@
 
 namespace Anymarket\Anymarket;
 
+use Anymarket\Wordpress\CronEvents;
+
 /**
  * Handles orders
  */
@@ -403,37 +405,41 @@ class AnymarketOrder extends ExportService {
 
 			if( $product_id || $variable_product_id ) {
 
-					$_id = $product_id ? $product_id : $variable_product_id;
+				$_id = $product_id ? $product_id : $variable_product_id;
 
-					$product_obj = wc_get_product($_id);
-					$amount = $orderItem->amount;
+				$product_obj = wc_get_product($_id);
+				$amount = $orderItem->amount;
 
-					$stock_managed_id = $product_obj->get_stock_managed_by_id();
+				$stock_managed_id = $product_obj->get_stock_managed_by_id();
 
-					$product_to_discount_stock = wc_get_product($stock_managed_id);
+				$product_to_discount_stock = wc_get_product($stock_managed_id);
 
-					$stock = $product_to_discount_stock->get_stock_quantity();
+				$stock = $product_to_discount_stock->get_stock_quantity();
 
-					$stock !== null &&
-					$product_to_discount_stock->set_stock_quantity($stock - $amount);
-					$product_to_discount_stock->save();
+				$stock !== null &&
+				$product_to_discount_stock->set_stock_quantity($stock - $amount);
+				$product_to_discount_stock->save();
+
+				if( get_option('anymarket_show_logs') == 'true' ){
+					$this->logger->debug( 'Produto id: ' . $product_to_discount_stock->get_id() . ' tinha '.  $stock .' items em estoque e foram descontados ' . $amount . ' itens. Estoque restante é de ' . ($stock - $amount) . ' itens', ['source' => 'woocommerce-anymarket'] );
+				}
+
+				$cron = new CronEvents();
+
+				if( $product_to_discount_stock instanceof \WC_Product_Variation || $product_to_discount_stock->get_parent_id() !== 0 ){
+					$cron->setCronExportProd( 5, [$product_to_discount_stock->get_parent_id()] );
 
 					if( get_option('anymarket_show_logs') == 'true' ){
-						$this->logger->debug( 'Produto id: ' . $product_to_discount_stock->get_id() . ' tinha '.  $stock .' items em estoque e foram descontados ' . $amount . ' itens. Estoque restante é de ' . ($stock - $amount) . ' itens', ['source' => 'woocommerce-anymarket'] );
+						$this->logger->debug( 'Produto id '. $product_to_discount_stock->get_parent_id() .' agendado para exportação', ['source' => 'woocommerce-anymarket'] );
 					}
 
-					$update = new ExportProducts;
+				} else{
+					$cron->setCronExportProd( 5, [$product_to_discount_stock->get_id()] );
 
-					if( $product_to_discount_stock instanceof \WC_Product_Variable || $product_to_discount_stock->get_type() === 'variable' ){
-
-						$update->export( [$product_to_discount_stock->get_parent_id()] );
-
-					} else{
-						$update->export( [$product_to_discount_stock->get_id()] );
+					if( get_option('anymarket_show_logs') == 'true' ){
+						$this->logger->debug( 'Produto id '. $product_to_discount_stock->get_id() .' agendado para exportação', ['source' => 'woocommerce-anymarket'] );
 					}
-
-
-
+				}
 			}
 		}
 	}

@@ -17,6 +17,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function register( $container ) {
 		$this->cron = new CronEvents();
+		$this->cron->init();
 	}
 
 	/**
