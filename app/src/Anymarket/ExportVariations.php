@@ -196,4 +196,8 @@ class ExportVariations extends ExportService
 
 	}
 
+	public function assignVariationIDs ( $object_id, $meta_value ){
+
+	}
+
 }

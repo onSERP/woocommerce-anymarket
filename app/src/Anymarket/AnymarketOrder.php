@@ -424,17 +424,19 @@ class AnymarketOrder extends ExportService {
 					$this->logger->debug( 'Produto id: ' . $product_to_discount_stock->get_id() . ' tinha '.  $stock .' items em estoque e foram descontados ' . $amount . ' itens. Estoque restante é de ' . ($stock - $amount) . ' itens', ['source' => 'woocommerce-anymarket'] );
 				}
 
-				$cron = new CronEvents();
+				$update = new ExportProducts;
 
 				if( $product_to_discount_stock instanceof \WC_Product_Variation || $product_to_discount_stock->get_parent_id() !== 0 ){
-					$cron->setCronExportProd( 5, [$product_to_discount_stock->get_parent_id()] );
+
+					$update->export( [$product_to_discount_stock->get_parent_id()] );
 
 					if( get_option('anymarket_show_logs') == 'true' ){
 						$this->logger->debug( 'Produto id '. $product_to_discount_stock->get_parent_id() .' agendado para exportação', ['source' => 'woocommerce-anymarket'] );
 					}
 
 				} else{
-					$cron->setCronExportProd( 5, [$product_to_discount_stock->get_id()] );
+
+					$update->export( [$product_to_discount_stock->get_id()] );
 
 					if( get_option('anymarket_show_logs') == 'true' ){
 						$this->logger->debug( 'Produto id '. $product_to_discount_stock->get_id() .' agendado para exportação', ['source' => 'woocommerce-anymarket'] );

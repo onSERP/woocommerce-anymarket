@@ -15,7 +15,7 @@ class CronEvents
 		add_action( 'anymarket_cron_export_products_on_save', [$this, 'exportProd'] );
 		add_action( 'anymarket_cron_bulk_export_products', [$this, 'bulkExportProd'] );
 
-		add_action( 'anymarket_cron_export_orders_on_save', [$this, 'exportOrder'] );
+		add_action( 'anymarket_cron_export_orders_on_save', [$this, 'exportOrder'], 10 , 2 );
 	}
 
   /**

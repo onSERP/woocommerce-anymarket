@@ -66,9 +66,6 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		add_action( 'admin_init', [$this, 'bulkExportVariations'] );
 		add_action('admin_footer', [$this, 'exportVariationsButton']);
 
-		// discount stock on new order
-		add_action( 'woocommerce_thankyou', [$this, 'discountStock'] );
-
 		//initiate shipping class
 		add_filter( 'woocommerce_shipping_methods', [$this, 'addAnymarketShippingMethod'] );
 
@@ -76,6 +73,9 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		if( get_option( 'anymarket_use_order' ) == 'true' ) {
 			add_action( 'woocommerce_order_status_changed', [$this, 'updateStatus'], 10, 3);
 		}
+		// discount stock on new order
+		add_action( 'woocommerce_order_status_changed', [$this, 'discountStock'], 10, 3);
+
 		// allow xml uploads
 		add_filter( 'upload_mimes', [$this, 'uploadXML'] );
 
@@ -507,10 +507,13 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 * @param int $order_id
 	 * @return void
 	 */
-	public function discountStock( $order_id ){
+	public function discountStock(  $order_id, $old_status, $new_status ){
+		$paid_statuses = wc_get_is_paid_statuses();
 
-		$exportStock = new ExportStock;
-		$exportStock->exportFromOrder( [$order_id] );
+		if ( in_array($new_status) ) {
+			$exportStock = new ExportStock;
+			$exportStock->exportFromOrder( [$order_id] );
+		}
 
 	}
 
