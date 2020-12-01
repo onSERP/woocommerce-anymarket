@@ -197,7 +197,76 @@ class ExportVariations extends ExportService
 	}
 
 	public function assignVariationIDs ( $object_id, $meta_value ){
+		$report = [];
+		$skus;
 
+		$this->curl->get($this->baseUrl . 'products/' . $meta_value . '/skus');
+
+		if( $this->curl->error ){
+			$report[] = [
+				'type' => 'Get skus ids',
+				'url' => $this->curl->url,
+				'errorCode' => $this->curl->errorCode,
+				'errorMessage' => $this->curl->errorMessage,
+			];
+
+			if( get_option('anymarket_show_logs') == 'true' ){
+				$this->logger->error( print_r($report, true), ['source' => 'woocommerce-anymarket'] );
+			}
+
+			return false;
+
+		} else {
+			$report[] = [
+				'type' => 'Get skus ids',
+				'url' => $this->curl->url,
+				'response' => json_encode($this->curl->response, JSON_UNESCAPED_UNICODE),
+				'responseCode' => json_encode($this->curl->httpStatusCode, JSON_UNESCAPED_UNICODE)
+			];
+
+			if( get_option('anymarket_show_logs') == 'true' ){
+				$this->logger->debug( print_r($report, true), ['source' => 'woocommerce-anymarket'] );
+			}
+
+			$skus = $this->curl->response;
+		}
+
+		$skusIDs = array_map( function ( $value ) {
+			return [
+				'id' => $value->id,
+				'sku' => $value->partnerId
+			];
+		}, $skus);
+
+		$product = wc_get_product( $object_id );
+		$productChildrenIDs = $product->get_children();
+
+		global $wpdb;
+
+		foreach ( $skusIDs as $skusID ){
+
+			$product_id = $wpdb->get_var(
+				$wpdb->prepare(
+					"
+					SELECT pm.post_id
+					FROM $wpdb->postmeta pm
+					LEFT JOIN $wpdb->posts p
+						ON p.ID = pm.post_id
+					WHERE pm.meta_key = '%s'
+						AND p.post_status = '%s'
+						AND p.post_type = '%s'
+						AND pm.meta_value = '%s'
+					"
+					, '_sku', 'publish', 'product_variation', $skusID['sku'] )
+			);
+
+			update_post_meta( $product_id, 'anymarket_variation_id', $skusID['id'] );
+
+			if( get_option('anymarket_show_logs') == 'true' ){
+				$this->logger->debug( $product_id . ' tem sku ' . $skusID['sku'] . ' e recebe o id ' . $skusID['id'], ['source' => 'woocommerce-anymarket'] );
+			}
+
+		}
 	}
 
 }
