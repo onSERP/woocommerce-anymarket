@@ -197,6 +197,8 @@ class ExportVariations extends ExportService
 	}
 
 	public function assignVariationIDs ( $object_id, $meta_value ){
+		global $wpdb;
+
 		$report = [];
 		$skus;
 
@@ -237,11 +239,6 @@ class ExportVariations extends ExportService
 				'sku' => $value->partnerId
 			];
 		}, $skus);
-
-		$product = wc_get_product( $object_id );
-		$productChildrenIDs = $product->get_children();
-
-		global $wpdb;
 
 		foreach ( $skusIDs as $skusID ){
 
