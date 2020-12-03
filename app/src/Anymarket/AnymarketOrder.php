@@ -416,7 +416,7 @@ class AnymarketOrder extends ExportService {
 
 				$stock = $product_to_discount_stock->get_stock_quantity();
 
-				$stock !== null &&
+				!empty($stock) &&
 				$product_to_discount_stock->set_stock_quantity($stock - $amount);
 				$product_to_discount_stock->save();
 
