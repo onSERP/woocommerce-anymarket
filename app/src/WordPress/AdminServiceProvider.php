@@ -75,6 +75,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		}
 		// discount stock on new order
 		add_action( 'woocommerce_thankyou', [$this, 'discountStock'], 10, 1);
+		add_action( 'woocommerce_order_status_changed', [$this, 'discountStockonStatusChanged'], 10, 3);
 
 		// allow xml uploads
 		add_filter( 'upload_mimes', [$this, 'uploadXML'] );
@@ -507,13 +508,21 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 * @param int $order_id
 	 * @return void
 	 */
-	public function discountStock(  $order_id ){
-
-
+	public function discountStock( $order_id ){
 		$exportStock = new ExportStock;
 		$exportStock->exportFromOrder( [$order_id] );
+	}
 
 
+	/**
+	 * remove stock from anymarket on order status changed
+	 *
+	 * @param int $order_id
+	 * @return void
+	 */
+	public function discountStockonStatusChanged( $order_id, $old_status, $new_status ){
+		$exportStock = new ExportStock;
+		$exportStock->exportFromOrder( [$order_id] );
 	}
 
 	/**
