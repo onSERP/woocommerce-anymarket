@@ -55,7 +55,7 @@ class ExportStock extends ExportService
 		if($this->curl->error){
 			$report[] = [
 				'order' => $order_ids[0],
-				'type' => 'Update stock',
+				'type' => 'Update stock from order',
 				'url' => $this->curl->url,
 				'errorCode' => $this->curl->errorCode,
 				'errorMessage' => $this->curl->response->message,
@@ -64,7 +64,7 @@ class ExportStock extends ExportService
 		} else {
 			$report[] = [
 				'order' => $order_ids[0],
-				'type' => 'Update stock',
+				'type' => 'Update stock from order',
 				'url' => $this->curl->url,
 				'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
 				'response' => $this->curl->response,
