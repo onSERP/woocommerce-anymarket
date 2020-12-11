@@ -149,7 +149,7 @@ class ExportProducts extends ExportService
 
 				//stocks
 				$exportStock = new ExportStock();
-				$exportStock->exportProductStock( [$product] );
+				$exportStock->exportProductStock( $product );
 
 				//product
 				$instance = $this->multiCurl->addPut($this->baseUrl . 'products/' . $anymarket_id, json_encode($data, JSON_UNESCAPED_UNICODE));

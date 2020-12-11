@@ -55,7 +55,7 @@ class ExportStock extends ExportService
 		if($this->curl->error){
 			$report[] = [
 				'order' => $order_ids[0],
-				'type' => 'Update stock from order',
+				'type' => 'Update stock from internal order',
 				'url' => $this->curl->url,
 				'errorCode' => $this->curl->errorCode,
 				'errorMessage' => $this->curl->response->message,
@@ -64,7 +64,7 @@ class ExportStock extends ExportService
 		} else {
 			$report[] = [
 				'order' => $order_ids[0],
-				'type' => 'Update stock from order',
+				'type' => 'Update stock from internal order',
 				'url' => $this->curl->url,
 				'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
 				'response' => $this->curl->response,
@@ -79,14 +79,21 @@ class ExportStock extends ExportService
 	}
 
 	/**
-	 * Undocumented function
+	 * Export product stock
+	 * it can be an its id or its object
 	 *
-	 * @param array $products
+	 * @param int|WC_Product|WC_Product_Variation $product
 	 * @return void
 	 */
-	public function exportProductStock( array $products ){
+	public function exportProductStock( $product ){
 
-		$product = $products[0];
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			$product = wc_get_product( $product );
+		}
+
+		if ( is_a( $product, 'WC_Product_Variation' ) ) {
+			$product = wc_get_product( $product->get_parent_id() );
+		}
 
 		$data = [];
 
