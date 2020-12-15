@@ -17,6 +17,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function register( $container ) {
 		$this->cron = new CronEvents();
+		$this->cron->init();
 	}
 
 	/**
@@ -65,9 +66,6 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		add_action( 'admin_init', [$this, 'bulkExportVariations'] );
 		add_action('admin_footer', [$this, 'exportVariationsButton']);
 
-		// discount stock on new order
-		add_action( 'woocommerce_thankyou', [$this, 'discountStock'] );
-
 		//initiate shipping class
 		add_filter( 'woocommerce_shipping_methods', [$this, 'addAnymarketShippingMethod'] );
 
@@ -75,6 +73,10 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		if( get_option( 'anymarket_use_order' ) == 'true' ) {
 			add_action( 'woocommerce_order_status_changed', [$this, 'updateStatus'], 10, 3);
 		}
+		// discount stock on new order
+		add_action( 'woocommerce_thankyou', [$this, 'discountStock'], 10, 1);
+		add_action( 'woocommerce_order_status_changed', [$this, 'discountStockonStatusChanged'], 10, 3);
+
 		// allow xml uploads
 		add_filter( 'upload_mimes', [$this, 'uploadXML'] );
 
@@ -507,10 +509,20 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 * @return void
 	 */
 	public function discountStock( $order_id ){
-
 		$exportStock = new ExportStock;
-		$exportStock->exportFromOrder( [$order_id] );
+		$exportStock->exportFromOrder( $order_id );
+	}
 
+
+	/**
+	 * remove stock from anymarket on order status changed
+	 *
+	 * @param int $order_id
+	 * @return void
+	 */
+	public function discountStockonStatusChanged( $order_id, $old_status, $new_status ){
+		$exportStock = new ExportStock;
+		$exportStock->exportFromOrder( $order_id );
 	}
 
 	/**

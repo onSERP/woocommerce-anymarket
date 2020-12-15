@@ -360,6 +360,12 @@ class AnymarketOrder extends ExportService {
 		return $newOrder;
 	}
 
+	/**
+	 * Undocumented function
+	 *
+	 * @param integer $id
+	 * @return void
+	 */
 	public function discount( int $id ){
 		global $wpdb;
 		$anyOrder = $this->getOrderData( $id )['response'];
@@ -403,37 +409,25 @@ class AnymarketOrder extends ExportService {
 
 			if( $product_id || $variable_product_id ) {
 
-					$_id = $product_id ? $product_id : $variable_product_id;
+				$_id = $variable_product_id ? $variable_product_id : $product_id;
 
-					$product_obj = wc_get_product($_id);
-					$amount = $orderItem->amount;
+				$product_obj = wc_get_product($_id);
+				$amount = $orderItem->amount;
+				$new_stock = wc_update_product_stock( $product_obj, $amount, 'decrease' );
 
-					$stock_managed_id = $product_obj->get_stock_managed_by_id();
+				if( get_option('anymarket_show_logs') == 'true' ){
+					$this->logger->debug( print_r('Produto id: ' . $_id . ' tinha '.  ($new_stock + $amount)  .' items em estoque e foram descontados ' . $amount . ' itens. Estoque restante é de ' . $new_stock . ' itens', true),
+					['source' => 'woocommerce-anymarket'] );
+				}
 
-					$product_to_discount_stock = wc_get_product($stock_managed_id);
+				$update = new ExportStock;
 
-					$stock = $product_to_discount_stock->get_stock_quantity();
+				$update->exportProductStock( $_id );
 
-					$stock !== null &&
-					$product_to_discount_stock->set_stock_quantity($stock - $amount);
-					$product_to_discount_stock->save();
-
-					if( get_option('anymarket_show_logs') == 'true' ){
-						$this->logger->debug( 'Produto id: ' . $product_to_discount_stock->get_id() . ' tinha '.  $stock .' items em estoque e foram descontados ' . $amount . ' itens. Estoque restante é de ' . ($stock - $amount) . ' itens', ['source' => 'woocommerce-anymarket'] );
-					}
-
-					$update = new ExportProducts;
-
-					if( $product_to_discount_stock instanceof \WC_Product_Variable || $product_to_discount_stock->get_type() === 'variable' ){
-
-						$update->export( [$product_to_discount_stock->get_parent_id()] );
-
-					} else{
-						$update->export( [$product_to_discount_stock->get_id()] );
-					}
-
-
-
+				if( get_option('anymarket_show_logs') == 'true' ){
+					$this->logger->debug( 'AnymarketOrder::discount('. $id .') called ExportStock::exportProductStock('. $_id .')',
+					['source' => 'woocommerce-anymarket'] );
+				}
 			}
 		}
 	}

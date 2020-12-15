@@ -10,12 +10,12 @@ class ExportStock extends ExportService
 	/**
 	 * Undocumented function
 	 *
-	 * @param array $order_ids
+	 * @param int $order_id
 	 * @return void
 	 */
-	public function exportFromOrder( array $order_ids ){
+	public function exportFromOrder( int $order_id ){
 
-		$order = wc_get_order( $order_ids[0] );
+		$order = wc_get_order( $order_id );
 
 		$stock = $this->formatStock( $order );
 
@@ -27,7 +27,7 @@ class ExportStock extends ExportService
 
 			$product_variation = $stock_item['variation_id'] !== 0 ? new \WC_Product_Variation( $stock_item['variation_id'] ) : 0;
 
-			$product_price = $product_variation === 0 ? $product->get_price() : $product_variation->get_price();
+			$product_price = $product_variation !== 0 ? $product_variation->get_price() : $product->get_price();
 
 			$id = $product_variation !== 0 ? get_post_meta($stock_item['variation_id'], 'anymarket_variation_id', true) : carbon_get_post_meta( $stock_item['item_id'], 'anymarket_variation_id' );
 
@@ -38,9 +38,9 @@ class ExportStock extends ExportService
 
 			if( !empty($id) ){
 				$data[] = [
-					'id' => intval($id),
-					'quantity' => $quantity,
-					'cost' => $product_price,
+					'id' => (int)$id,
+					'quantity' => (int)$quantity,
+					'cost' => (float)$product_price,
 				];
 			}
 
@@ -54,8 +54,8 @@ class ExportStock extends ExportService
 
 		if($this->curl->error){
 			$report[] = [
-				'order' => $order_ids[0],
-				'type' => 'Update stock',
+				'order' => $order_id,
+				'type' => 'Update stock from internal order',
 				'url' => $this->curl->url,
 				'errorCode' => $this->curl->errorCode,
 				'errorMessage' => $this->curl->response->message,
@@ -63,8 +63,8 @@ class ExportStock extends ExportService
 			];
 		} else {
 			$report[] = [
-				'order' => $order_ids[0],
-				'type' => 'Update stock',
+				'order' => $order_id,
+				'type' => 'Update stock from internal order',
 				'url' => $this->curl->url,
 				'data' => json_encode($data, JSON_UNESCAPED_UNICODE),
 				'response' => $this->curl->response,
@@ -79,14 +79,21 @@ class ExportStock extends ExportService
 	}
 
 	/**
-	 * Undocumented function
+	 * Export product stock
+	 * it can be an its id or its object
 	 *
-	 * @param array $products
+	 * @param int|WC_Product|WC_Product_Variation $product
 	 * @return void
 	 */
-	public function exportProductStock( array $products ){
+	public function exportProductStock( $product ){
 
-		$product = $products[0];
+		if ( ! is_a( $product, 'WC_Product' ) ) {
+			$product = wc_get_product( $product );
+		}
+
+		if ( is_a( $product, 'WC_Product_Variation' ) ) {
+			$product = wc_get_product( $product->get_parent_id() );
+		}
 
 		$data = [];
 
