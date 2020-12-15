@@ -375,6 +375,37 @@ class AnymarketOrder extends ExportService {
 			$this->logger->debug( print_r($this->getOrderData( $id )['report'], true), ['source' => 'woocommerce-anymarket']);
 		}
 
+		if ( get_transient( "anymarket_order_{$id}_stock_discounted") && $anyOrder->status != 'CANCELED' ){
+
+			if( get_option('anymarket_show_logs') == 'true' ){
+				$this->logger->debug( print_r('AnymarketOrder::discount('. $id .') was rejected to avoid duplicate discounts in stock', true),
+				['source' => 'woocommerce-anymarket'] );
+			}
+
+			if ( $anyOrder->status == 'CONCLUDED' ){
+				delete_transient("anymarket_order_{$id}_stock_discounted");
+				if( get_option('anymarket_show_logs') == 'true' ){
+					$this->logger->debug( print_r('AnymarketOrder::discount('. $id .') was completed, so its transient was deleted', true),
+					['source' => 'woocommerce-anymarket'] );
+				}
+			}
+
+			return;
+
+		}
+
+		if ( get_transient( "anymarket_order_{$id}_stock_increased" ) ){
+
+			delete_transient("anymarket_order_{$id}_stock_discounted");
+
+			if( get_option('anymarket_show_logs') == 'true' ){
+				$this->logger->debug( print_r('AnymarketOrder::discount('. $id .') was rejected because the order was already cancelled', true),
+				['source' => 'woocommerce-anymarket'] );
+			}
+
+			return;
+		}
+
 		foreach ($anyOrder->items as $orderItem ){
 
 			$product_id = $wpdb->get_var(
@@ -413,7 +444,12 @@ class AnymarketOrder extends ExportService {
 
 				$product_obj = wc_get_product($_id);
 				$amount = $orderItem->amount;
-				$new_stock = wc_update_product_stock( $product_obj, $amount, 'decrease' );
+
+				if( $anyOrder->status == 'CANCELED' ){
+					$new_stock = wc_update_product_stock( $product_obj, $amount, 'increase' );
+				} else {
+					$new_stock = wc_update_product_stock( $product_obj, $amount, 'decrease' );
+				}
 
 				if( get_option('anymarket_show_logs') == 'true' ){
 					$this->logger->debug( print_r('Produto id: ' . $_id . ' tinha '.  ($new_stock + $amount)  .' items em estoque e foram descontados ' . $amount . ' itens. Estoque restante é de ' . $new_stock . ' itens', true),
@@ -425,10 +461,16 @@ class AnymarketOrder extends ExportService {
 				$update->exportProductStock( $_id );
 
 				if( get_option('anymarket_show_logs') == 'true' ){
-					$this->logger->debug( 'AnymarketOrder::discount('. $id .') called ExportStock::exportProductStock('. $_id .')',
+					$this->logger->debug( print_r('AnymarketOrder::discount('. $id .') called ExportStock::exportProductStock('. $_id .')', true),
 					['source' => 'woocommerce-anymarket'] );
 				}
 			}
+		}
+
+		if( $anyOrder->status == 'CANCELED' ){
+			set_transient( "anymarket_order_{$id}_stock_increased", 1, DAY_IN_SECONDS * 7 );
+		} else {
+			set_transient( "anymarket_order_{$id}_stock_discounted", 1 );
 		}
 	}
 }
