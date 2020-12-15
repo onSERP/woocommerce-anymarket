@@ -328,11 +328,11 @@ class ExportService
 
 		foreach ($order->get_items() as $order_item){
 
-			$stock[] = [
-				'item_id' => $order_item->get_product_id(),
-				'variation_id' =>  $order_item->get_variation_id(),
-				'quantity' => $order_item->get_quantity(),
-			];
+			if ( is_a( $order_item, 'WC_Order_Item_Product') )
+				$stock[] = [
+					'item_id' => $order_item->get_product_id(),
+					'variation_id' =>  $order_item->get_variation_id(),
+				];
 		}
 
 		return $stock;

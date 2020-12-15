@@ -510,7 +510,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function discountStock( $order_id ){
 		$exportStock = new ExportStock;
-		$exportStock->exportFromOrder( [$order_id] );
+		$exportStock->exportFromOrder( $order_id );
 	}
 
 
@@ -522,7 +522,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function discountStockonStatusChanged( $order_id, $old_status, $new_status ){
 		$exportStock = new ExportStock;
-		$exportStock->exportFromOrder( [$order_id] );
+		$exportStock->exportFromOrder( $order_id );
 	}
 
 	/**
