@@ -383,7 +383,7 @@ class AnymarketOrder extends ExportService {
 			}
 
 			if ( $anyOrder->status == 'CONCLUDED' ){
-				delete_transient("anymarket_order_{$id}_stock_discounted");
+
 				if( get_option('anymarket_show_logs') == 'true' ){
 					$this->logger->debug( print_r('AnymarketOrder::discount('. $id .') was completed, so its transient was deleted', true),
 					['source' => 'woocommerce-anymarket'] );
