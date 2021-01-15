@@ -84,6 +84,9 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		if( get_option( 'anymarket_edit_mode' ) == 'true' ) {
 			add_filter( 'update_post_metadata', [$this, 'updateAnymarketId'], 10, 5 );
 		}
+
+		add_action( 'admin_init', [$this, 'updateAllProducts'] );
+
 	}
 
 	/**
@@ -665,5 +668,47 @@ class AdminServiceProvider implements ServiceProviderInterface {
 		}
 
 		return $check;
+	}
+
+	/**
+	 * Update all products
+	 *
+	 * @return void
+	 */
+	public function updateAllProducts(){
+
+		if ( wp_doing_ajax() ) return;
+
+		if ( isset( $_GET['anymarket_action'])
+		&& $_GET['anymarket_action'] === 'update_all'
+		&& current_user_can('manage_options') ){
+
+			global $wpdb;
+
+			$exportedProducts = $wpdb->get_results(
+				$wpdb->prepare(
+					"
+						SELECT pm.post_id, pm.meta_value, p.post_type
+						FROM $wpdb->postmeta pm
+						LEFT JOIN $wpdb->posts p
+							ON p.ID = pm.post_id
+						WHERE pm.meta_key = '%s'
+							AND p.post_status = '%s'
+							AND p.post_type = '%s'
+							AND pm.meta_value <> ''
+					"
+					  , '_anymarket_id', 'publish', 'product' )
+			);
+
+			$product_ids = array_map( function($value){
+				return (int)$value->post_id;
+			}, $exportedProducts);
+
+			$this->cron->setCronExportProd( 5, $product_ids );
+
+			wp_safe_redirect( remove_query_arg( 'anymarket_action' ) );
+		}
+
+		return;
 	}
 }
