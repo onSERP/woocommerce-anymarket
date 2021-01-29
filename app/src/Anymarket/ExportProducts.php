@@ -108,10 +108,10 @@ class ExportProducts extends ExportService
 				'warrantyTime' => carbon_get_post_meta( $product->get_id(), 'anymarket_warranty_time' ),
 				'model' => carbon_get_post_meta( $product->get_id(), 'anymarket_model' ),
 				'priceFactor' => $priceFactor,
-				'height' => str_replace( ',', '.', $product->get_height() ),
-				'width' =>  str_replace( ',', '.', $product->get_width() ),
-				'weight' =>  str_replace( ',', '.', $product->get_weight() ),
-				'length' =>  str_replace( ',', '.', $product->get_length() ),
+				'height' => anymarket_format_dimension( $product->get_height() ),
+				'width' =>  anymarket_format_dimension( $product->get_width() ),
+				'weight' =>  anymarket_format_weight( $product->get_weight() ),
+				'length' =>  anymarket_format_dimension( $product->get_length() ),
 				'characteristics' => $this->formatProductAttributes( $product ),
 				'definitionPriceScope' => carbon_get_post_meta($product->get_id(), 'anymarket_definition_price_scope')
 			];
