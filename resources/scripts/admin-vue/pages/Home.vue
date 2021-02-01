@@ -9,12 +9,6 @@
           alt="Anymarket"
         />
         <div>
-          <a
-            href="/wp-admin/?anymarket_action=update_all"
-            class="btn btn-base mt-6 sm:mt-0 mb-4 cursor-pointer"
-          >
-            Atualizar todos os produtos
-          </a>
           <div class="select-menu">
             <div class="btn btn-base mt-6 sm:mt-0">Exportar em massa</div>
             <ul>
