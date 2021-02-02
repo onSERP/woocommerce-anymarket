@@ -705,7 +705,13 @@ class AdminServiceProvider implements ServiceProviderInterface {
 				return (int)$value->post_id;
 			}, $exportedProducts);
 
-			$this->cron->setCronExportProd( 5, $product_ids );
+			$update_args = [
+				'stock' => isset( $_GET['stock'] ) ? $_GET['stock'] : false,
+				'price' => isset( $_GET['price'] ) ? $_GET['price'] : false,
+				'images' => isset( $_GET['images'] ) ? $_GET['images'] : false,
+			];
+
+			$this->cron->setCronBulkExportProd( 5, [$product_ids, true, $update_args] );
 
 			wp_safe_redirect( remove_query_arg( 'anymarket_action' ) );
 		}

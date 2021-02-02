@@ -13,7 +13,7 @@ class CronEvents
 
 	public function init(){
 		add_action( 'anymarket_cron_export_products_on_save', [$this, 'exportProd'] );
-		add_action( 'anymarket_cron_bulk_export_products', [$this, 'bulkExportProd'] );
+		add_action( 'anymarket_cron_bulk_export_products', [$this, 'bulkExportProd'], 10, 3 );
 
 		add_action( 'anymarket_cron_export_orders_on_save', [$this, 'exportOrder'], 10 , 2 );
 	}
@@ -60,9 +60,10 @@ class CronEvents
    * @param [type] $object_ids
    * @return void
    */
-  	public function bulkExportProd( $object_ids ){
+  	public function bulkExportProd( $object_ids, $update = false, $update_args = [] ){
 		$exportProducts = new ExportProducts;
-			$response = $exportProducts->export( $object_ids );
+
+		$response = $exportProducts->export( $object_ids, $update, $update_args );
 
 		if( is_wp_error($response) ){
 			set_transient( 'anymarket_export_product_fail', $response->get_error_message(), MINUTE_IN_SECONDS );

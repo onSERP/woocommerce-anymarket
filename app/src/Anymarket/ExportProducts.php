@@ -13,7 +13,27 @@ class ExportProducts extends ExportService
 	 * @param array $post_ids
 	 * @return array|boolean list of successful or unsuccessful exportations
 	 */
-	public function export( array $post_ids ){
+	public function export( array $post_ids, bool $update = false, array $update_args = [] ){
+
+		if( !empty($update_args) ){
+			if( $update_args['images'] && $update_args === 'true' ){
+				$update_args['images'] = true;
+			} else {
+				$update_args['images'] = false;
+			}
+
+			if( $update_args['stock'] && $update_args === 'true' ){
+				$update_args['stock'] = true;
+			} else {
+				$update_args['stock'] = false;
+			}
+
+			if( $update_args['price'] && $update_args === 'true' ){
+				$update_args['price'] = true;
+			} else {
+				$update_args['price'] = false;
+			}
+		}
 
 		// check if it's just one product
 		// then check if it should be exported to anymarket
@@ -140,16 +160,23 @@ class ExportProducts extends ExportService
 				$anymarket_id = carbon_get_post_meta($product->get_id(), 'anymarket_id');
 
 				//images
-				$exportImages = new ExportImages();
-				$exportImages->export( $product, $anymarket_id );
+				if ( $update === false || ($update === true && $update_args['images'] === true )){
+					$exportImages = new ExportImages();
+					$exportImages->export( $product, $anymarket_id );
+				}
+
 
 				//skus
-				$exportSkus = new ExportSkus();
-				$exportSkus->export( $product, $anymarket_id );
+				if ( $update === false || ($update === true && $update_args['price'] === true )){
+					$exportSkus = new ExportSkus();
+					$exportSkus->export( $product, $anymarket_id );
+				}
 
 				//stocks
-				$exportStock = new ExportStock();
-				$exportStock->exportProductStock( $product );
+				if ( $update === false || ($update === true && $update_args['stock'] === true )){
+					$exportStock = new ExportStock();
+					$exportStock->exportProductStock( $product );
+				}
 
 				//product
 				$instance = $this->multiCurl->addPut($this->baseUrl . 'products/' . $anymarket_id, json_encode($data, JSON_UNESCAPED_UNICODE));
