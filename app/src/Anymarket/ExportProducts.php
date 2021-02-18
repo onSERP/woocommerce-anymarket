@@ -16,19 +16,19 @@ class ExportProducts extends ExportService
 	public function export( array $post_ids, bool $update = false, array $update_args = [] ){
 
 		if( !empty($update_args) ){
-			if( $update_args['images'] && $update_args === 'true' ){
+			if( $update_args['images'] && $update_args['images'] === 'true' ){
 				$update_args['images'] = true;
 			} else {
 				$update_args['images'] = false;
 			}
 
-			if( $update_args['stock'] && $update_args === 'true' ){
+			if( $update_args['stock'] && $update_args['stock'] === 'true' ){
 				$update_args['stock'] = true;
 			} else {
 				$update_args['stock'] = false;
 			}
 
-			if( $update_args['price'] && $update_args === 'true' ){
+			if( $update_args['price'] && $update_args['price'] === 'true' ){
 				$update_args['price'] = true;
 			} else {
 				$update_args['price'] = false;
