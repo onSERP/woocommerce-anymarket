@@ -14,6 +14,14 @@ export default new Router({
         ),
     },
     {
+      path: '/mass_update',
+      name: 'MassUpdate',
+      component: () =>
+        import(
+          /* webpackChunkName: "anymarket_mass_update" */ '@scripts/admin-vue/pages/MassUpdate.vue'
+        ),
+    },
+    {
       path: '/instructions',
       name: 'Instructions',
       component: () =>

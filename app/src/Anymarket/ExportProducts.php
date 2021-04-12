@@ -13,7 +13,27 @@ class ExportProducts extends ExportService
 	 * @param array $post_ids
 	 * @return array|boolean list of successful or unsuccessful exportations
 	 */
-	public function export( array $post_ids ){
+	public function export( array $post_ids, bool $update = false, array $update_args = [] ){
+
+		if( !empty($update_args) ){
+			if( $update_args['images'] && $update_args['images'] === 'true' ){
+				$update_args['images'] = true;
+			} else {
+				$update_args['images'] = false;
+			}
+
+			if( $update_args['stock'] && $update_args['stock'] === 'true' ){
+				$update_args['stock'] = true;
+			} else {
+				$update_args['stock'] = false;
+			}
+
+			if( $update_args['price'] && $update_args['price'] === 'true' ){
+				$update_args['price'] = true;
+			} else {
+				$update_args['price'] = false;
+			}
+		}
 
 		// check if it's just one product
 		// then check if it should be exported to anymarket
@@ -108,10 +128,10 @@ class ExportProducts extends ExportService
 				'warrantyTime' => carbon_get_post_meta( $product->get_id(), 'anymarket_warranty_time' ),
 				'model' => carbon_get_post_meta( $product->get_id(), 'anymarket_model' ),
 				'priceFactor' => $priceFactor,
-				'height' => str_replace( ',', '.', $product->get_height() ),
-				'width' =>  str_replace( ',', '.', $product->get_width() ),
-				'weight' =>  str_replace( ',', '.', $product->get_weight() ),
-				'length' =>  str_replace( ',', '.', $product->get_length() ),
+				'height' => anymarket_format_dimension( $product->get_height() ),
+				'width' =>  anymarket_format_dimension( $product->get_width() ),
+				'weight' =>  anymarket_format_weight( $product->get_weight() ),
+				'length' =>  anymarket_format_dimension( $product->get_length() ),
 				'characteristics' => $this->formatProductAttributes( $product ),
 				'definitionPriceScope' => carbon_get_post_meta($product->get_id(), 'anymarket_definition_price_scope')
 			];
@@ -140,16 +160,23 @@ class ExportProducts extends ExportService
 				$anymarket_id = carbon_get_post_meta($product->get_id(), 'anymarket_id');
 
 				//images
-				$exportImages = new ExportImages();
-				$exportImages->export( $product, $anymarket_id );
+				if ( $update === false || ($update === true && $update_args['images'] === true )){
+					$exportImages = new ExportImages();
+					$exportImages->export( $product, $anymarket_id );
+				}
+
 
 				//skus
-				$exportSkus = new ExportSkus();
-				$exportSkus->export( $product, $anymarket_id );
+				if ( $update === false || ($update === true && $update_args['price'] === true )){
+					$exportSkus = new ExportSkus();
+					$exportSkus->export( $product, $anymarket_id );
+				}
 
 				//stocks
-				$exportStock = new ExportStock();
-				$exportStock->exportProductStock( $product );
+				if ( $update === false || ($update === true && $update_args['stock'] === true )){
+					$exportStock = new ExportStock();
+					$exportStock->exportProductStock( $product );
+				}
 
 				//product
 				$instance = $this->multiCurl->addPut($this->baseUrl . 'products/' . $anymarket_id, json_encode($data, JSON_UNESCAPED_UNICODE));
