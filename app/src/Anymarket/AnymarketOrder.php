@@ -349,7 +349,12 @@ class AnymarketOrder extends ExportService {
 
 		//meta fields that are not officialy part of WP_Order
 		$documentType =  $oldOrder->buyer->documentType === 'CPF' ? 'cpf' : 'cnpj';
+
+		$documentType === 'cpf' && update_post_meta($newOrder->get_id(), '_billing_persontype', '1');
+		$documentType === 'cnpj' && update_post_meta($newOrder->get_id(), '_billing_persontype', '2');
+
 		$cpfCnpj = anymarket_formatCnpjCpf( $oldOrder->buyer->documentNumberNormalized );
+
 		update_post_meta($newOrder->get_id(), '_billing_' . $documentType, $cpfCnpj );
 
 		update_post_meta($newOrder->get_id(), '_billing_neighborhood', $oldOrder->billingAddress->neighborhood);

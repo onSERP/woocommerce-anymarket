@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.0 🎉 - 2021-04-12
 
-### Added
+### Fixed
 
+-   Required field `_billing_persontype` wasn't being sent
 -   Added missing shipping fields to order
 
 ## 1.0.0-beta.6 - 2021-01-15
