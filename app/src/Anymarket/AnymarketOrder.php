@@ -240,17 +240,21 @@ class AnymarketOrder extends ExportService {
 
 			//formatar endereço - shipping
 
+			if ( isset( $oldOrder->buyer ) ){
+				$billingFname = anymarket_split_name( $oldOrder->buyer->name )[0];
+				$billingLname = anymarket_split_name( $oldOrder->buyer->name )[1];
+				$newOrder->set_billing_email( $oldOrder->buyer->email );
+				$newOrder->set_billing_phone( $oldOrder->buyer->phone );
+			}
+
 			if ( isset( $oldOrder->shipping ) ){
+				$newOrder->set_shipping_first_name( isset($billingFname) ? $billingFname : '' );
+				$newOrder->set_shipping_last_name( isset($billingLname) ? $billingLname : '' );
 				$newOrder->set_shipping_address_1( $oldOrder->shipping->street );
 				$newOrder->set_shipping_city( $oldOrder->shipping->city );
 				$newOrder->set_shipping_state( $oldOrder->shipping->stateNameNormalized );
 				$newOrder->set_shipping_postcode( $oldOrder->shipping->zipCode );
 				$newOrder->set_shipping_country( $oldOrder->shipping->countryNameNormalized );
-			}
-
-			if ( isset( $oldOrder->buyer ) ){
-				$billingFname = anymarket_split_name( $oldOrder->buyer->name )[0];
-				$billingLname = anymarket_split_name( $oldOrder->buyer->name )[1];
 			}
 
 			if ( isset( $oldOrder->billingAddress ) ){
@@ -261,11 +265,6 @@ class AnymarketOrder extends ExportService {
 				$newOrder->set_billing_state( $oldOrder->billingAddress->stateNameNormalized );
 				$newOrder->set_billing_postcode( $oldOrder->billingAddress->zipCode );
 				$newOrder->set_billing_country( $oldOrder->billingAddress->country );
-			}
-
-			if ( isset( $oldOrder->buyer ) ){
-				$newOrder->set_billing_email( $oldOrder->buyer->email );
-				$newOrder->set_billing_phone( $oldOrder->buyer->phone );
 			}
 
 			$newOrder->set_created_via( $oldOrder->marketPlace );
@@ -356,6 +355,10 @@ class AnymarketOrder extends ExportService {
 		update_post_meta($newOrder->get_id(), '_billing_neighborhood', $oldOrder->billingAddress->neighborhood);
 		update_post_meta($newOrder->get_id(), '_billing_number', $oldOrder->billingAddress->number);
 		update_post_meta($newOrder->get_id(), '_billing_cellphone', $oldOrder->buyer->phone);
+
+		update_post_meta($newOrder->get_id(), '_shipping_neighborhood', $oldOrder->shipping->neighborhood);
+		update_post_meta($newOrder->get_id(), '_shipping_number', $oldOrder->shipping->number);
+		update_post_meta($newOrder->get_id(), '_shipping_cellphone', $oldOrder->buyer->phone);
 
 		return $newOrder;
 	}
