@@ -35,7 +35,7 @@ class CronEvents
    */
 	public function exportProd( $post_id ){
 		$exportProducts = new ExportProducts();
-		$response = $exportProducts->export( [$post_id] );
+		$response = is_array($post_id[0]) ? $exportProducts->export( $post_id ) : $exportProducts->export( [$post_id] );
 
 		if( is_wp_error($response) ){
 			set_transient( 'anymarket_product_export_fail', $response->get_error_message(), MINUTE_IN_SECONDS );
