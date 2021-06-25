@@ -8,6 +8,9 @@ use Anymarket\Anymarket\ExportBrands;
 use Anymarket\Anymarket\ExportStock;
 use Anymarket\Anymarket\ExportVariations;
 
+use Anymarket\Anymarket\ExportProducts;
+use Anymarket\Anymarket\AnymarketOrder;
+
 /**
  * Register admin-related entities, like admin menu pages.
  */
@@ -311,7 +314,23 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	public function handleBulkExportProducts( $redirect, $doaction, $object_ids ){
 
 		if( 'anymarket_bulk_export_products' === $doaction ){
-			$this->cron->setCronExportProd( 5, [$object_ids] );
+
+			if( get_option( 'anymarket_use_cron' ) == 'true' ){
+
+				count($object_ids) > 1 && $this->cron->setCronBulkExportProd( 5, [$object_ids, false, []] );
+				count($object_ids) <= 1 && $this->cron->setCronExportProd( 5, $object_ids );
+
+			} else {
+				$exportProducts = new ExportProducts();
+				$response = $exportProducts->export( $object_ids );
+
+				if( is_wp_error($response) ){
+					set_transient( 'anymarket_product_export_fail', $response->get_error_message(), MINUTE_IN_SECONDS );
+				} else{
+					set_transient( 'anymarket_product_export_result', $response, MINUTE_IN_SECONDS );
+				}
+
+			}
 		}
 
 		return $redirect;
@@ -484,7 +503,19 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 		if( 'true' === $should_export ) {
 
-			$this->cron->setCronExportProd( 5, [$post_id] );
+			if( get_option( 'anymarket_use_cron' ) == 'true' ) {
+				$this->cron->setCronExportProd( 5, [$post_id] );
+
+			} else{
+				$exportProducts = new ExportProducts();
+				$response = $exportProducts->export( [$post_id] );
+
+				if( is_wp_error($response) ){
+					set_transient( 'anymarket_product_export_fail', $response->get_error_message(), MINUTE_IN_SECONDS );
+				} else{
+					set_transient( 'anymarket_product_export_result', $response, MINUTE_IN_SECONDS );
+				}
+			}
 
 		} else {
 				carbon_set_post_meta( $post_id, 'anymarket_id', '' );
@@ -622,7 +653,14 @@ class AdminServiceProvider implements ServiceProviderInterface {
 	 */
 	public function updateStatus( $order_id, $old_status, $new_status ){
 
-		$this->cron->setCronExportOrder( 5, [$order_id, $new_status] );
+		if(get_option( 'anymarket_use_cron' ) == 'true'){
+			$this->cron->setCronExportOrder( 5, [$order_id, $new_status] );
+		} else {
+			$order = new AnymarketOrder();
+			$order->updateStatus( $order_id, $new_status );
+		}
+
+
 
 	}
 
@@ -711,7 +749,20 @@ class AdminServiceProvider implements ServiceProviderInterface {
 				'images' => isset( $_GET['images'] ) ? $_GET['images'] : false,
 			];
 
-			$this->cron->setCronBulkExportProd( 5, [$product_ids, true, $update_args] );
+			if(get_option( 'anymarket_use_cron' ) == 'true'){
+
+				$this->cron->setCronBulkExportProd( 5, [$product_ids, true, $update_args] );
+
+			} else{
+				$exportProducts = new ExportProducts();
+				$response = $exportProducts->export( $object_ids, true, $update_args );
+
+				if( is_wp_error($response) ){
+					set_transient( 'anymarket_product_export_fail', $response->get_error_message(), MINUTE_IN_SECONDS );
+				} else{
+					set_transient( 'anymarket_product_export_result', $response, MINUTE_IN_SECONDS );
+				}
+			}
 
 			wp_safe_redirect( remove_query_arg( 'anymarket_action' ) );
 		}

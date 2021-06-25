@@ -129,10 +129,30 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="useOrder">Modo de Edição</label>
+          <label for="useCron">Cronjobs</label>
           <div class="input relative">
             <toggle-button
-              id="useOrder"
+              id="useCron"
+              v-model="options.useCron"
+              sync
+              :color="{
+                checked: '#3366FF',
+                unchecked: '#555770',
+                disabled: '#CCCCCC',
+              }"
+            />
+            <span class="absolute left-0 ml-16"> Utilizar Cron </span>
+            <div class="help-text">
+              Agendar tarefas em vez de executá-las em tempo real. (Use isto
+              caso o painel esteja lento ao salvar os produtos)
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="editMode">Modo de Edição</label>
+          <div class="input relative">
+            <toggle-button
+              id="editMode"
               v-model="options.editMode"
               sync
               :color="{
@@ -218,6 +238,7 @@ export default {
         callbackURL: '',
         showLogs: false,
         useOrder: false,
+        useCron: false,
         editMode: false,
       },
     }
@@ -233,6 +254,7 @@ export default {
         this.options.isDevEnv = response.data.is_dev_env === 'true'
         this.options.showLogs = response.data.show_logs === 'true'
         this.options.useOrder = response.data.use_order === 'true'
+        this.options.useCron = response.data.use_cron === 'true'
         this.options.editMode = response.data.edit_mode === 'true'
       })
       .catch((err) => {

@@ -79,6 +79,7 @@ class PluginServiceProvider implements ServiceProviderInterface
 		if( !get_option( $pre . 'oi', false ) ) add_option( $pre . 'oi', '');
 		if( !get_option( $pre . 'is_dev_env', false ) ) add_option( $pre . 'is_dev_env', false);
 		if( !get_option( $pre . 'show_logs', false ) ) add_option( $pre . 'show_logs', false);
+		if( !get_option( $pre . 'use_cron', false ) ) add_option( $pre . 'use_cron', false);
 		if( !get_option( $pre . 'use_order', false ) ) add_option( $pre . 'use_order', false);
 		if( !get_option( $pre . 'edit_mode', false ) ) add_option( $pre . 'edit_mode', false);
 		if( !get_option( $pre . 'callback_url', false ) ) add_option( $pre . 'callback_url', rest_url('anymarket/v1/notifications'));
