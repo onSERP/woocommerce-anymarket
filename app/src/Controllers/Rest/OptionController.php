@@ -64,6 +64,12 @@ class OptionController
 			$use_order = 'false';
 		}
 
+		if ($request['useCron'] === true ) {
+			$use_cron = 'true';
+		} else {
+			$use_cron = 'false';
+		}
+
 		if ($request['editMode'] === true ) {
 			$edit_mode = 'true';
 		} else {
@@ -76,6 +82,7 @@ class OptionController
 		update_option( 'anymarket_is_dev_env', $is_dev_env );
 		update_option( 'anymarket_show_logs', $show_logs );
 		update_option( 'anymarket_use_order', $use_order );
+		update_option( 'anymarket_use_cron', $use_cron );
 		update_option( 'anymarket_edit_mode', $edit_mode );
 
 		$response = new \WP_REST_Response( [$request['isDevEnv']] );

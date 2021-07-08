@@ -86,6 +86,16 @@ class FieldsServiceProvider implements ServiceProviderInterface
 					->set_help_text(__('Alterar esse campo pode fazer com que seu sistema se comporte de forma inesperada. Não altere se não souber o que está fazendo.', 'anymarket')),
 				Field::make( 'hidden', 'anymarket_variation_id', __('ID do SKU no ANYMARKET', 'anymarket')),
 
+				Field::make( 'radio', 'anymarket_export_images', __( 'Sincronizar imagens?', 'anymarket' ) )
+				->set_options( [
+					'true' => __('Sim', 'anymarket'),
+					'false' => __('Não', 'anymarket'),
+				 ])
+				 ->set_conditional_logic( [[
+					'field' => 'anymarket_should_export',
+            		'value' => 'true'
+				]] ),
+
 				Field::make( 'text', 'anymarket_warranty_time', __('Garantia (meses)', 'anymarket') )
 					->set_attribute('type', 'number')
 					->set_attribute('min', '0')

@@ -29,6 +29,9 @@ class PluginServiceProvider implements ServiceProviderInterface
 		add_action( 'init', [$this, 'setSettings'] );
 		add_action( 'rest_api_init' , [$this, 'initRestRouter']);
 
+		add_action( 'rest_api_init', [$this, 'checkLicenseKey'] );
+		add_action( 'admin_notices', [$this, 'licenseNotice'] );
+
 		add_action( 'plugin_action_links_' . $this->plugin_slug, [$this, 'actionLinks'] );
 
 		add_filter('plugins_api', [$this, 'pluginInfo'], 20, 3);
@@ -76,9 +79,12 @@ class PluginServiceProvider implements ServiceProviderInterface
 		if( !get_option( $pre . 'oi', false ) ) add_option( $pre . 'oi', '');
 		if( !get_option( $pre . 'is_dev_env', false ) ) add_option( $pre . 'is_dev_env', false);
 		if( !get_option( $pre . 'show_logs', false ) ) add_option( $pre . 'show_logs', false);
+		if( !get_option( $pre . 'use_cron', false ) ) add_option( $pre . 'use_cron', false);
 		if( !get_option( $pre . 'use_order', false ) ) add_option( $pre . 'use_order', false);
 		if( !get_option( $pre . 'edit_mode', false ) ) add_option( $pre . 'edit_mode', false);
 		if( !get_option( $pre . 'callback_url', false ) ) add_option( $pre . 'callback_url', rest_url('anymarket/v1/notifications'));
+		if( !get_option( $pre . 'license_key', false ) ) add_option( $pre . 'license_key', '' );
+		if( !get_option( $pre . 'is_license_active', false ) ) add_option( $pre . 'is_license_active', false );
 	}
 
 	public function initRestRouter(){
@@ -91,6 +97,40 @@ class PluginServiceProvider implements ServiceProviderInterface
 		), $links );
 
 		return $links;
+	}
+
+	public function checkLicenseKey(){
+		$license_key = get_option( 'anymarket_license_key', false );
+
+		if( empty($license_key) ) {
+			update_option( 'anymarket_is_license_active', false );
+			return;
+		}
+
+		$api_params = [
+			'slm_action' => 'slm_check',
+			'secret_key' => ANYMARKET_LICENSE_SECRET_KEY,
+			'license_key' => $license_key,
+		];
+
+		// Send query to the license manager server
+		$response = wp_remote_get(add_query_arg($api_params, ANYMARKET_LICENSE_SERVER_URL), ['timeout' => 20, 'sslverify' => true]);
+
+
+	}
+
+	public function licenseNotice(){
+		$license_key = get_option( 'anymarket_license_key', false );
+
+		if( empty($license_key) || false === IS_USER_ALLOWED ){
+			$class = 'notice notice-error';
+			$plugin = 'Woocommerce Anymarket';
+			$activation_url = 'https://onserp.com.br/#section-contato';
+
+			printf( '<div class="%1$s"><p>Você está usando uma versão não verificada do plugin <b>%2$s</b>.
+			<a href="%3$s" target="_blank">Ative sua licença</a> para obter suporte e atualizações.</p></div>',
+			esc_attr( $class ), esc_html( $plugin ), esc_url( $activation_url ) );
+		}
 	}
 
 	public function showUpdateMessage(){

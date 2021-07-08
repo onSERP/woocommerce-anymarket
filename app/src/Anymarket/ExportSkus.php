@@ -115,7 +115,7 @@ class ExportSkus extends ExportService
 			unset($currentSKU['amount']);
 
 			//update current sku
-			$skuInAnymarket = carbon_get_post_meta( $currentSKU['internalId'], 'anymarket_variation_id');
+			$skuInAnymarket = carbon_get_post_meta( $product->get_id(), 'anymarket_variation_id');
 
 			$this->curl->put($this->baseUrl . 'products/' . $anymarket_id . '/skus' . '/' . $skuInAnymarket, $currentSKU);
 
