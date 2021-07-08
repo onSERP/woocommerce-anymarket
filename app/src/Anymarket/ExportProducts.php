@@ -121,6 +121,8 @@ class ExportProducts extends ExportService
 				$priceFactor = str_replace(',', '.', $priceFactor);
 			}
 
+			$should_export_images = carbon_get_post_meta( $product->get_id(), 'anymarket_export_images' );
+
 			$data = [
 				'title' => $product->get_name(),
 				'description' => $product->get_description(),
@@ -145,7 +147,8 @@ class ExportProducts extends ExportService
 			if( empty( carbon_get_post_meta($product->get_id(), 'anymarket_id') ) ){
 				$data['skus'] = $this->formatProductVariations( $product );
 				$data['origin']['id'] = 0;
-				if ( !empty( $this->formatProductImages( $product ) ) ) {
+
+				if ( !empty( $this->formatProductImages( $product ) ) && $should_export_images === 'true' ) {
 					$data['images'] = $this->formatProductImages( $product );
 				}
 
@@ -160,7 +163,7 @@ class ExportProducts extends ExportService
 				$anymarket_id = carbon_get_post_meta($product->get_id(), 'anymarket_id');
 
 				//images
-				if ( $update === false || ($update === true && $update_args['images'] === true )){
+				if ( $update === false || ($update === true && $update_args['images'] === true) && $should_export_images === 'true' ){
 					$exportImages = new ExportImages();
 					$exportImages->export( $product, $anymarket_id );
 				}
