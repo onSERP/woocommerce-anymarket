@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.1.0 - 2021-07-08
+
+### Fixed
+
+-   Failing mass export in cron events.
+-   Admin scripts throwing error on settings page
+
+### Added
+
+-   PHP console logger function
+-   Logging cron schedule events
+-   Option to enable/disable cron events
+-   Option in product to enable/disable images sync
+
+### Changed
+
+-   Bump ssri from 6.0.1 to 6.0.2
+-   Bump handlebars from 4.7.6 to 4.7.7
+-   Bump url-parse from 1.4.7 to 1.5.1
+-   Bump hosted-git-info from 2.8.8 to 2.8.9
+-   Bump lodash from 4.17.20 to 4.17.21
+-   Bump dns-packet from 1.3.1 to 1.3.4
+-   Bump ws from 6.2.1 to 6.2.2
+-   Bump htmlburger/carbon-fields from 3.1 to 3.3.2
+-   Bump color-string from 1.5.4 to 1.5.5
+-   Bump php-curl from dev-master to 8.9.3
+
 ## 1.0.0 🎉 - 2021-04-12
 
 ### Fixed
