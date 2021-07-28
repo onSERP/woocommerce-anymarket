@@ -472,6 +472,10 @@ class AnymarketOrder extends ExportService {
 					$this->logger->debug( print_r('AnymarketOrder::discount('. $id .') called ExportStock::exportProductStock('. $_id .')', true),
 					['source' => 'woocommerce-anymarket'] );
 				}
+			} else {
+				if( get_option('anymarket_show_logs') == 'true' ){
+					$this->logger->error( print_r('Impossível atualizar estoque. Produto ' . ($variable_product_id || $product_id) . ' não encontrado'), ['source' => 'woocommerce-anymarket'] );
+				}
 			}
 		}
 
