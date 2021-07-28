@@ -3,7 +3,7 @@
  * Plugin Name: Woocommerce Anymarket
  * Plugin URI: https://onserp.com.br/
  * Description: Integração entre o Woocommerce e a plataforma de marketplaces ANYMARKET.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Requires at least: 5.3
  * Requires PHP: 7.3.2
  * Author: onSERP Marketing
@@ -40,7 +40,7 @@ if ( ! $load ) {
 
 define( 'ANYMARKET_PLUGIN_FILE', __FILE__ );
 define( 'ANYMARKET_PLUGIN_NAME', 'anymarket');
-define( 'ANYMARKET_PLUGIN_VERSION', '1.0.0' );
+define( 'ANYMARKET_PLUGIN_VERSION', '1.1.1' );
 define( 'ANYMARKET_LICENSE_SECRET_KEY', 'AEo<J)k5lzY~|*p;iKoQd*mpyES?kup6Z4AS6[|@(?&|3V3}m(tkX/Xx8V#{TC2T' );
 define( 'ANYMARKET_LICENSE_SERVER_URL', 'https://admin.onserp.com.br' );
 define( 'ANYMARKET_LICENSE_ITEM_REFERENCE', 'ANYMARKET' );

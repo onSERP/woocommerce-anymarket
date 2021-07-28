@@ -15,6 +15,10 @@ class ExportStock extends ExportService
 	 */
 	public function exportFromOrder( int $order_id ){
 
+		$order_anymarket_id = carbon_get_post_meta($order_id, 'anymarket_id');
+
+		if( !empty( $order_anymarket_id ) ) return;
+
 		$order = wc_get_order( $order_id );
 
 		$stock = $this->formatStock( $order );
