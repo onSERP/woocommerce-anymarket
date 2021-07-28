@@ -163,7 +163,7 @@ class ExportProducts extends ExportService
 				$anymarket_id = carbon_get_post_meta($product->get_id(), 'anymarket_id');
 
 				//images
-				if ( $update === false || ($update === true && $update_args['images'] === true) && $should_export_images === 'true' ){
+				if ( ($update === false || ($update === true && $update_args['images'] === true)) && $should_export_images === 'true' ){
 					$exportImages = new ExportImages();
 					$exportImages->export( $product, $anymarket_id );
 				}

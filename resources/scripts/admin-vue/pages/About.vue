@@ -5,13 +5,11 @@
     </div>
     <div class="px-4">
       <p class="title mb-4">Sobre este plugin</p>
-      <p class="text-lg mb-4">Woocommerce Anymarket v1.0.0</p>
+      <p class="text-lg mb-4">Woocommerce Anymarket</p>
       <main class="wysiwyg">
         <p>
           Este plugin é desenvolvido e mantido por
-          <a href="https://onserp.com.br" target="_blank">
-            onSERP Marketing
-          </a>
+          <a href="https://onserp.com.br" target="_blank"> onSERP Marketing </a>
         </p>
 
         <p>
@@ -20,17 +18,13 @@
             termos de uso
           </a>
           e com a nossa
-          <a
-            href="https://onserp.com.br/anymarket-plugin-politica-de-privacidade"
-          >
+          <a href="https://onserp.com.br/politica-de-privacidade">
             política de privacidade
           </a>
         </p>
       </main>
 
-      <p class="title my-4">
-        Changelog
-      </p>
+      <p class="title my-4">Changelog</p>
       <div class="changelog wysiwyg" v-html="changelog"></div>
     </div>
   </div>
@@ -65,7 +59,6 @@ export default {
 
   .changelog {
     max-height: 320px;
-    @apply font-mono overflow-y-scroll bg-gray-300 rounded mb-8 py-6 px-4;
 
     p,
     ul,
@@ -80,6 +73,7 @@ export default {
     h2 {
       @apply text-base;
     }
+    @apply font-mono overflow-y-scroll bg-gray-300 rounded mb-8 py-6 px-4;
   }
 }
 </style>
