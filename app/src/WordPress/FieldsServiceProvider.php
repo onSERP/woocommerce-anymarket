@@ -48,6 +48,10 @@ class FieldsServiceProvider implements ServiceProviderInterface
 
 		add_action('admin_init', [$this, 'saveCustomFieldsToProductAttributes']);
 
+		//rest api
+		add_action( 'rest_api_init', [$this, 'registerProductFieldsToRestAPI'] );
+		add_action( 'rest_api_init', [$this, 'registerOrderFieldsToRestAPI'] );
+
 	}
 
 	/**
@@ -411,6 +415,59 @@ class FieldsServiceProvider implements ServiceProviderInterface
 				break;
 		}
 
+	}
+
+	public function registerProductFieldsToRestAPI () {
+   		$items = ['_anymarket_warranty_time', '_anymarket_model', '_anymarket_markup', '_anymarket_definition_price_scope', 'anymarket_variable_barcode', 'anymarket_simple_barcode'];
+
+		foreach($items as $item){
+			register_rest_field( 'product', $item, array(
+			'get_callback' => function ( $params ) use ($item) {
+					$post_id = $params['id'];
+					return get_post_meta( $post_id, $item, true );
+			},
+				'update_callback' =>  function ($value, $object, $fieldName) {
+					update_post_meta( $object->ID, $fieldName, $value );
+			},
+			'schema'          => null,
+			));
+		}
+	}
+
+	public function registerOrderFieldsToRestAPI () {
+   		$items = [
+			'_anymarket_id',
+			'_is_anymarket_order',
+			'_anymarket_nfe_access_key',
+			'_anymarket_nfe_series',
+			'_anymarket_nfe_number',
+			'_anymarket_nfe_datetime',
+			'_anymarket_nfe_cfop',
+			'_anymarket_nfe_link',
+			'_anymarket_nfe_link_xml',
+			'_anymarket_nfe_extra_description',
+			'_anymarket_nfe_xml',
+			'_anymarket_tracking_url',
+			'_anymarket_tracking_number',
+			'_anymarket_tracking_carrier',
+			'_anymarket_tracking_carrier_document',
+			'_anymarket_tracking_estimate',
+			'_anymarket_tracking_shipped',
+			'_anymarket_tracking_delivered'
+		];
+
+		foreach($items as $item){
+			register_rest_field( 'shop_order', $item, array(
+			'get_callback' => function ( $params ) use ($item) {
+					$post_id = $params['id'];
+					return get_post_meta( $post_id, $item, true );
+			},
+				'update_callback' =>  function ($value, $object, $fieldName) {
+					update_post_meta( $object->ID, $fieldName, $value );
+			},
+			'schema'          => null,
+			));
+		}
 	}
 
 }
