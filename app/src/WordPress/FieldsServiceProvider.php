@@ -100,6 +100,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 					->set_attribute('type', 'number')
 					->set_attribute('min', '0')
 					->set_attribute('step', 'any')
+					->set_visible_in_rest_api( true )
 					->set_help_text(__('Campo obrigatório para o Anymarket', 'anymarket'))
 					->set_conditional_logic( [[
 						'field' => 'anymarket_should_export',
@@ -108,6 +109,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 
 				Field::make( 'text', 'anymarket_model', __('Modelo', 'anymarket') )
 					->set_help_text(__('Campo obrigatório para o Anymarket.', 'anymarket'))
+					->set_visible_in_rest_api( true )
 					->set_conditional_logic( [[
 						'field' => 'anymarket_should_export',
             			'value' => 'true'
@@ -118,6 +120,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 					->set_attribute('min', '0')
 					->set_attribute('step', 'any')
 					->set_help_text(__('Campo obrigatório para o Anymarket. Se não preenchido, será enviado "1"', 'anymarket'))
+					->set_visible_in_rest_api( true )
 					->set_conditional_logic( [[
 						'field' => 'anymarket_should_export',
             			'value' => 'true'
@@ -129,6 +132,7 @@ class FieldsServiceProvider implements ServiceProviderInterface
 						'SKU' => __('Manual, eu controlo o preço pelo SKU', 'anymarket'),
 						'SKU_MARKETPLACE' => __('Manual, eu controlo o preço pelo anúncio', 'anymarket'),
 					])
+					->set_visible_in_rest_api( true )
 					->set_conditional_logic( [[
 						'field' => 'anymarket_should_export',
 						'value' => 'true'

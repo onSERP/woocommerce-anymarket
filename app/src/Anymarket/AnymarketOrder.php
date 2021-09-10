@@ -1,6 +1,7 @@
 <?php
 
 namespace Anymarket\Anymarket;
+use ExportStock;
 
 /**
  * Handles orders
@@ -223,48 +224,48 @@ class AnymarketOrder extends ExportService {
 	 */
 	protected function assignToOrder(object $oldOrder, \WC_Order $newOrder, $updated = true ){
 		global $wpdb;
+
+		$orderStatuses = [
+			'PENDING' => 'pending',
+			'PAID_WAITING_SHIP' => 'processing',
+			'INVOICED' => 'anymarket-billed',
+			'PAID_AWAITING_DELIVERY' => 'anymarket-shipped',
+			'CONCLUDED' => 'completed',
+			'CANCELED' => 'cancelled'
+		];
+
 		// first - carbon meta fields
 		carbon_set_post_meta($newOrder->get_id(), 'anymarket_order_marketplace', $oldOrder->marketPlace);
 		carbon_set_post_meta($newOrder->get_id(), 'is_anymarket_order', 'true');
 		carbon_set_post_meta($newOrder->get_id(), 'anymarket_id', $oldOrder->id);
 
 		if( false === $updated ){
-
-			if ( isset( $oldOrder->billingAddress ) ){
-				$shippingFname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[0];
-				$shippingLname = anymarket_split_name($oldOrder->billingAddress->shipmentUserName)[1];
-			}
-
-			$newOrder->set_shipping_first_name( isset($shippingFname) ? $shippingFname : '' );
-			$newOrder->set_shipping_last_name( isset($shippingLname) ? $shippingLname : '' );
-
 			//formatar endereço - shipping
 
-			if ( isset( $oldOrder->buyer ) ){
-				$billingFname = anymarket_split_name( $oldOrder->buyer->name )[0];
-				$billingLname = anymarket_split_name( $oldOrder->buyer->name )[1];
-				$newOrder->set_billing_email( $oldOrder->buyer->email );
-				$newOrder->set_billing_phone( $oldOrder->buyer->phone );
-			}
+			$billingFname = anymarket_split_name( $oldOrder->buyer->name )[0];
+			$billingLname = anymarket_split_name( $oldOrder->buyer->name )[1];
+			$newOrder->set_billing_email( $oldOrder->buyer->email );
+			$newOrder->set_billing_phone( $oldOrder->buyer->phone );
 
-			if ( isset( $oldOrder->shipping ) ){
+
+			if ( isset( $oldOrder->anymarketAddress ) ){
 				$newOrder->set_shipping_first_name( isset($billingFname) ? $billingFname : '' );
 				$newOrder->set_shipping_last_name( isset($billingLname) ? $billingLname : '' );
-				$newOrder->set_shipping_address_1( $oldOrder->shipping->street );
-				$newOrder->set_shipping_city( $oldOrder->shipping->city );
-				$newOrder->set_shipping_state( $oldOrder->shipping->stateNameNormalized );
-				$newOrder->set_shipping_postcode( $oldOrder->shipping->zipCode );
-				$newOrder->set_shipping_country( $oldOrder->shipping->countryNameNormalized );
-			}
+				$newOrder->set_shipping_address_1( $oldOrder->anymarketAddress->street );
+				$newOrder->set_shipping_city( $oldOrder->anymarketAddress->city );
+				$newOrder->set_shipping_state( $oldOrder->anymarketAddress->state );
+				$newOrder->set_shipping_country( $oldOrder->anymarketAddress->country );
 
-			if ( isset( $oldOrder->billingAddress ) ){
 				$newOrder->set_billing_first_name( isset($billingFname) ? $billingFname : '' );
 				$newOrder->set_billing_last_name( isset($billingLname) ? $billingLname : '' );
-				$newOrder->set_billing_address_1( $oldOrder->billingAddress->street );
-				$newOrder->set_billing_city( $oldOrder->billingAddress->city );
-				$newOrder->set_billing_state( $oldOrder->billingAddress->stateNameNormalized );
-				$newOrder->set_billing_postcode( $oldOrder->billingAddress->zipCode );
-				$newOrder->set_billing_country( $oldOrder->billingAddress->country );
+				$newOrder->set_billing_address_1( $oldOrder->anymarketAddress->street );
+				$newOrder->set_billing_city( $oldOrder->anymarketAddress->city );
+				$newOrder->set_billing_state( $oldOrder->anymarketAddress->state );
+
+				$newOrder->set_billing_postcode( $oldOrder->anymarketAddress->zipCode );
+				$newOrder->set_shipping_postcode( $oldOrder->anymarketAddress->zipCode );
+
+				$newOrder->set_billing_country( $oldOrder->anymarketAddress->country );
 			}
 
 			$newOrder->set_created_via( $oldOrder->marketPlace );
@@ -332,19 +333,28 @@ class AnymarketOrder extends ExportService {
 
 			$newOrder->set_total( $oldOrder->total );
 			$newOrder->save();
+
+			if( get_option('anymarket_show_logs') == 'true' ){
+				$this->logger->debug( print_r('Pedido '. $newOrder->get_id() .' criado.', true),
+					['source' => 'woocommerce-anymarket']
+				);
+			}
+
+			$exportStock = new ExportStock;
+			$exportStock->exportFromOrder( $newOrder->get_id() );
+
 		}
 
-			$orderStatuses = [
-			'PENDING' => 'pending',
-			'PAID_WAITING_SHIP' => 'processing',
-			'INVOICED' => 'anymarket-billed',
-			'PAID_AWAITING_DELIVERY' => 'anymarket-shipped',
-			'CONCLUDED' => 'completed',
-			'CANCELED' => 'cancelled'
-		];
+		if( $updated === true && empty( $orderStatuses[$oldOrder->status] ) ) return;
 
 		$newOrder->update_status( $orderStatuses[$oldOrder->status],
-					__('Pedido importado do Anymarket', 'anymarket'));
+					__('Pedido importado do Anymarket.', 'anymarket'));
+
+		if( get_option('anymarket_show_logs') == 'true' ){
+			$this->logger->debug( print_r('Pedido '. $newOrder->get_id() .' importado/atualizado. Novo status: ' . $orderStatuses[$oldOrder->status] . '.', true),
+				['source' => 'woocommerce-anymarket']
+			);
+		}
 
 
 		//meta fields that are not officialy part of WP_Order
@@ -361,8 +371,7 @@ class AnymarketOrder extends ExportService {
 		update_post_meta($newOrder->get_id(), '_billing_number', $oldOrder->billingAddress->number);
 		update_post_meta($newOrder->get_id(), '_billing_cellphone', $oldOrder->buyer->phone);
 
-		update_post_meta($newOrder->get_id(), '_shipping_neighborhood', $oldOrder->shipping->neighborhood);
-		update_post_meta($newOrder->get_id(), '_shipping_number', $oldOrder->shipping->number);
+		update_post_meta($newOrder->get_id(), '_shipping_number', $oldOrder->anymarketAddress->number);
 		update_post_meta($newOrder->get_id(), '_shipping_cellphone', $oldOrder->buyer->phone);
 
 		return $newOrder;

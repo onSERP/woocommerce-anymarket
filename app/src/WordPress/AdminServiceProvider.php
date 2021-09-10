@@ -755,7 +755,7 @@ class AdminServiceProvider implements ServiceProviderInterface {
 
 			} else{
 				$exportProducts = new ExportProducts();
-				$response = $exportProducts->export( $object_ids, true, $update_args );
+				$response = $exportProducts->export( $product_ids, true, $update_args );
 
 				if( is_wp_error($response) ){
 					set_transient( 'anymarket_product_export_fail', $response->get_error_message(), MINUTE_IN_SECONDS );
