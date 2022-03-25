@@ -1,4 +1,9 @@
-# Woocommerce AnyMarketing
+**Atenção**
+
+Este plugin foi descontinuado e não daremos mais suporte. Caso tenha alguma dúvida você ainda pode abrir uma issue que responderemos.
+
+
+# Woocommerce AnyMarket
 
 Plugin desenvolvido por onSERP Marketing
 
@@ -8,7 +13,7 @@ Plugin desenvolvido por onSERP Marketing
 
 -   O cliente cria o produto no Woocommerce.
 -   Escolhe exportar o produto para a Anymarket
--   O produto recebe dois parãmetros extras:
+-   O produto recebe dois parãmetros extras (custom fields):
     -   exported_to_anymarket (bool)
     -   anymarket_id (string)
 
@@ -19,55 +24,83 @@ Plugin desenvolvido por onSERP Marketing
 -   Cria novo pedido no woocommerce
 -   Recebe os status e atualizações desse pedido
 
-## Atividades
+## Estrutura de arquivos
 
-### Pré dev
+```
+wp-content/plugins/woocommerce-anymarket
+├── app/
+│   ├── helpers/              			# Helper files, add your own here as well.
+│   ├── routes/               			# Registro de rotas.
+│   │   └── rest.php
+│   ├── src/                  			# PSR-4 autoloaded classes.
+│   │   ├── Controllers/      			# Controllers para cada rota.
+│   │   ├── Anymarket/        			# Classes do Anymarket.
+│   │   ├── WordPress/        			# Registro post types, taxonomias, hooks em geral.
+│   │   └── ...
+│   ├── config.php            			# WP Emerge configuration.
+│   ├── helpers.php           			# Require your helper files here.
+│   ├── hooks.php             			# Registro de actions e filters mais avuslsos.
+│   └── version.php           			# WP Emerge version handling.
+├── dist/                     			# Bundles, optimized images etc.
+├── languages/                			# Language files.
+├── resources/
+│   ├── build/                			# Build process configuration.
+│   ├── fonts/
+│   ├── images/
+│   ├── scripts/
+│   │   ├── admin/            			# Administration scripts.
+│   │   └── frontend/         			# Front-end scripts.
+│   ├── styles/
+│   │   ├── admin/            			# Administration styles.
+│   │   ├── frontend/         			# Front-end styles.
+│   │   └── shared/           			# Shared styles.
+│   └── vendor/              			# Any third-party, non-npm assets.
+├── vendor/                   			# Composer packages.
+├── views/
+│   ├── layouts/
+│   └── partials/
+├── screenshot-1.png          			# Plugin screenshot.
+├── wpemerge                  			# WP Emerge CLI shortcut.
+├── woocommerce-anymarket.php           # Bootstrap plugin.
+└── ...
+```
 
--   [x] Levantamento de campos equvalentes entre as duas plataformas.
--   [x] Levantamento de campos novos no Woocommerce.
--   [x] Fazer equivalencia dos campos da Anymarket com os novos campos do Woocommerce.
+### Diretórios importantes
 
-### Funcionalidades gerais
+#### `app/helpers/`
 
--   [x] Exportação em massa - Categoria
--   [x] Exportação individual - Categoria
--   [x] Exportação seletiva - Categoria
--   [x] Exportação em massa - Produto
--   [ ] Exportação individual - Produto
--   [x] Exportação seletiva - Produto
--   [ ] Links nas áreas do woocommerce para o cliente editar algo no Anymarket.
+Adicione arquivos auxiliares PHP aqui. Os arquivos auxiliares devem incluir __definições de função apenas__. Veja abaixo informações sobre onde colocar ações, filtros, classes etc.
 
-### Opções de Preço - (Morre?)
+#### `app/src/`
 
--   [ ] Preço automático (Custo + Markup)
--   [ ] Preço manual por anúncio (Editado somente na Anymarket)
--   [ ] Preço manual por SKU (Editado nas variações de produtos do Woocommerce)
+Adicione as classes PHP aqui. Todas as classes no namespace `Anymarket\` são carregadas de acordo com o [PSR-4](http://www.php-fig.org/psr/psr-4/).
 
-### Produto
+#### `resources/images/`
 
--   [x] Adicionar campo de código de barras no produto
--   [x] Adicionar campo de tempo de garantia (meses) no produto
--   [x] Checkbox - "Exportar para o Anymarket?"
+Adicione imagens aqui. As cópias otimizadas serão colocadas em `dist/images/` ao executar o processo de compilação.
 
-### Pedido
+#### `resources/styles/frontend/`
 
--   [x] Adicionar campo marketplace
--   [x] Inserir na visualização de pedidos o nome do marketplace
--   [x] Link para verificar pedido no ANYMARKET
+Adicione arquivos .css e .scss para adicioná-los ao bundle do front-end. Não se esqueça de importá-los com `@import` no index.scss`.
 
-### Status de pedido
+#### `resources/styles/admin/`
 
--   [ ] Pendente - Pagamento Pendente ou Aguardando
--   [x] Pago - Pago (CRIAR)
--   [x] Faturado - Faturado (CRIAR)
--   [x] Enviado - Enviado (CRIAR)
--   [ ] Concluído - Concluído
--   [ ] Cancelado - Cancelado
+O diretório contém os estilos referentes ao painel administrativo do WP que funciona de forma idêntica ao diretório `resources/styles/frontend/`.
 
-### Dúvidas
+#### `resources/scripts/frontend/`
 
--   [x] Integração com NFE e informações de envio
+Adicione arquivos JavaScript aqui para adicioná-los ao bundle do front-end. O entrypoint é `index.js`.
 
----
+#### `resources/scripts/admin/`
 
-**Importante: Depois que o plugin estiver pronto e rodando, adicionar funcionalidade de contratação pelo próprio plugin**
+Os scripts do admin funcionam de forma idêntica aos do diretório `resources/scripts/frontend/`.
+
+#### `views/`
+
+1. `views/layouts/` - Layouts that other views extend.
+2. `views/partials/` - Small snippets that are meant to be reused throughout other views.
+3. `views/` - Full page views that may extend layouts and may include partials.
+
+Evite adicionar qualquer lógica PHP em qualquer uma dessas visualizações, a menos que se refira ao layout. A lógica de negócios deve entrar em:
+- Helper files (`app/helpers/*.php`)
+- Service classes
