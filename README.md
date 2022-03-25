@@ -1,6 +1,6 @@
 **Atenção**
 
-Este plugin foi descontinuado e não daremos mais suporte. Caso tenha alguma dúvida você ainda pode abrir uma issue que responderemos.
+Este plugin foi descontinuado e não daremos mais suporte. Caso tenha alguma dúvida você ainda pode enviar um e-mail para suporte@onserp.com.br e responderemos.
 
 
 # Woocommerce AnyMarket
